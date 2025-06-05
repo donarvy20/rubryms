@@ -63,6 +63,24 @@
         input[type="date"]::-webkit-calendar-picker-indicator {
             cursor: pointer;
         }
+        .input-group {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        .input-group label {
+            flex-grow: 1;
+        }
+        .input-group input, .input-group select {
+            flex-grow: 1;
+        }
+        .input-group button {
+            flex-shrink: 0;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
@@ -71,8 +89,19 @@
 
         <!-- Sección de Añadir Estudiantes -->
         <div id="add-students-section" class="bg-blue-50 p-6 rounded-xl border border-blue-200">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">1. Agregar Lista de Estudiantes</h2>
-            <p class="text-gray-600 mb-4 text-center">Pega aquí la lista de nombres de tus estudiantes (uno por línea).</p>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">1. Agregar y Gestionar Estudiantes</h2>
+            
+            <div class="mb-4">
+                <label for="group-name-input" class="block text-gray-700 font-medium mb-2">Nombre del Nuevo Grupo de Estudiantes (opcional):</label>
+                <input
+                    type="text"
+                    id="group-name-input"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Ej: Grupo A, Ciencias Sociales"
+                />
+            </div>
+
+            <p class="text-gray-600 mb-2 text-center">Pega aquí la lista de nombres de tus estudiantes (uno por línea).</p>
             <textarea
                 id="student-list-input"
                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-200"
@@ -82,9 +111,29 @@
                 id="add-students-btn"
                 class="w-full bg-blue-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
             >
-                Agregar Estudiantes y Continuar
+                Guardar Lista de Estudiantes
             </button>
             <div id="student-message-box" class="message-box"></div>
+
+            <div class="mt-6 border-t pt-4 border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4 text-center">Seleccionar Grupo para Evaluación</h3>
+                <p class="text-gray-600 mb-2 text-center">O elige un grupo existente para evaluar:</p>
+                <select id="group-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                    <option value="">-- Seleccionar Grupo --</option>
+                </select>
+                <button
+                    id="select-group-btn"
+                    class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                >
+                    Cargar Grupo Seleccionado y Continuar
+                </button>
+                <button
+                    id="delete-group-btn"
+                    class="w-full bg-red-500 text-white font-semibold py-3 px-6 mt-2 rounded-xl shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"
+                >
+                    Eliminar Grupo Seleccionado
+                </button>
+            </div>
         </div>
 
         <!-- Sección de Configuración de Rúbrica (Oculta inicialmente) -->
@@ -93,21 +142,36 @@
             <p class="text-gray-600 mb-4 text-center">Define los detalles de la sesión, aspectos a evaluar y los niveles de desempeño con sus puntajes.</p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label for="institution-input" class="block text-gray-700 font-medium mb-2">Institución Educativa:</label>
-                    <input type="text" id="institution-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Ej: Universidad de Ingeniería">
+                <div class="input-group flex-col md:flex-row">
+                    <label for="institution-select" class="block text-gray-700 font-medium mb-2 md:mb-0">Institución Educativa:</label>
+                    <select id="institution-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                        <option value="">-- Seleccionar o Añadir --</option>
+                    </select>
+                    <input type="text" id="new-institution-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 hidden" placeholder="Añadir nueva institución">
+                    <button id="add-institution-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600">Añadir</button>
+                    <button id="toggle-institution-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500">+/-</button>
                 </div>
-                <div>
-                    <label for="course-input" class="block text-gray-700 font-medium mb-2">Curso/Módulo:</label>
-                    <input type="text" id="course-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Ej: Ingeniería de Software I">
+                <div class="input-group flex-col md:flex-row">
+                    <label for="course-select" class="block text-gray-700 font-medium mb-2 md:mb-0">Curso/Módulo:</label>
+                    <select id="course-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                        <option value="">-- Seleccionar o Añadir --</option>
+                    </select>
+                    <input type="text" id="new-course-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 hidden" placeholder="Añadir nuevo curso">
+                    <button id="add-course-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600">Añadir</button>
+                    <button id="toggle-course-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500">+/-</button>
                 </div>
-                <div>
+                <div class="input-group flex-col md:flex-row">
+                    <label for="teacher-select" class="block text-gray-700 font-medium mb-2 md:mb-0">Docente:</label>
+                    <select id="teacher-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                        <option value="">-- Seleccionar o Añadir --</option>
+                    </select>
+                    <input type="text" id="new-teacher-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 hidden" placeholder="Añadir nuevo docente">
+                    <button id="add-teacher-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600">Añadir</button>
+                    <button id="toggle-teacher-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500">+/-</button>
+                </div>
+                <div class="col-span-full">
                     <label for="session-title-input" class="block text-gray-700 font-medium mb-2">Título de la sesión:</label>
                     <input type="text" id="session-title-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Ej: Presentación Final de Proyecto">
-                </div>
-                <div>
-                    <label for="teacher-input" class="block text-gray-700 font-medium mb-2">Docente:</label>
-                    <input type="text" id="teacher-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Ej: Dr. Alejandro Vargas">
                 </div>
                 <div class="col-span-full">
                     <label for="date-input" class="block text-gray-700 font-medium mb-2">Fecha:</label>
@@ -132,7 +196,7 @@ Uso de la gramática</textarea>
                     type="text"
                     id="levels-input"
                     class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 transition duration-200"
-                    placeholder="Ejemplo: Destacado, Logrado, En Proceso, En Inicio , Previo Inicio"
+                    placeholder="Ejemplo: Destacado, Logrado, En Proceso, En Inicio"
                     value="Destacado, Logrado, En Proceso, En Inicio"
                 />
             </div>
@@ -149,14 +213,12 @@ Uso de la gramática</textarea>
                 <h3 class="text-xl font-semibold text-gray-700 mb-4">Asignar Puntajes por Nivel</h3>
                 <p class="text-gray-600 mb-4">Define el puntaje máximo para cada nivel de desempeño.</p>
                 <div id="level-scores-input-area" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <!-- Inputs para puntajes por nivel se generarán aquí -->
-                </div>
+                    </div>
 
                 <h3 class="text-xl font-semibold text-gray-700 mb-4">Descriptores de la Rúbrica</h3>
                 <p class="text-gray-600 mb-4">Edita los descriptores para cada aspecto y nivel.</p>
                 <div id="descriptors-table" class="overflow-x-auto">
-                    <!-- La tabla se generará dinámicamente aquí -->
-                </div>
+                    </div>
 
                 <div class="mt-6">
                     <label for="general-observations-input" class="block text-gray-700 font-medium mb-2">Observaciones Generales de la Rúbrica:</label>
@@ -177,7 +239,6 @@ Uso de la gramática</textarea>
             </div>
         </div>
 
-        <!-- Sección de Evaluación (Oculta inicialmente) -->
         <div id="evaluation-section" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">3. Evaluación de Estudiantes</h2>
             <div class="text-center mb-4">
@@ -185,8 +246,7 @@ Uso de la gramática</textarea>
                 <p class="text-gray-600 text-sm">Estudiante <span id="student-index">1</span> de <span id="total-students">0</span></p>
             </div>
             <div id="student-rubric-display" class="overflow-x-auto">
-                <!-- La rúbrica del estudiante se mostrará aquí -->
-            </div>
+                </div>
             <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
                 <button
                     id="prev-student-btn"
@@ -210,7 +270,6 @@ Uso de la gramática</textarea>
             <div id="evaluation-message-box" class="message-box"></div>
         </div>
 
-        <!-- Sección de Reporte PDF (Oculta inicialmente) -->
         <div id="report-section" class="bg-red-50 p-6 rounded-xl border border-red-200 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">4. Reporte y Exportación a PDF</h2>
             <p class="text-gray-600 mb-4 text-center">Haz clic para generar el reporte de todas las evaluaciones.</p>
@@ -219,7 +278,7 @@ Uso de la gramática</textarea>
                     id="export-pdf-btn"
                     class="flex-1 bg-red-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
                 >
-                    Exportar Reporte a PDF
+                    Exportar Reporte General a PDF
                 </button>
                 <button
                     id="export-individual-rubrics-btn"
@@ -247,23 +306,34 @@ Uso de la gramática</textarea>
 
     </div>
 
-    <!-- Carga de jsPDF para la generación de PDFs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Carga del plugin jspdf-autotable para la generación de tablas en PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
 
     <script>
         // Obtener referencias a los elementos del DOM
         const addStudentsSection = document.getElementById('add-students-section');
+        const groupNameInput = document.getElementById('group-name-input'); // Nuevo
         const studentListInput = document.getElementById('student-list-input');
         const addStudentsBtn = document.getElementById('add-students-btn');
+        const groupSelect = document.getElementById('group-select'); // Nuevo
+        const selectGroupBtn = document.getElementById('select-group-btn'); // Nuevo
+        const deleteGroupBtn = document.getElementById('delete-group-btn'); // Nuevo
         const studentMessageBox = document.getElementById('student-message-box');
 
         const rubricConfigSection = document.getElementById('rubric-config-section');
-        const institutionInput = document.getElementById('institution-input');
-        const courseInput = document.getElementById('course-input');
+        const institutionSelect = document.getElementById('institution-select'); // Cambiado a select
+        const newInstitutionInput = document.getElementById('new-institution-input'); // Nuevo
+        const addInstitutionBtn = document.getElementById('add-institution-btn'); // Nuevo
+        const toggleInstitutionInput = document.getElementById('toggle-institution-input'); // Nuevo
+        const courseSelect = document.getElementById('course-select'); // Cambiado a select
+        const newCourseInput = document.getElementById('new-course-input'); // Nuevo
+        const addCourseBtn = document.getElementById('add-course-btn'); // Nuevo
+        const toggleCourseInput = document.getElementById('toggle-course-input'); // Nuevo
+        const teacherSelect = document.getElementById('teacher-select'); // Cambiado a select
+        const newTeacherInput = document.getElementById('new-teacher-input'); // Nuevo
+        const addTeacherBtn = document.getElementById('add-teacher-btn'); // Nuevo
+        const toggleTeacherInput = document.getElementById('toggle-teacher-input'); // Nuevo
         const sessionTitleInput = document.getElementById('session-title-input');
-        const teacherInput = document.getElementById('teacher-input');
         const dateInput = document.getElementById('date-input');
         const aspectsInput = document.getElementById('aspects-input');
         const levelsInput = document.getElementById('levels-input');
@@ -293,8 +363,13 @@ Uso de la gramática</textarea>
         const reportMessageBox = document.getElementById('report-message-box');
 
         // Variables globales para la aplicación
-        let students = [];
+        let studentGroups = {}; // { 'Group Name': ['Student 1', 'Student 2'], ... }
+        let currentStudents = []; // The currently selected group of students for evaluation
         let currentStudentIndex = 0;
+        let savedInstitutions = [];
+        let savedCourses = [];
+        let savedTeachers = [];
+
         let rubric = {
             institution: '',
             course: '',
@@ -307,7 +382,8 @@ Uso de la gramática</textarea>
             descriptors: {}, // { aspect: { level: descriptor_text, ... }, ... }
             levelScores: {} // { level: score, ... }
         };
-        let evaluations = {}; // { studentName: { aspect: level_selected, ... }, ... }
+        // Evaluations now store the group name, and then per-student data
+        let evaluations = {}; // { 'GroupName_StudentName': { aspect: level_selected, ... }, ... }
 
         // --- Funciones de Utilidad ---
 
@@ -334,10 +410,28 @@ Uso de la gramática</textarea>
          */
         function loadData() {
             try {
-                const storedStudents = localStorage.getItem('students');
-                if (storedStudents) {
-                    students = JSON.parse(storedStudents);
+                const storedStudentGroups = localStorage.getItem('studentGroups');
+                if (storedStudentGroups) {
+                    studentGroups = JSON.parse(storedStudentGroups);
+                    renderGroupSelect(); // Rellenar el selector de grupos
                 }
+
+                const storedInstitutions = localStorage.getItem('savedInstitutions');
+                if (storedInstitutions) {
+                    savedInstitutions = JSON.parse(storedInstitutions);
+                    renderDropdownOptions(institutionSelect, savedInstitutions);
+                }
+                const storedCourses = localStorage.getItem('savedCourses');
+                if (storedCourses) {
+                    savedCourses = JSON.parse(storedCourses);
+                    renderDropdownOptions(courseSelect, savedCourses);
+                }
+                const storedTeachers = localStorage.getItem('savedTeachers');
+                if (storedTeachers) {
+                    savedTeachers = JSON.parse(storedTeachers);
+                    renderDropdownOptions(teacherSelect, savedTeachers);
+                }
+
 
                 const storedRubric = localStorage.getItem('rubric');
                 if (storedRubric) {
@@ -348,6 +442,10 @@ Uso de la gramática</textarea>
                     if (rubric.date) {
                          dateInput.value = rubric.date;
                     }
+                    // Seleccionar valores de dropdown
+                    institutionSelect.value = rubric.institution;
+                    courseSelect.value = rubric.course;
+                    teacherSelect.value = rubric.teacher;
                 }
 
                 const storedEvaluations = localStorage.getItem('evaluations');
@@ -355,18 +453,22 @@ Uso de la gramática</textarea>
                     evaluations = JSON.parse(storedEvaluations);
                 }
 
+                const storedCurrentGroup = localStorage.getItem('currentSelectedGroup');
+                if(storedCurrentGroup && studentGroups[storedCurrentGroup]) {
+                    currentStudents = studentGroups[storedCurrentGroup];
+                    groupSelect.value = storedCurrentGroup;
+                }
+
+
                 // Pre-llenar campos de configuración si hay datos guardados
-                institutionInput.value = rubric.institution;
-                courseInput.value = rubric.course;
                 sessionTitleInput.value = rubric.sessionTitle;
-                teacherInput.value = rubric.teacher;
                 generalObservationsInput.value = rubric.generalObservations;
                 aspectsInput.value = rubric.aspects.join('\n');
                 levelsInput.value = rubric.levels.join(', ');
 
 
-                // Si hay estudiantes, pasar a la configuración de rúbrica o evaluación
-                if (students.length > 0) {
+                // Si hay estudiantes en el grupo actual, pasar a la configuración de rúbrica o evaluación
+                if (currentStudents.length > 0) {
                     addStudentsSection.classList.add('hidden');
                     if (rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
                         rubricConfigSection.classList.add('hidden');
@@ -396,9 +498,13 @@ Uso de la gramática</textarea>
          */
         function saveData() {
             try {
-                localStorage.setItem('students', JSON.stringify(students));
+                localStorage.setItem('studentGroups', JSON.stringify(studentGroups));
+                localStorage.setItem('savedInstitutions', JSON.stringify(savedInstitutions));
+                localStorage.setItem('savedCourses', JSON.stringify(savedCourses));
+                localStorage.setItem('savedTeachers', JSON.stringify(savedTeachers));
                 localStorage.setItem('rubric', JSON.stringify(rubric));
                 localStorage.setItem('evaluations', JSON.stringify(evaluations));
+                localStorage.setItem('currentSelectedGroup', groupSelect.value); // Guardar el grupo actualmente seleccionado
             } catch (e) {
                 console.error("Error al guardar datos en localStorage:", e);
                 showMessage(studentMessageBox, "No se pudieron guardar los datos. Verifique el espacio disponible en su navegador.", 'error');
@@ -406,12 +512,31 @@ Uso de la gramática</textarea>
         }
 
         /**
-         * Resetea todos los datos y la UI para empezar una nueva rúbrica.
+         * Rellena las opciones de un dropdown con una lista de elementos.
+         * @param {HTMLSelectElement} selectElement - El elemento select del DOM.
+         * @param {string[]} optionsArray - Un array de cadenas para las opciones.
+         * @param {string} defaultText - Texto de la opción por defecto.
+         */
+        function renderDropdownOptions(selectElement, optionsArray, defaultText = '-- Seleccionar o Añadir --') {
+            selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+            optionsArray.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                selectElement.appendChild(option);
+            });
+        }
+
+        /**
+         * Resetea la RÚBRICA y las EVALUACIONES, pero mantiene los grupos de estudiantes y los datos institucionales.
          */
         function resetApp() {
-            localStorage.clear();
-            students = [];
-            currentStudentIndex = 0;
+            // Borrar solo los datos de la rúbrica actual y las evaluaciones
+            localStorage.removeItem('rubric');
+            localStorage.removeItem('evaluations');
+            // NO borrar 'studentGroups', 'savedInstitutions', 'savedCourses', 'savedTeachers'
+
+            // Restablecer variables a su estado inicial solo para la rúbrica y evaluaciones
             rubric = {
                 institution: '',
                 course: '',
@@ -426,15 +551,12 @@ Uso de la gramática</textarea>
             };
             evaluations = {};
 
-            // Restablecer campos de input
-            studentListInput.value = '';
-            institutionInput.value = '';
-            courseInput.value = '';
+            // Restablecer campos de input de la rúbrica en la UI
+            // Las selecciones de institución, curso, docente se mantienen si estaban cargadas
             sessionTitleInput.value = '';
-            teacherInput.value = '';
             dateInput.value = '';
             aspectsInput.value = 'Coherencia\nClaridad\nUso de la gramática'; // Valores por defecto
-            levelsInput.value = 'Destacado, Logrado, En Proceso, En Inicio, Previo Inicio'; // Valores por defecto
+            levelsInput.value = 'Destacado, Logrado, En Proceso, En Inicio'; // Valores por defecto
             generalObservationsInput.value = '';
 
             // Ocultar todas las secciones excepto la inicial
@@ -444,54 +566,215 @@ Uso de la gramática</textarea>
             rubricDescriptorsEditor.classList.add('hidden');
             addStudentsSection.classList.remove('hidden');
 
-            showMessage(reportMessageBox, "La aplicación ha sido reiniciada para una nueva rúbrica.", 'success');
+            // Asegurarse de que los dropdowns institucionales reflejen la selección guardada
+            institutionSelect.value = '';
+            courseSelect.value = '';
+            teacherSelect.value = '';
+
+            // Esconder los inputs de añadir nuevos elementos
+            newInstitutionInput.classList.add('hidden');
+            newInstitutionInput.value = '';
+            newCourseInput.classList.add('hidden');
+            newCourseInput.value = '';
+            newTeacherInput.classList.add('hidden');
+            newTeacherInput.value = '';
+
+
+            showMessage(reportMessageBox, "La rúbrica y las evaluaciones han sido reiniciadas. Tus grupos y datos institucionales permanecen guardados.", 'success');
         }
 
 
-        // --- Lógica de Añadir Estudiantes ---
+        // --- Lógica de Añadir y Gestionar Estudiantes ---
 
         /**
-         * Maneja el clic en el botón "Agregar Estudiantes".
-         * Parsea la lista de estudiantes y guarda en localStorage.
+         * Rellena el selector de grupos con los grupos guardados.
+         */
+        function renderGroupSelect() {
+            groupSelect.innerHTML = '<option value="">-- Seleccionar Grupo --</option>';
+            for (const groupName in studentGroups) {
+                const option = document.createElement('option');
+                option.value = groupName;
+                option.textContent = groupName;
+                groupSelect.appendChild(option);
+            }
+        }
+
+        /**
+         * Maneja el clic en el botón "Guardar Lista de Estudiantes".
+         * Guarda los estudiantes en un nuevo grupo, los añade a uno existente o los reemplaza.
          */
         addStudentsBtn.addEventListener('click', () => {
             const rawList = studentListInput.value.trim();
+            let groupName = groupNameInput.value.trim();
+            const selectedGroup = groupSelect.value;
+
             if (!rawList) {
                 showMessage(studentMessageBox, "Por favor, introduce la lista de estudiantes.", 'error');
                 return;
             }
 
-            // Eliminar líneas en blanco y duplicados, luego limpiar espacios extra
             const newStudents = rawList.split('\n')
                                       .map(name => name.trim())
                                       .filter(name => name !== '')
                                       .filter((name, index, self) => self.indexOf(name) === index); // Filtrar duplicados
 
             if (newStudents.length === 0) {
-                showMessage(studentMessageBox, "No se encontraron nombres de estudiantes válidos.", 'error');
+                showMessage(studentMessageBox, "No se encontraron nombres de estudiantes válidos en la lista.", 'error');
                 return;
             }
 
-            students = newStudents;
+            let targetGroupName;
+            let actionMessage = "";
+
+            if (groupName) { // Si se ha introducido un nombre de grupo explícito
+                targetGroupName = groupName;
+                // Si el grupo ya existe, se sobrescribe; si no, se crea
+                studentGroups[targetGroupName] = newStudents;
+                actionMessage = `¡Grupo "${targetGroupName}" con ${newStudents.length} estudiantes guardado (o actualizado)!`;
+            } else if (selectedGroup) { // Si no se introdujo nombre de grupo, pero hay uno seleccionado
+                targetGroupName = selectedGroup;
+                // Añadir estudiantes al grupo existente, evitando duplicados
+                const existingStudents = studentGroups[targetGroupName] || [];
+                const combinedStudents = [...new Set([...existingStudents, ...newStudents])];
+                studentGroups[targetGroupName] = combinedStudents;
+                actionMessage = `¡${newStudents.length} estudiantes añadidos al grupo "${targetGroupName}"! Total: ${combinedStudents.length} estudiantes.`;
+            } else { // Ni nombre de grupo explícito ni grupo seleccionado, crear uno nuevo anónimo
+                targetGroupName = `Grupo - ${new Date().toLocaleDateString('es-ES')}`;
+                let counter = 1;
+                while(studentGroups[targetGroupName]) {
+                    targetGroupName = `Grupo - ${new Date().toLocaleDateString('es-ES')} (${counter})`;
+                    counter++;
+                }
+                studentGroups[targetGroupName] = newStudents;
+                actionMessage = `¡Nuevo grupo anónimo "${targetGroupName}" con ${newStudents.length} estudiantes creado!`;
+            }
+
+            currentStudents = studentGroups[targetGroupName]; // Establecer este como el grupo actual
+            renderGroupSelect(); // Actualizar el selector de grupos
+            groupSelect.value = targetGroupName; // Seleccionar el grupo trabajado
             saveData();
-            showMessage(studentMessageBox, `¡${students.length} estudiantes agregados correctamente!`, 'success');
+            showMessage(studentMessageBox, actionMessage, 'success');
+
+            // --- CAMBIO CLAVE AQUÍ: YA NO PASAMOS A LA SIGUIENTE PANTALLA AUTOMÁTICAMENTE ---
+            // Limpiar los campos de entrada para permitir añadir otro grupo
+            groupNameInput.value = '';
+            studentListInput.value = '';
+        });
+
+        /**
+         * Maneja el clic en el botón "Cargar Grupo Seleccionado".
+         */
+        selectGroupBtn.addEventListener('click', () => {
+            const selectedGroup = groupSelect.value;
+            if (!selectedGroup) {
+                showMessage(studentMessageBox, "Por favor, selecciona un grupo de estudiantes.", 'error');
+                return;
+            }
+            if (currentStudents.length > 0 && rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
+                const confirmChangeGroup = window.confirm("Ya tienes una rúbrica activa. ¿Estás seguro de que quieres cambiar a este grupo? Se perderán las evaluaciones no guardadas de la rúbrica actual (si las hay) y se cargarán las evaluaciones de este grupo.");
+                if (!confirmChangeGroup) {
+                    return;
+                }
+            }
+
+
+            currentStudents = studentGroups[selectedGroup];
+            saveData(); // Guardar el grupo actualmente seleccionado
+            showMessage(studentMessageBox, `¡Grupo "${selectedGroup}" cargado para evaluación!`, 'success');
 
             // Ocultar sección de estudiantes y mostrar configuración de rúbrica
             addStudentsSection.classList.add('hidden');
             rubricConfigSection.classList.remove('hidden');
+            currentStudentIndex = 0; // Resetear el índice del estudiante al cargar un nuevo grupo
+
+            // Si ya hay una rúbrica configurada, ir directamente a la evaluación
+            if (rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
+                rubricConfigSection.classList.add('hidden');
+                evaluationSection.classList.remove('hidden');
+                renderStudentEvaluation();
+            }
         });
 
+        /**
+         * Maneja el clic en el botón "Eliminar Grupo Seleccionado".
+         */
+        deleteGroupBtn.addEventListener('click', () => {
+            const selectedGroup = groupSelect.value;
+            if (!selectedGroup) {
+                showMessage(studentMessageBox, "Por favor, selecciona un grupo para eliminar.", 'error');
+                return;
+            }
+
+            const confirmDelete = window.confirm(`¿Estás seguro de que quieres eliminar el grupo "${selectedGroup}"? Ten en cuenta que esto NO eliminará las evaluaciones asociadas a este grupo si ya se han realizado. Para borrar evaluaciones individuales, necesitarías reiniciar la rúbrica.`);
+            if (confirmDelete) {
+                delete studentGroups[selectedGroup];
+                if (localStorage.getItem('currentSelectedGroup') === selectedGroup) {
+                    localStorage.removeItem('currentSelectedGroup');
+                    currentStudents = []; // Limpiar el grupo actual si es el eliminado
+                }
+                renderGroupSelect();
+                saveData();
+                showMessage(studentMessageBox, `Grupo "${selectedGroup}" eliminado.`, 'success');
+            }
+        });
+
+
         // --- Lógica de Configuración de Rúbrica ---
+
+        // Función auxiliar para añadir y renderizar elementos en listas guardadas
+        function addAndRenderItem(inputElement, dataArray, selectElement, messageBox, storageKey, messageType) {
+            const newItem = inputElement.value.trim();
+            if (newItem) { // Asegurarse de que no sea vacío
+                if (!dataArray.includes(newItem)) { // Verificar si el elemento ya existe
+                    dataArray.push(newItem);
+                    dataArray.sort(); // Mantener orden alfabético
+                    renderDropdownOptions(selectElement, dataArray);
+                    selectElement.value = newItem; // Seleccionar el nuevo elemento
+                    inputElement.value = ''; // Limpiar input
+                    localStorage.setItem(storageKey, JSON.stringify(dataArray));
+                    showMessage(messageBox, messageType, 'success');
+                } else {
+                     showMessage(messageBox, 'El elemento ya existe en la lista.', 'error');
+                }
+            } else {
+                showMessage(messageBox, 'Por favor, introduce un valor para añadir.', 'error');
+            }
+        }
+
+        // Event listeners para añadir nuevas opciones permanentes
+        addInstitutionBtn.addEventListener('click', () => addAndRenderItem(newInstitutionInput, savedInstitutions, institutionSelect, rubricConfigMessageBox, 'savedInstitutions', 'Institución añadida.'));
+        addCourseBtn.addEventListener('click', () => addAndRenderItem(newCourseInput, savedCourses, courseSelect, rubricConfigMessageBox, 'savedCourses', 'Curso añadido.'));
+        addTeacherBtn.addEventListener('click', () => addAndRenderItem(newTeacherInput, savedTeachers, teacherSelect, rubricConfigMessageBox, 'savedTeachers', 'Docente añadido.'));
+
+        // Event listeners para alternar inputs de añadir
+        toggleInstitutionInput.addEventListener('click', () => newInstitutionInput.classList.toggle('hidden'));
+        toggleCourseInput.addEventListener('click', () => newCourseInput.classList.toggle('hidden'));
+        toggleTeacherInput.addEventListener('click', () => newTeacherInput.classList.toggle('hidden'));
+
 
         /**
          * Genera la tabla de descriptores de la rúbrica para edición y los inputs de puntaje.
          */
         generateRubricBtn.addEventListener('click', () => {
-            rubric.institution = institutionInput.value.trim();
-            rubric.course = courseInput.value.trim();
+            rubric.institution = institutionSelect.value; // Obtener del select
+            rubric.course = courseSelect.value;           // Obtener del select
+            rubric.teacher = teacherSelect.value;         // Obtener del select
             rubric.sessionTitle = sessionTitleInput.value.trim();
-            rubric.teacher = teacherInput.value.trim();
             rubric.date = dateInput.value.trim();
+
+            if (!rubric.institution) {
+                showMessage(rubricConfigMessageBox, "Por favor, selecciona o añade una Institución Educativa.", 'error');
+                return;
+            }
+            if (!rubric.course) {
+                showMessage(rubricConfigMessageBox, "Por favor, selecciona o añade un Curso/Módulo.", 'error');
+                return;
+            }
+            if (!rubric.teacher) {
+                showMessage(rubricConfigMessageBox, "Por favor, selecciona o añade un Docente.", 'error');
+                return;
+            }
+
 
             const rawAspects = aspectsInput.value.trim();
             const rawLevels = levelsInput.value.trim();
@@ -611,14 +894,15 @@ Uso de la gramática</textarea>
          */
         saveRubricBtn.addEventListener('click', () => {
             // Recopilar los campos generales de la rúbrica
-            rubric.institution = institutionInput.value.trim();
-            rubric.course = courseInput.value.trim();
+            rubric.institution = institutionSelect.value;
+            rubric.course = courseSelect.value;
             rubric.sessionTitle = sessionTitleInput.value.trim();
-            rubric.teacher = teacherInput.value.trim();
+            rubric.teacher = teacherSelect.value;
             rubric.date = dateInput.value.trim();
             rubric.generalObservations = generalObservationsInput.value.trim();
 
             // Recopilar los puntajes de los niveles
+            let allScoresValid = true;
             rubric.levels.forEach(level => {
                 const scoreInputId = `score-${level.replace(/\s/g, '-')}`;
                 const scoreInput = document.getElementById(scoreInputId);
@@ -626,9 +910,13 @@ Uso de la gramática</textarea>
                     rubric.levelScores[level] = parseInt(scoreInput.value);
                 } else {
                     showMessage(rubricConfigMessageBox, `Por favor, ingresa un puntaje válido para el nivel '${level}'.`, 'error');
-                    return; // Detener el proceso si hay un puntaje inválido
+                    allScoresValid = false;
+                    return; // Detener el forEach si hay un puntaje inválido
                 }
             });
+
+            if (!allScoresValid) return; // Detener la función si algún puntaje no es válido
+
 
             // Recopilar los descriptores actualizados de la tabla
             rubric.aspects.forEach(aspect => {
@@ -641,13 +929,14 @@ Uso de la gramática</textarea>
                 });
             });
 
-            // Inicializar las evaluaciones para cada estudiante si no existen
-            students.forEach(student => {
-                if (!evaluations[student]) {
-                    evaluations[student] = {};
+            // Inicializar las evaluaciones para cada estudiante (con la clave única del grupo)
+            const currentGroupName = groupSelect.value;
+            currentStudents.forEach(student => {
+                const evaluationKey = `${currentGroupName}_${student}`;
+                if (!evaluations[evaluationKey]) {
+                    evaluations[evaluationKey] = {};
                     rubric.aspects.forEach(aspect => {
-                        // Establecer un valor por defecto o nulo si no ha sido evaluado
-                        evaluations[student][aspect] = null;
+                        evaluations[evaluationKey][aspect] = null; // Establecer un valor por defecto
                     });
                 }
             });
@@ -668,49 +957,34 @@ Uso de la gramática</textarea>
          * Renderiza la rúbrica para el estudiante actual y sus evaluaciones.
          */
         function renderStudentEvaluation() {
-            if (students.length === 0) {
+            if (currentStudents.length === 0) {
                 currentStudentName.textContent = "No hay estudiantes";
                 studentRubricDisplay.innerHTML = "";
                 return;
             }
 
-            const studentName = students[currentStudentIndex];
+            const studentName = currentStudents[currentStudentIndex];
             currentStudentName.textContent = studentName;
             studentIndexSpan.textContent = currentStudentIndex + 1;
-            totalStudentsSpan.textContent = students.length;
+            totalStudentsSpan.textContent = currentStudents.length;
 
-           /*  let tableHTML = `
-                <table class="w-full text-left table-auto min-w-max">
-                    <thead">
-                        <tr hover:bg-slate-50>
-                            <th class="py-3 px-4 text-left text-gray-50 font-semibold border-b">Aspecto</th>
-                            <th class="py-3 px-4 text-left text-gray-50 font-semibold border-b">Nivel Asignado</th>
-                            <th class="py-3 px-4 text-left text-gray-50 font-semibold border-b">Puntaje</th>
-                            <th class="py-3 px-4 text-left text-gray-90 font-semibold border-b">Descriptores (Haz clic para asignar)</th>
+            const evaluationKey = `${groupSelect.value}_${studentName}`; // Clave de evaluación para el estudiante actual
+
+            let tableHTML = `
+                <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Aspecto</th>
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Nivel Asignado</th>
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Puntaje</th>
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Descriptores (Haz clic para asignar)</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
- */
-
-let tableHTML = `
-<div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm"> <!-- Contenedor responsivo -->
-    <table class="min-w-full divide-y divide-gray-300"> <!-- Bordes horizontales visibles -->
-        <thead class="bg-gray-800">
-            <tr>
-                <th class="py-3 px-4 text-left text-sm font-semibold text-white border-b-2 border-gray-600">Aspecto</th>
-                <th class="py-3 px-4 text-left text-sm font-semibold text-white border-b-2 border-gray-600">Nivel Asignado</th>
-                <th class="py-3 px-4 text-left text-sm font-semibold text-white border-b-2 border-gray-600">Puntaje</th>
-                <th class="py-3 px-4 text-left text-sm font-semibold text-white border-b-2 border-gray-600">Descriptores</th>
-            </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-300"> <!-- Bordes entre filas -->
-`;
-
-
 
             rubric.aspects.forEach(aspect => {
-                const currentLevel = evaluations[studentName][aspect];
+                const currentLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] : null; // Check if evaluationKey exists
                 const currentScore = currentLevel ? rubric.levelScores[currentLevel] || 0 : 0; // Obtener puntaje
                 tableHTML += `
                     <tr>
@@ -766,8 +1040,8 @@ let tableHTML = `
 
             // Mostrar/ocultar botones de navegación y finalizar
             prevStudentBtn.disabled = currentStudentIndex === 0;
-            nextStudentBtn.disabled = currentStudentIndex === students.length - 1;
-            if (currentStudentIndex === students.length - 1) {
+            nextStudentBtn.disabled = currentStudentIndex === currentStudents.length - 1;
+            if (currentStudentIndex === currentStudents.length - 1) {
                 finishEvaluationBtn.classList.remove('hidden');
                 nextStudentBtn.classList.add('hidden'); // Ocultar "Siguiente" si es el último
             } else {
@@ -783,10 +1057,11 @@ let tableHTML = `
          * @param {string} level - Nivel de desempeño asignado.
          */
         function evaluateAspect(studentName, aspect, level) {
-            if (!evaluations[studentName]) {
-                evaluations[studentName] = {};
+            const evaluationKey = `${groupSelect.value}_${studentName}`;
+            if (!evaluations[evaluationKey]) {
+                evaluations[evaluationKey] = {};
             }
-            evaluations[studentName][aspect] = level;
+            evaluations[evaluationKey][aspect] = level;
             saveData(); // Guardar después de cada cambio
             renderStudentEvaluation(); // Volver a renderizar para actualizar la UI
             showMessage(evaluationMessageBox, `Evaluación para '${aspect}' del estudiante '${studentName}' actualizada a '${level}'.`, 'success');
@@ -806,7 +1081,7 @@ let tableHTML = `
          * Navega al siguiente estudiante.
          */
         nextStudentBtn.addEventListener('click', () => {
-            if (currentStudentIndex < students.length - 1) {
+            if (currentStudentIndex < currentStudents.length - 1) {
                 currentStudentIndex++;
                 renderStudentEvaluation();
             }
@@ -833,8 +1108,7 @@ let tableHTML = `
          * Inicia una nueva rúbrica desde cero.
          */
         newRubricBtn.addEventListener('click', () => {
-            // Mostrar un mensaje de confirmación antes de resetear
-            const confirmReset = window.confirm("¿Estás seguro de que quieres iniciar una nueva rúbrica? Se borrarán todos los datos actuales de estudiantes y evaluaciones.");
+            const confirmReset = window.confirm("¿Estás seguro de que quieres iniciar una nueva rúbrica? Esto borrará solo la configuración actual de la rúbrica y las evaluaciones realizadas, pero tus grupos de estudiantes y datos institucionales guardados PERMANECERÁN.");
             if (confirmReset) {
                 resetApp();
             }
@@ -845,8 +1119,9 @@ let tableHTML = `
         /**
          * Genera un PDF para un único estudiante.
          * @param {string} studentName - El nombre del estudiante para el cual se generará el PDF.
+         * @param {string} groupName - El nombre del grupo al que pertenece el estudiante.
          */
-        function generateSingleStudentPdf(studentName) {
+        function generateSingleStudentPdf(studentName, groupName) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
                 orientation: 'portrait',
@@ -859,10 +1134,15 @@ let tableHTML = `
             const margin = 20;
 
             // Información general de la rúbrica
-            doc.setFontSize(18);
+            doc.setFontSize(22);
             doc.setTextColor(40, 40, 40);
             doc.text("Rúbrica de Evaluación", doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 10;
+            yOffset += 10; // Espacio después del título principal
+
+            doc.setFontSize(14); // Un poco más grande para el nombre del grupo
+            doc.setTextColor(50, 50, 50);
+            doc.text(`Grupo: ${groupName || 'N/A'}`, doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
+            yOffset += 10; // Espacio después del grupo
 
             doc.setFontSize(10);
             doc.setTextColor(80, 80, 80);
@@ -899,12 +1179,13 @@ let tableHTML = `
             const headers = ["Aspecto", "Nivel Asignado", "Puntaje", "Descriptor"];
             const tableColumnWidths = [40, 25, 15, 90];
 
+            const evaluationKey = `${groupName}_${studentName}`;
             const tableData = [];
             let studentTotalScore = 0;
             let hasEvaluatedAspects = false;
 
             rubric.aspects.forEach(aspect => {
-                const assignedLevel = evaluations[studentName][aspect] || 'No Evaluado';
+                const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || 'No Evaluado' : 'No Evaluado';
                 const scoreForAspect = rubric.levelScores[assignedLevel] || 0;
                 const descriptorText = rubric.descriptors[aspect][assignedLevel] || 'N/A';
                 tableData.push([aspect, assignedLevel, scoreForAspect, descriptorText]);
@@ -969,15 +1250,18 @@ let tableHTML = `
             doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10);
             yOffset += 20;
 
-            doc.save(`rubrica_${studentName.replace(/\s/g, '_')}.pdf`);
+            // Asegurarse de que el nombre del archivo sea compatible con sistemas de archivos
+            const safeStudentName = studentName.replace(/[^a-z0-9]/gi, '_');
+            const safeGroupName = groupName.replace(/[^a-z0-9]/gi, '_');
+            doc.save(`rubrica_${safeStudentName}_${safeGroupName}.pdf`);
         }
 
         /**
-         * Exporta todas las evaluaciones a un archivo PDF (un PDF por estudiante).
+         * Exporta todas las evaluaciones a archivos PDF individuales (un PDF por estudiante).
          */
         exportIndividualRubricsBtn.addEventListener('click', async () => {
-            if (students.length === 0) {
-                showMessage(reportMessageBox, "No hay estudiantes para generar reportes individuales.", 'error');
+            if (currentStudents.length === 0) {
+                showMessage(reportMessageBox, "No hay estudiantes en el grupo actual para generar reportes individuales.", 'error');
                 return;
             }
             if (rubric.aspects.length === 0 || Object.keys(rubric.levelScores).length === 0) {
@@ -985,8 +1269,9 @@ let tableHTML = `
                 return;
             }
 
-            for (const student of students) {
-                generateSingleStudentPdf(student);
+            const currentGroupName = groupSelect.value;
+            for (const student of currentStudents) {
+                generateSingleStudentPdf(student, currentGroupName);
             }
             showMessage(reportMessageBox, "¡Rúbricas individuales generadas y descargadas!", 'success');
         });
@@ -995,8 +1280,8 @@ let tableHTML = `
          * Exporta todas las evaluaciones a un único archivo PDF.
          */
         exportPdfBtn.addEventListener('click', async () => {
-            if (students.length === 0) {
-                showMessage(reportMessageBox, "No hay estudiantes para generar el reporte.", 'error');
+            if (currentStudents.length === 0) {
+                showMessage(reportMessageBox, "No hay estudiantes en el grupo actual para generar el reporte.", 'error');
                 return;
             }
             if (rubric.aspects.length === 0 || Object.keys(rubric.levelScores).length === 0) {
@@ -1015,13 +1300,18 @@ let tableHTML = `
             doc.setFont("helvetica");
 
             let yOffset = 20; // Posición vertical inicial
-            const margin = 20; // Margen para los lados
+            const margin = 20; // Márgenes
 
-            // Información general de la rúbrica (una sola vez)
+            // Información general de la rúbrica (una sola vez al inicio del documento general)
             doc.setFontSize(22);
             doc.setTextColor(40, 40, 40);
-            doc.text("Reporte de Evaluación de Estudiantes", doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 10;
+            doc.text("Reporte General de Evaluación de Estudiantes", doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
+            yOffset += 10; // Espacio después del título principal
+
+            doc.setFontSize(14); // Un poco más grande para el nombre del grupo
+            doc.setTextColor(50, 50, 50);
+            doc.text(`Grupo: ${groupSelect.value || 'N/A'}`, doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
+            yOffset += 10; // Espacio después del grupo
 
             doc.setFontSize(10);
             doc.setTextColor(80, 80, 80);
@@ -1043,8 +1333,10 @@ let tableHTML = `
                 yOffset += 5;
                 const splitObservations = doc.splitTextToSize(rubric.generalObservations, doc.internal.pageSize.width - (2 * margin));
                 doc.text(splitObservations, margin, yOffset);
-                yOffset += (splitObservations.length * 4) + 10; // 4mm por línea + un espacio
+                yOffset += (splitObservations.length * 4) + 10;
             }
+            // Eliminado: doc.text(`Grupo de Estudiantes: ${groupSelect.value || 'N/A'}`, margin, yOffset); // Se movió arriba
+            // Eliminado: yOffset += 10;
 
             // Calcular puntaje total posible y máximo
             let maxPossibleScore = 0;
@@ -1062,12 +1354,14 @@ let tableHTML = `
             let totalSumOfFinalScores = 0;
             let evaluatedStudentCount = 0;
 
-            for (const student of students) {
+            const currentGroupName = groupSelect.value;
+
+            for (const student of currentStudents) { // Iterar sobre el grupo de estudiantes actual
                 // Verificar si hay espacio para el siguiente estudiante, si no, añadir nueva página
-                if (yOffset > 270) { // Aprox. altura de página A4 - margen inferior
+                if (yOffset > 270) {
                     doc.addPage();
-                    yOffset = 20; // Reiniciar offset
-                    // Añadir información general de la rúbrica en la nueva página si es necesario
+                    yOffset = 20;
+                    // Añadir información de la rúbrica al inicio de cada nueva página si es necesario
                     doc.setFontSize(10);
                     doc.setTextColor(80, 80, 80);
                     doc.text(`Institución Educativa: ${rubric.institution || 'N/A'}`, margin, yOffset);
@@ -1079,30 +1373,30 @@ let tableHTML = `
                     doc.text(`Docente: ${rubric.teacher || 'N/A'}`, margin, yOffset);
                     yOffset += 5;
                     doc.text(`Fecha: ${rubric.date || 'N/A'}`, margin, yOffset);
+                    yOffset += 5;
+                    doc.text(`Grupo de Estudiantes: ${groupSelect.value || 'N/A'}`, margin, yOffset);
                     yOffset += 10;
                 }
 
                 // Título del estudiante
                 doc.setFontSize(16);
-                doc.setTextColor(0, 70, 150); // Azul oscuro
+                doc.setTextColor(0, 70, 150);
                 doc.text(`Estudiante: ${student}`, margin, yOffset);
                 yOffset += 8;
 
                 doc.setFontSize(9);
                 doc.setTextColor(80, 80, 80);
 
-                // Cabecera de la tabla de rúbrica en PDF
                 const headers = ["Aspecto", "Nivel Asignado", "Puntaje", "Descriptor"];
-                // Se ajustó el ancho de la columna 'Descriptor' para evitar que la tabla no quepa en la página.
-                const tableColumnWidths = [40, 25, 15, 90]; // Anchos de columna: [Aspecto, Nivel Asignado, Puntaje, Descriptor]
+                const tableColumnWidths = [40, 25, 15, 90];
 
-                // Preparar datos para la tabla de jsPDF
+                const evaluationKey = `${currentGroupName}_${student}`;
                 const tableData = [];
                 let studentTotalScore = 0;
                 let hasEvaluatedAspects = false;
 
                 rubric.aspects.forEach(aspect => {
-                    const assignedLevel = evaluations[student][aspect] || 'No Evaluado';
+                    const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || 'No Evaluado' : 'No Evaluado';
                     const scoreForAspect = rubric.levelScores[assignedLevel] || 0;
                     const descriptorText = rubric.descriptors[aspect][assignedLevel] || 'N/A';
                     tableData.push([aspect, assignedLevel, scoreForAspect, descriptorText]);
@@ -1118,15 +1412,14 @@ let tableHTML = `
                     evaluatedStudentCount++;
                 }
 
-                // Añadir la tabla al PDF
                 doc.autoTable({
                     startY: yOffset,
                     head: [headers],
                     body: tableData,
-                    theme: 'grid', // Borde de cuadrícula
+                    theme: 'grid',
                     styles: {
-                        fontSize: 7, // Reducir un poco el tamaño de la fuente para mejor ajuste
-                        cellPadding: 1.5, // Reducir el padding
+                        fontSize: 7,
+                        cellPadding: 1.5,
                         valign: 'middle',
                         halign: 'left',
                         textColor: [50, 50, 50],
@@ -1139,11 +1432,10 @@ let tableHTML = `
                     columnStyles: {
                         0: { cellWidth: tableColumnWidths[0] },
                         1: { cellWidth: tableColumnWidths[1] },
-                        2: { cellWidth: tableColumnWidths[2], halign: 'center' }, // Puntaje centrado
+                        2: { cellWidth: tableColumnWidths[2], halign: 'center' },
                         3: { cellWidth: tableColumnWidths[3] }
                     },
                     didDrawPage: function (data) {
-                        // Pie de página con número de página
                         let str = "Página " + doc.internal.getNumberOfPages();
                         doc.setFontSize(8);
                         doc.setTextColor(150);
@@ -1151,39 +1443,38 @@ let tableHTML = `
                     }
                 });
 
-                yOffset = doc.autoTable.previous.finalY; // Actualizar offset después de la tabla
+                yOffset = doc.autoTable.previous.finalY;
 
-                // Mostrar puntaje total y promedio para el estudiante
                 doc.setFontSize(10);
-                doc.setTextColor(0, 100, 0); // Verde oscuro
+                doc.setTextColor(0, 100, 0);
                 doc.text(`Puntaje Final: ${studentTotalScore} / ${maxPossibleScore} pts`, margin, yOffset + 5);
 
                 const studentAverageScore = hasEvaluatedAspects ? (studentTotalScore / rubric.aspects.length).toFixed(2) : 'N/A';
                 doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10);
-                yOffset += 20; // Espacio después de los puntajes del estudiante
+                yOffset += 20;
             }
 
             // Puntaje promedio global (si hay estudiantes evaluados)
             if (evaluatedStudentCount > 0) {
                 const globalAverageScore = (totalSumOfFinalScores / evaluatedStudentCount).toFixed(2);
-                doc.addPage(); // Nueva página para el resumen global
+                doc.addPage();
                 yOffset = 30;
                 doc.setFontSize(20);
-                doc.setTextColor(0, 0, 120); // Azul muy oscuro
+                doc.setTextColor(0, 0, 120);
                 doc.text("Resumen General de Evaluaciones", doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
                 yOffset += 15;
 
                 doc.setFontSize(12);
                 doc.setTextColor(0, 0, 0);
-                doc.text(`Número total de estudiantes evaluados: ${evaluatedStudentCount}`, margin, yOffset);
+                doc.text(`Número total de estudiantes evaluados en este grupo: ${evaluatedStudentCount}`, margin, yOffset);
                 yOffset += 10;
-                doc.text(`Puntaje Promedio Global (por estudiante): ${globalAverageScore} pts`, margin, yOffset);
+                doc.text(`Puntaje Promedio Global (por estudiante) en este grupo: ${globalAverageScore} pts`, margin, yOffset);
                 yOffset += 10;
                 doc.text(`Puntaje Máximo Posible por estudiante: ${maxPossibleScore} pts`, margin, yOffset);
             }
 
 
-            doc.save('reporte_evaluacion_estudiantes.pdf');
+            doc.save('reporte_general_evaluacion_grupo.pdf');
             showMessage(reportMessageBox, "¡Reporte PDF generado y descargado!", 'success');
         });
 
