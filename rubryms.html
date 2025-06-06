@@ -224,11 +224,9 @@
             }
         }
 
-        @media (min-width: 768px) { /* Desde 768px (tablets y desktop) */
+        @media (min-width: 768px) and (max-width: 1023px) { /* Tablets (768px a 1023px) */
             #nav-links-container {
-                /* Por defecto estará oculto en HTML. Aquí lo mostramos como flex. */
-                display: flex !important; /* !important para sobreescribir 'hidden' */
-                position: static; /* Eliminar posicionamiento absoluto */
+                display: flex; /* Mostrar como flex */
                 flex-direction: column; /* Menú en columna por defecto para tablets */
                 flex-grow: 1;
                 justify-content: center;
@@ -241,19 +239,31 @@
                 width: auto;
                 margin: 5px auto; /* Centrar elementos en columna para tablets */
             }
-            #mobile-menu-toggle { /* Ocultar botón de hamburguesa en tablet y desktop */
+            #mobile-menu-toggle { /* Mostrar botón de hamburguesa en tablets */
+                display: block !important;
+            }
+            #nav-links-container:not(.md-forced-display) { /* Ocultar si no está forzado a mostrarse */
                 display: none !important;
             }
         }
 
         @media (min-width: 1024px) { /* Escritorio (1024px y más) */
             #nav-links-container {
-                flex-direction: row; /* Volver a fila en desktop */
+                display: flex !important; /* Siempre visible como flex en desktop */
+                flex-direction: row; /* En fila */
+                flex-grow: 1;
                 justify-content: flex-end; /* Alinear a la derecha */
                 gap: 8px; /* Restablecer el gap */
+                position: static; /* Asegurarse de que no sea absoluto en desktop */
+                background-color: transparent; /* Fondo transparente */
+                box-shadow: none; /* Sin sombra */
+                padding: 0; /* Sin padding */
             }
             .nav-item {
                 margin: 0 5px; /* Restablecer el margen horizontal */
+            }
+            #mobile-menu-toggle { /* Ocultar botón de hamburguesa en desktop */
+                display: none !important;
             }
         }
     </style>
@@ -277,6 +287,8 @@
             </div>
 
             <!-- Contenedor de enlaces de navegación -->
+            <!-- La clase 'hidden' inicial hace que esté oculto por defecto en móviles y tablets. -->
+            <!-- Las media queries en CSS y el JS lo controlarán. -->
             <div id="nav-links-container" class="hidden">
                 <button id="nav-select-group" class="nav-item active"><i class="fas fa-folder-open mr-2"></i> Gestión de Grupos</button>
                 <button id="nav-add-students" class="nav-item"><i class="fas fa-users-cog mr-2"></i> Añadir Estudiantes</button>
@@ -459,6 +471,17 @@ Uso de la gramática</textarea>
             </button>
             <div id="rubric-config-message-box" class="message-box"></div>
 
+            <!-- Botones de Importación/Exportación de Rúbrica -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+                <input type="file" id="import-rubric-csv-file-input" accept=".csv" class="hidden">
+                <button id="import-rubric-btn" class="flex-1 bg-gray-500 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-300">
+                    <i class="fas fa-file-import"></i> Importar Configuración (CSV)
+                </button>
+                <button id="export-rubric-config-btn" class="flex-1 bg-gray-500 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-300">
+                    <i class="fas fa-file-export"></i> Exportar Configuración (CSV)
+                </button>
+            </div>
+
             <div id="rubric-descriptors-editor" class="mt-8 hidden">
                 <h3 class="text-xl font-semibold text-gray-700 mb-4">Asignar Puntajes por Nivel</h3>
                 <p class="text-gray-600 mb-4">Define el puntaje máximo para cada nivel de desempeño.</p>
@@ -532,13 +555,19 @@ Uso de la gramática</textarea>
                     id="export-pdf-btn"
                     class="flex-1 bg-red-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
                 >
-                    <i class="fas fa-file-alt"></i> Exportar Reporte General a PDF
+                    <i class="fas fa-file-alt"></i> Exportar Reporte General (PDF)
                 </button>
                 <button
                     id="export-individual-rubrics-btn"
                     class="flex-1 bg-teal-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-300"
                 >
-                    <i class="fas fa-file-export"></i> Exportar Rúbricas Individuales a PDF
+                    <i class="fas fa-file-export"></i> Exportar Rúbricas Individuales (PDF)
+                </button>
+                <button
+                    id="export-evaluations-csv-btn"
+                    class="flex-1 bg-green-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
+                >
+                    <i class="fas fa-file-csv"></i> Exportar Evaluaciones (CSV)
                 </button>
             </div>
             <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
@@ -569,15 +598,15 @@ Uso de la gramática</textarea>
 
     <script>
         // Obtener referencias a los elementos del DOM
-        const navSelectGroupBtn = document.getElementById('nav-select-group'); // Nuevo botón de navegación
-        const navAddStudentsBtn = document.getElementById('nav-add-students'); // Nuevo botón de navegación
+        const navSelectGroupBtn = document.getElementById('nav-select-group');
+        const navAddStudentsBtn = document.getElementById('nav-add-students');
         const navLevelsBtn = document.getElementById('nav-levels'); 
         const navRubricBtn = document.getElementById('nav-rubric');
         const navEvaluationBtn = document.getElementById('nav-evaluation');
         const navReportsBtn = document.getElementById('nav-reports');
 
-        const selectGroupScreen = document.getElementById('select-group-screen'); // Nueva pantalla principal
-        const addStudentsScreen = document.getElementById('add-students-screen'); // Nueva pantalla para añadir
+        const selectGroupScreen = document.getElementById('select-group-screen'); 
+        const addStudentsScreen = document.getElementById('add-students-screen'); 
         const levelManagementScreen = document.getElementById('level-management-screen'); 
         const rubricConfigScreen = document.getElementById('rubric-config-screen');
         const evaluationScreen = document.getElementById('evaluation-screen');
@@ -590,11 +619,11 @@ Uso de la gramática</textarea>
 
         const groupNameInput = document.getElementById('group-name-input');
         const studentListInput = document.getElementById('student-list-input');
-        const saveStudentsListBtn = document.getElementById('save-students-list-btn'); // Renombrado de addStudentsBtn
+        const saveStudentsListBtn = document.getElementById('save-students-list-btn'); 
         const groupCardsContainer = document.getElementById('group-cards-container'); 
-        const addStudentsMessageBox = document.getElementById('add-students-message-box'); // Renombrado de studentMessageBox
-        const selectGroupMessageBox = document.getElementById('select-group-message-box'); // Nuevo para la pantalla de selección
-        const goToAddStudentsBtn = document.getElementById('go-to-add-students-btn'); // Botón para ir a la pantalla de añadir
+        const addStudentsMessageBox = document.getElementById('add-students-message-box'); 
+        const selectGroupMessageBox = document.getElementById('select-group-message-box'); 
+        const goToAddStudentsBtn = document.getElementById('go-to-add-students-btn'); 
 
         // Referencias para el nuevo módulo de gestión de niveles
         const levelGroupNameInput = document.getElementById('level-group-name-input');
@@ -628,6 +657,13 @@ Uso de la gramática</textarea>
         const descriptorsTable = document.getElementById('descriptors-table');
         const generalObservationsInput = document.getElementById('general-observations-input');
         const saveRubricBtn = document.getElementById('save-rubric-btn');
+
+        // Referencias para CSV Import/Export de Rúbrica
+        const importRubricCsvFileInput = document.getElementById('import-rubric-csv-file-input');
+        const importRubricBtn = document.getElementById('import-rubric-btn');
+        const exportRubricConfigBtn = document.getElementById('export-rubric-config-btn');
+        const exportEvaluationsCsvBtn = document.getElementById('export-evaluations-csv-btn');
+
 
         const currentStudentName = document.getElementById('current-student-name');
         const studentIndexSpan = document.getElementById('student-index');
@@ -707,15 +743,15 @@ Uso de la gramática</textarea>
         function showScreen(screenId) {
             // Oculta todas las pantallas
             selectGroupScreen.classList.add('hidden');
-            addStudentsScreen.classList.add('hidden'); // Nueva pantalla de añadir
+            addStudentsScreen.classList.add('hidden'); 
             levelManagementScreen.classList.add('hidden'); 
             rubricConfigScreen.classList.add('hidden');
             evaluationScreen.classList.add('hidden');
             reportScreen.classList.add('hidden');
 
             // Quita la clase 'active' de todos los botones de navegación
-            navSelectGroupBtn.classList.remove('active'); // Nuevo
-            navAddStudentsBtn.classList.remove('active'); // Nuevo
+            navSelectGroupBtn.classList.remove('active'); 
+            navAddStudentsBtn.classList.remove('active'); 
             navLevelsBtn.classList.remove('active'); 
             navRubricBtn.classList.remove('active');
             navEvaluationBtn.classList.remove('active');
@@ -726,7 +762,7 @@ Uso de la gramática</textarea>
                 selectGroupScreen.classList.remove('hidden');
                 navSelectGroupBtn.classList.add('active');
                 renderGroupCards(); // Asegurarse de renderizar las tarjetas al volver a esta pantalla
-            } else if (screenId === 'add-students-screen') { // Nueva pantalla de añadir
+            } else if (screenId === 'add-students-screen') { 
                 addStudentsScreen.classList.remove('hidden');
                 navAddStudentsBtn.classList.add('active');
             }
@@ -755,9 +791,9 @@ Uso de la gramática</textarea>
         }
 
         // Event listeners para la navegación
-        navSelectGroupBtn.addEventListener('click', () => showScreen('select-group-screen')); // Nuevo
-        navAddStudentsBtn.addEventListener('click', () => showScreen('add-students-screen')); // Nuevo
-        goToAddStudentsBtn.addEventListener('click', () => showScreen('add-students-screen')); // Botón de la pantalla principal para ir a añadir estudiantes
+        navSelectGroupBtn.addEventListener('click', () => showScreen('select-group-screen')); 
+        navAddStudentsBtn.addEventListener('click', () => showScreen('add-students-screen')); 
+        goToAddStudentsBtn.addEventListener('click', () => showScreen('add-students-screen')); 
         navLevelsBtn.addEventListener('click', () => showScreen('level-management-screen'));
         navRubricBtn.addEventListener('click', () => showScreen('rubric-config-screen'));
         navEvaluationBtn.addEventListener('click', () => {
@@ -785,7 +821,9 @@ Uso de la gramática</textarea>
                 navLinksContainer.classList.remove('hidden', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10');
                 navLinksContainer.classList.add('flex', 'flex-row');
             } else { /* Para 768px a 1023px (md) y móviles (max-767px) */
-                navLinksContainer.classList.add('hidden'); // Ocultar por defecto para el comportamiento de hamburguesa
+                // Si el ancho es <= 1023px, ocultar siempre el menú por defecto,
+                // a menos que el usuario lo haya desplegado con el toggle.
+                navLinksContainer.classList.add('hidden'); 
                 navLinksContainer.classList.remove('flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10', 'flex-row');
             }
         });
@@ -1089,7 +1127,7 @@ Uso de la gramática</textarea>
 
 
         // Event listener para el botón principal de guardar lista de estudiantes
-        saveStudentsListBtn.addEventListener('click', () => { // Renombrado de addStudentsBtn
+        saveStudentsListBtn.addEventListener('click', () => { 
             const rawList = studentListInput.value.trim();
             let groupName = groupNameInput.value.trim();
 
@@ -1115,14 +1153,14 @@ Uso de la gramática</textarea>
                 targetGroupName = groupName;
                 studentGroups[targetGroupName] = newStudents;
                 actionMessage = `¡Grupo "${targetGroupName}" con ${newStudents.length} estudiantes guardado (o actualizado)!`;
-            } else if (currentSelectedGroupName && studentGroups[currentSelectedGroupName]) { // Añadir a grupo ya seleccionado si no se dio nuevo nombre
+            } else if (currentSelectedGroupName && studentGroups[currentSelectedGroupName]) { 
                 targetGroupName = currentSelectedGroupName;
                 const existingStudents = studentGroups[targetGroupName] || [];
                 const combinedStudents = [...new Set([...existingStudents, ...newStudents])];
                 studentGroups[targetGroupName] = combinedStudents;
                 actionMessage = `¡${newStudents.length} estudiantes añadidos al grupo "${targetGroupName}"! Total: ${combinedStudents.length} estudiantes.`;
             }
-            else { // Crear nuevo grupo anónimo si no hay nombre ni selección
+            else { 
                 targetGroupName = `Grupo - ${new Date().toLocaleDateString('es-ES')}`;
                 let counter = 1;
                 while(studentGroups[targetGroupName]) {
@@ -1136,7 +1174,7 @@ Uso de la gramática</textarea>
             currentStudents = studentGroups[targetGroupName];
             currentSelectedGroupName = targetGroupName; 
             saveData();
-            renderGroupCards(); // Renderiza las tarjetas en la pantalla de selección de grupo
+            renderGroupCards(); 
             highlightSelectedGroupCard(targetGroupName); 
             showMessage(addStudentsMessageBox, actionMessage, 'success');
 
