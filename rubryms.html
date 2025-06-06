@@ -6,6 +6,8 @@
     <title>Evaluador de Estudiantes por Rúbrica</title>
     <!-- Carga de Tailwind CSS para un diseño responsivo y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -36,6 +38,10 @@
         }
         button {
             transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Espacio entre icono y texto */
         }
         button:hover {
             transform: translateY(-2px);
@@ -81,6 +87,31 @@
             line-height: 1.25rem;
             margin-bottom: 0;
         }
+        /* Estilo para el textarea con líneas de fondo */
+        #aspects-input {
+            background-image: linear-gradient(to bottom, #d1d5db 1px, transparent 1px);
+            background-size: 100% 1.5em; /* Ajusta la altura de la línea según el line-height del texto */
+            background-position: 0 0.8em; /* Ajusta la posición de la primera línea */
+            line-height: 1.5em; /* Coincide con background-size para una alineación perfecta */
+            padding-top: 0.5em; /* Ajusta el padding para que el texto no se superponga con la primera línea */
+        }
+        /* Asegura que la tabla de descriptores no se encoja */
+        #descriptors-table table {
+            min-width: 700px; /* Ancho mínimo para la tabla completa */
+        }
+        #descriptors-table th,
+        #descriptors-table td {
+            width: 150px; /* Ancho fijo para las celdas de los niveles */
+        }
+        #descriptors-table th:first-child,
+        #descriptors-table td:first-child {
+            width: 120px; /* Ancho fijo para la columna de Aspectos */
+        }
+        #descriptors-table textarea {
+            min-height: 80px; /* Altura mínima para los textareas en la tabla */
+            max-height: 150px; /* Altura máxima para permitir el scroll interno */
+            resize: vertical; /* Permitir redimensionar solo verticalmente */
+        }
     </style>
 </head>
 <body>
@@ -89,7 +120,9 @@
 
         <!-- Sección de Añadir Estudiantes -->
         <div id="add-students-section" class="bg-blue-50 p-6 rounded-xl border border-blue-200">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">1. Agregar y Gestionar Estudiantes</h2>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
+                <i class="fas fa-users text-blue-600 mr-2"></i> 1. Agregar y Gestionar Estudiantes
+            </h2>
             
             <div class="mb-4">
                 <label for="group-name-input" class="block text-gray-700 font-medium mb-2">Nombre del Nuevo Grupo de Estudiantes (opcional):</label>
@@ -111,7 +144,7 @@
                 id="add-students-btn"
                 class="w-full bg-blue-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
             >
-                Guardar Lista de Estudiantes
+                <i class="fas fa-save"></i> Guardar Lista de Estudiantes
             </button>
             <div id="student-message-box" class="message-box"></div>
 
@@ -125,20 +158,22 @@
                     id="select-group-btn"
                     class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
                 >
-                    Cargar Grupo Seleccionado y Continuar
+                    <i class="fas fa-folder-open"></i> Cargar Grupo Seleccionado y Continuar
                 </button>
                 <button
                     id="delete-group-btn"
                     class="w-full bg-red-500 text-white font-semibold py-3 px-6 mt-2 rounded-xl shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"
                 >
-                    Eliminar Grupo Seleccionado
+                    <i class="fas fa-trash-alt"></i> Eliminar Grupo Seleccionado
                 </button>
             </div>
         </div>
 
         <!-- Sección de Configuración de Rúbrica (Oculta inicialmente) -->
         <div id="rubric-config-section" class="bg-green-50 p-6 rounded-xl border border-green-200 hidden">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">2. Configuración de la Rúbrica</h2>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
+                <i class="fas fa-cogs text-green-600 mr-2"></i> 2. Configuración de la Rúbrica
+            </h2>
             <p class="text-gray-600 mb-4 text-center">Define los detalles de la sesión, aspectos a evaluar y los niveles de desempeño con sus puntajes.</p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -148,8 +183,8 @@
                         <option value="">-- Seleccionar o Añadir --</option>
                     </select>
                     <input type="text" id="new-institution-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 hidden" placeholder="Añadir nueva institución">
-                    <button id="add-institution-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600">Añadir</button>
-                    <button id="toggle-institution-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500">+/-</button>
+                    <button id="add-institution-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600"><i class="fas fa-plus"></i></button>
+                    <button id="toggle-institution-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500"><i class="fas fa-exchange-alt"></i></button>
                 </div>
                 <div class="input-group flex-col md:flex-row">
                     <label for="course-select" class="block text-gray-700 font-medium mb-2 md:mb-0">Curso/Módulo:</label>
@@ -157,8 +192,8 @@
                         <option value="">-- Seleccionar o Añadir --</option>
                     </select>
                     <input type="text" id="new-course-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 hidden" placeholder="Añadir nuevo curso">
-                    <button id="add-course-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600">Añadir</button>
-                    <button id="toggle-course-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500">+/-</button>
+                    <button id="add-course-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600"><i class="fas fa-plus"></i></button>
+                    <button id="toggle-course-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500"><i class="fas fa-exchange-alt"></i></button>
                 </div>
                 <div class="input-group flex-col md:flex-row">
                     <label for="teacher-select" class="block text-gray-700 font-medium mb-2 md:mb-0">Docente:</label>
@@ -166,8 +201,8 @@
                         <option value="">-- Seleccionar o Añadir --</option>
                     </select>
                     <input type="text" id="new-teacher-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 hidden" placeholder="Añadir nuevo docente">
-                    <button id="add-teacher-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600">Añadir</button>
-                    <button id="toggle-teacher-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500">+/-</button>
+                    <button id="add-teacher-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600"><i class="fas fa-plus"></i></button>
+                    <button id="toggle-teacher-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500"><i class="fas fa-exchange-alt"></i></button>
                 </div>
                 <div class="col-span-full">
                     <label for="session-title-input" class="block text-gray-700 font-medium mb-2">Título de la sesión:</label>
@@ -205,7 +240,7 @@ Uso de la gramática</textarea>
                 id="generate-rubric-btn"
                 class="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
             >
-                Generar Rúbrica
+                <i class="fas fa-magic"></i> Generar Rúbrica
             </button>
             <div id="rubric-config-message-box" class="message-box"></div>
 
@@ -217,7 +252,7 @@ Uso de la gramática</textarea>
 
                 <h3 class="text-xl font-semibold text-gray-700 mb-4">Descriptores de la Rúbrica</h3>
                 <p class="text-gray-600 mb-4">Edita los descriptores para cada aspecto y nivel.</p>
-                <div id="descriptors-table" class="overflow-x-auto"> <!-- Re-añadido overflow-x-auto aquí -->
+                <div id="descriptors-table" class="overflow-x-auto"> <!-- Contenedor para scroll horizontal si es necesario -->
                     </div>
 
                 <div class="mt-6">
@@ -234,13 +269,15 @@ Uso de la gramática</textarea>
                     id="save-rubric-btn"
                     class="w-full bg-purple-600 text-white font-semibold py-3 px-6 mt-6 rounded-xl shadow-md hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-300"
                 >
-                    Guardar Rúbrica y Empezar Evaluación
+                    <i class="fas fa-save"></i> Guardar Rúbrica y Empezar Evaluación
                 </button>
             </div>
         </div>
 
         <div id="evaluation-section" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 hidden">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">3. Evaluación de Estudiantes</h2>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
+                <i class="fas fa-pencil-alt text-yellow-600 mr-2"></i> 3. Evaluación de Estudiantes
+            </h2>
             <div class="text-center mb-4">
                 <p class="text-lg text-gray-800 font-semibold">Estudiante Actual: <span id="current-student-name" class="text-blue-600"></span></p>
                 <p class="text-gray-600 text-sm">Estudiante <span id="student-index">1</span> de <span id="total-students">0</span></p>
@@ -252,39 +289,41 @@ Uso de la gramática</textarea>
                     id="prev-student-btn"
                     class="flex-1 bg-gray-400 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-300"
                 >
-                    Anterior
+                    <i class="fas fa-arrow-left"></i> Anterior
                 </button>
                 <button
                     id="next-student-btn"
                     class="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 >
-                    Siguiente Estudiante
+                    Siguiente Estudiante <i class="fas fa-arrow-right"></i>
                 </button>
                 <button
                     id="finish-evaluation-btn"
                     class="flex-1 bg-indigo-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 hidden"
                 >
-                    Finalizar Evaluación y Exportar
+                    <i class="fas fa-check-circle"></i> Finalizar Evaluación y Exportar
                 </button>
             </div>
             <div id="evaluation-message-box" class="message-box"></div>
         </div>
 
         <div id="report-section" class="bg-red-50 p-6 rounded-xl border border-red-200 hidden">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">4. Reporte y Exportación a PDF</h2>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
+                <i class="fas fa-file-pdf text-red-600 mr-2"></i> 4. Reporte y Exportación a PDF
+            </h2>
             <p class="text-gray-600 mb-4 text-center">Haz clic para generar el reporte de todas las evaluaciones.</p>
             <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
                 <button
                     id="export-pdf-btn"
                     class="flex-1 bg-red-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
                 >
-                    Exportar Reporte General a PDF
+                    <i class="fas fa-file-alt"></i> Exportar Reporte General a PDF
                 </button>
                 <button
                     id="export-individual-rubrics-btn"
                     class="flex-1 bg-teal-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-300"
                 >
-                    Exportar Rúbricas Individuales a PDF
+                    <i class="fas fa-file-export"></i> Exportar Rúbricas Individuales a PDF
                 </button>
             </div>
             <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
@@ -292,13 +331,13 @@ Uso de la gramática</textarea>
                     id="back-to-evaluation-btn"
                     class="flex-1 bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300"
                 >
-                    Atrás (Modificar Evaluación)
+                    <i class="fas fa-undo"></i> Atrás (Modificar Evaluación)
                 </button>
                 <button
                     id="new-rubric-btn"
                     class="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 >
-                    Nueva Rúbrica
+                    <i class="fas fa-plus-circle"></i> Nueva Rúbrica
                 </button>
             </div>
             <div id="report-message-box" class="message-box"></div>
@@ -312,27 +351,27 @@ Uso de la gramática</textarea>
     <script>
         // Obtener referencias a los elementos del DOM
         const addStudentsSection = document.getElementById('add-students-section');
-        const groupNameInput = document.getElementById('group-name-input'); // Nuevo
+        const groupNameInput = document.getElementById('group-name-input');
         const studentListInput = document.getElementById('student-list-input');
         const addStudentsBtn = document.getElementById('add-students-btn');
-        const groupSelect = document.getElementById('group-select'); // Nuevo
-        const selectGroupBtn = document.getElementById('select-group-btn'); // Nuevo
-        const deleteGroupBtn = document.getElementById('delete-group-btn'); // Nuevo
+        const groupSelect = document.getElementById('group-select');
+        const selectGroupBtn = document.getElementById('select-group-btn');
+        const deleteGroupBtn = document.getElementById('delete-group-btn');
         const studentMessageBox = document.getElementById('student-message-box');
 
         const rubricConfigSection = document.getElementById('rubric-config-section');
-        const institutionSelect = document.getElementById('institution-select'); // Cambiado a select
-        const newInstitutionInput = document.getElementById('new-institution-input'); // Nuevo
-        const addInstitutionBtn = document.getElementById('add-institution-btn'); // Nuevo
-        const toggleInstitutionInput = document.getElementById('toggle-institution-input'); // Nuevo
-        const courseSelect = document.getElementById('course-select'); // Cambiado a select
-        const newCourseInput = document.getElementById('new-course-input'); // Nuevo
-        const addCourseBtn = document.getElementById('add-course-btn'); // Nuevo
-        const toggleCourseInput = document.getElementById('toggle-course-input'); // Nuevo
-        const teacherSelect = document.getElementById('teacher-select'); // Cambiado a select
-        const newTeacherInput = document.getElementById('new-teacher-input'); // Nuevo
-        const addTeacherBtn = document.getElementById('add-teacher-btn'); // Nuevo
-        const toggleTeacherInput = document.getElementById('toggle-teacher-input'); // Nuevo
+        const institutionSelect = document.getElementById('institution-select');
+        const newInstitutionInput = document.getElementById('new-institution-input');
+        const addInstitutionBtn = document.getElementById('add-institution-btn');
+        const toggleInstitutionInput = document.getElementById('toggle-institution-input');
+        const courseSelect = document.getElementById('course-select');
+        const newCourseInput = document.getElementById('new-course-input');
+        const addCourseBtn = document.getElementById('add-course-btn');
+        const toggleCourseInput = document.getElementById('toggle-course-input');
+        const teacherSelect = document.getElementById('teacher-select');
+        const newTeacherInput = document.getElementById('new-teacher-input');
+        const addTeacherBtn = document.getElementById('add-teacher-btn');
+        const toggleTeacherInput = document.getElementById('toggle-teacher-input');
         const sessionTitleInput = document.getElementById('session-title-input');
         const dateInput = document.getElementById('date-input');
         const aspectsInput = document.getElementById('aspects-input');
@@ -357,7 +396,7 @@ Uso de la gramática</textarea>
 
         const reportSection = document.getElementById('report-section');
         const exportPdfBtn = document.getElementById('export-pdf-btn');
-        const exportIndividualRubricsBtn = document.getElementById('export-individual-rubrics-btn'); // Nuevo botón
+        const exportIndividualRubricsBtn = document.getElementById('export-individual-rubrics-btn');
         const backToEvaluationBtn = document.getElementById('back-to-evaluation-btn');
         const newRubricBtn = document.getElementById('new-rubric-btn');
         const reportMessageBox = document.getElementById('report-message-box');
@@ -852,12 +891,15 @@ Uso de la gramática</textarea>
          * Renderiza la tabla para editar los descriptores de la rúbrica.
          */
         function renderDescriptorsTable() {
+            // Se utiliza una clase "table-fixed" para mantener el ancho de las columnas.
+            // Se define un ancho mínimo para toda la tabla para asegurar que no se encoja demasiado
+            // Y se define un ancho explícito para la primera columna y para las celdas de descriptor.
             let tableHTML = `
-                <table class="w-full table-fixed bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+                <table class="w-full table-fixed bg-white border border-gray-300 rounded-lg shadow-sm">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b" style="width: 150px;">Aspectos a Evaluar</th>
-                            ${rubric.levels.map(level => `<th class="py-3 px-4 text-left text-gray-700 font-semibold border-b" style="width: 150px;">${level}</th>`).join('')}
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b" style="width: 120px;">Aspectos a Evaluar</th>
+                            ${rubric.levels.map(level => `<th class="py-3 px-4 text-left text-gray-700 font-semibold border-b" style="width: 180px;">${level}</th>`).join('')}
                         </tr>
                     </thead>
                     <tbody>
@@ -866,9 +908,9 @@ Uso de la gramática</textarea>
             rubric.aspects.forEach(aspect => {
                 tableHTML += `
                     <tr>
-                        <td class="py-3 px-4 border-b text-gray-800 font-medium" style="width: 150px;">${aspect}</td>
+                        <td class="py-3 px-4 border-b text-gray-800 font-medium" style="width: 120px;">${aspect}</td>
                         ${rubric.levels.map(level => `
-                            <td class="py-2 px-4 border-b" style="width: 150px;">
+                            <td class="py-2 px-4 border-b" style="width: 180px;">
                                 <textarea
                                     id="descriptor-${aspect.replace(/\s/g, '-')}-${level.replace(/\s/g, '-')}"
                                     class="w-full p-2 text-sm border border-gray-200 rounded-md focus:ring-blue-400 focus:border-blue-400"
