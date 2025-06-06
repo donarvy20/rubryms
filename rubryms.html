@@ -198,7 +198,8 @@
             transform: none;
         }
 
-        @media (max-width: 767px) {
+        /* Media queries para el menú responsivo */
+        @media (max-width: 767px) { /* Hasta 767px (móviles) */
             .nav-bar {
                 flex-direction: column;
                 align-items: flex-start;
@@ -208,18 +209,42 @@
                 top: 100%;
                 left: 0;
                 width: 100%;
-                background-color: #e2e8f0; /* Mismo color que la barra */
+                background-color: #e2e8f0;
                 border-radius: 0 0 10px 10px;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-                z-index: 10; /* Asegura que esté por encima del contenido */
+                z-index: 10;
             }
-            #nav-links-container.flex-col { /* Tailwind's flex-col for mobile */
+            #nav-links-container.flex-col {
                 display: flex;
             }
             .nav-item {
-                width: 100%; /* Ocupar todo el ancho disponible */
-                margin: 5px 0; /* Espaciado vertical */
+                width: 100%;
+                margin: 5px 0;
                 text-align: center;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) { /* Tablets (768px a 1023px) */
+            #nav-links-container {
+                display: flex; /* Mostrar como flex */
+                flex-direction: column; /* En columna */
+                flex-grow: 1;
+                justify-content: center; /* Centrar elementos verticalmente */
+                gap: 0; /* Eliminar el gap horizontal */
+            }
+            .nav-item {
+                width: auto; /* Ancho automático para los elementos */
+                margin: 5px auto; /* Centrar elementos con margen automático */
+            }
+        }
+
+        @media (min-width: 1024px) { /* Escritorio (1024px y más) */
+            #nav-links-container {
+                display: flex; /* Mostrar como flex */
+                flex-direction: row; /* En fila */
+                flex-grow: 1;
+                justify-content: flex-end; /* Alinear a la derecha */
+                gap: 8px; /* Restablecer el gap */
             }
         }
     </style>
@@ -288,6 +313,7 @@
                 <div id="group-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Las tarjetas de grupo se renderizarán aquí -->
                 </div>
+                <!-- Los botones Cargar y Eliminar ya no son necesarios aquí directamente si están en las tarjetas
                 <button
                     id="select-group-from-cards-btn"
                     class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 hidden"
@@ -300,6 +326,7 @@
                 >
                     <i class="fas fa-trash-alt"></i> Eliminar Grupo Seleccionado
                 </button>
+                -->
             </div>
         </div>
 
@@ -528,7 +555,7 @@ Uso de la gramática</textarea>
     </div>
 
     <footer class="w-full text-center py-4 text-gray-600 text-sm">
-        Development for YJMS
+        developed by YJMS
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -537,13 +564,13 @@ Uso de la gramática</textarea>
     <script>
         // Obtener referencias a los elementos del DOM
         const navStudentsBtn = document.getElementById('nav-students');
-        const navLevelsBtn = document.getElementById('nav-levels'); // Nuevo botón de navegación
+        const navLevelsBtn = document.getElementById('nav-levels'); 
         const navRubricBtn = document.getElementById('nav-rubric');
         const navEvaluationBtn = document.getElementById('nav-evaluation');
         const navReportsBtn = document.getElementById('nav-reports');
 
         const studentsScreen = document.getElementById('students-screen');
-        const levelManagementScreen = document.getElementById('level-management-screen'); // Nueva pantalla
+        const levelManagementScreen = document.getElementById('level-management-screen'); 
         const rubricConfigScreen = document.getElementById('rubric-config-screen');
         const evaluationScreen = document.getElementById('evaluation-screen');
         const reportScreen = document.getElementById('report-screen');
@@ -556,10 +583,7 @@ Uso de la gramática</textarea>
         const groupNameInput = document.getElementById('group-name-input');
         const studentListInput = document.getElementById('student-list-input');
         const addStudentsBtn = document.getElementById('add-students-btn');
-        const groupCardsContainer = document.getElementById('group-cards-container'); // Nuevo: Contenedor para las tarjetas
-        // const groupSelect = document.getElementById('group-select'); // Eliminado: Reemplazado por tarjetas
-        // const selectGroupBtn = document.getElementById('select-group-btn'); // Eliminado: Lógica en las tarjetas
-        // const deleteGroupBtn = document.getElementById('delete-group-btn'); // Eliminado: Lógica en las tarjetas
+        const groupCardsContainer = document.getElementById('group-cards-container'); 
         const studentMessageBox = document.getElementById('student-message-box');
 
         // Referencias para el nuevo módulo de gestión de niveles
@@ -586,7 +610,7 @@ Uso de la gramática</textarea>
         const sessionTitleInput = document.getElementById('session-title-input');
         const dateInput = document.getElementById('date-input');
         const aspectsInput = document.getElementById('aspects-input');
-        const rubricLevelsGroupSelect = document.getElementById('rubric-levels-group-select'); // Cambiado a select de grupos de niveles
+        const rubricLevelsGroupSelect = document.getElementById('rubric-levels-group-select'); 
         const generateRubricBtn = document.getElementById('generate-rubric-btn');
         const rubricConfigMessageBox = document.getElementById('rubric-config-message-box');
         const rubricDescriptorsEditor = document.getElementById('rubric-descriptors-editor');
@@ -738,11 +762,15 @@ Uso de la gramática</textarea>
 
         // Asegura que el menú de navegación se muestre/oculte correctamente al redimensionar la ventana
         window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) { 
-                navLinksContainer.classList.remove('hidden', 'flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10');
-            } else { 
+            if (window.innerWidth >= 1024) { /* Usar lg breakpoint para flex-row */
+                navLinksContainer.classList.remove('hidden', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10');
+                navLinksContainer.classList.add('flex', 'flex-row');
+            } else if (window.innerWidth >= 768) { /* Usar md breakpoint para flex-col */
+                navLinksContainer.classList.remove('hidden', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10', 'flex-row');
+                navLinksContainer.classList.add('flex', 'flex-col');
+            } else { /* Móvil */
                 navLinksContainer.classList.add('hidden');
-                navLinksContainer.classList.remove('flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10');
+                navLinksContainer.classList.remove('flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10', 'flex-row');
             }
         });
 
@@ -812,7 +840,7 @@ Uso de la gramática</textarea>
                 if(storedCurrentGroup && studentGroups[storedCurrentGroup]) {
                     currentStudents = studentGroups[storedCurrentGroup];
                     currentSelectedGroupName = storedCurrentGroup; // Actualizar la variable global
-                    highlightSelectedGroupCard(currentSelectedGroupName); // Resaltar la tarjeta
+                    // highlightSelectedGroupCard(currentSelectedGroupName); // Ya se llama desde renderGroupCards
                 }
 
                 sessionTitleInput.value = rubric.sessionTitle;
@@ -1088,13 +1116,6 @@ Uso de la gramática</textarea>
             groupNameInput.value = '';
             studentListInput.value = '';
         });
-
-        // El botón "Cargar Grupo Seleccionado y Continuar" ahora usa loadGroupForEvaluation directamente
-        // selectGroupBtn.addEventListener('click', () => { /* ... */ }); // Eliminado
-
-        // El botón "Eliminar Grupo Seleccionado" ahora usa deleteGroup directamente
-        // deleteGroupBtn.addEventListener('click', () => { /* ... */ }); // Eliminado
-
 
         // --- Lógica de Gestión de Niveles de Desempeño ---
         /**
