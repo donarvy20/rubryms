@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluador de Estudiantes por Rúbrica</title>
+    <title>Evaluador de Estudiantes por Rúbrica - Rubryms</title>
     <!-- Carga de Tailwind CSS para un diseño responsivo y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Carga de Font Awesome para iconos -->
@@ -14,8 +14,9 @@
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8; /* Un color de fondo suave */
             display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Alineado arriba para contenido más largo */
+            flex-direction: column; /* Cambiado a columna para el footer */
+            justify-content: space-between; /* Para empujar el footer al final */
+            align-items: center;
             min-height: 100vh;
             padding: 20px;
             box-sizing: border-box;
@@ -31,6 +32,7 @@
             flex-direction: column;
             gap: 20px;
             transition: all 0.3s ease-in-out;
+            margin-bottom: 20px; /* Espacio antes del footer */
         }
         textarea {
             min-height: 150px;
@@ -154,6 +156,48 @@
             transform: translateY(-2px); /* Un ligero efecto de elevación */
         }
 
+        /* Estilos para las tarjetas de grupo */
+        .group-card {
+            background-color: #f8fafc; /* light blue-grey */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: 2px solid transparent; /* Para el borde activo */
+        }
+        .group-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .group-card.active {
+            border-color: #6366f1; /* indigo-500 */
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            background-color: #e0e7ff; /* indigo-100 */
+        }
+        .group-card .group-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        .group-card .group-actions button {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+            border-radius: 6px;
+            box-shadow: none;
+            transform: none;
+            background-color: #cbd5e0; /* gray-300 */
+            color: #4a5568; /* gray-700 */
+        }
+        .group-card .group-actions button:hover {
+            background-color: #a0aec0; /* gray-400 */
+            transform: none;
+        }
+
         @media (max-width: 767px) {
             .nav-bar {
                 flex-direction: column;
@@ -182,7 +226,10 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-6">Evaluador de Estudiantes</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-6 flex items-center justify-center">
+            <img src="https://cdn-icons-png.flaticon.com/512/11339/11339984.png" alt="Rubryms Icon" class="w-10 h-10 mr-3">
+            Rubryms - Evaluador de Estudiantes
+        </h1>
 
         <!-- Menú de Navegación -->
         <nav class="nav-bar flex items-center justify-between">
@@ -237,19 +284,19 @@
 
             <div class="mt-6 border-t pt-4 border-gray-200">
                 <h3 class="text-xl font-semibold text-gray-700 mb-4 text-center">Seleccionar Grupo para Evaluación</h3>
-                <p class="text-gray-600 mb-2 text-center">O elige un grupo existente para evaluar:</p>
-                <select id="group-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                    <option value="">-- Seleccionar Grupo --</option>
-                </select>
+                <p class="text-gray-600 mb-4 text-center">Haz clic en una tarjeta para cargar o editar un grupo:</p>
+                <div id="group-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Las tarjetas de grupo se renderizarán aquí -->
+                </div>
                 <button
-                    id="select-group-btn"
-                    class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                    id="select-group-from-cards-btn"
+                    class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 hidden"
                 >
                     <i class="fas fa-folder-open"></i> Cargar Grupo Seleccionado y Continuar
                 </button>
                 <button
-                    id="delete-group-btn"
-                    class="w-full bg-red-500 text-white font-semibold py-3 px-6 mt-2 rounded-xl shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"
+                    id="delete-group-from-cards-btn"
+                    class="w-full bg-red-500 text-white font-semibold py-3 px-6 mt-2 rounded-xl shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 hidden"
                 >
                     <i class="fas fa-trash-alt"></i> Eliminar Grupo Seleccionado
                 </button>
@@ -480,6 +527,10 @@ Uso de la gramática</textarea>
 
     </div>
 
+    <footer class="w-full text-center py-4 text-gray-600 text-sm">
+        Development for YJMS
+    </footer>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
 
@@ -505,9 +556,10 @@ Uso de la gramática</textarea>
         const groupNameInput = document.getElementById('group-name-input');
         const studentListInput = document.getElementById('student-list-input');
         const addStudentsBtn = document.getElementById('add-students-btn');
-        const groupSelect = document.getElementById('group-select');
-        const selectGroupBtn = document.getElementById('select-group-btn');
-        const deleteGroupBtn = document.getElementById('delete-group-btn');
+        const groupCardsContainer = document.getElementById('group-cards-container'); // Nuevo: Contenedor para las tarjetas
+        // const groupSelect = document.getElementById('group-select'); // Eliminado: Reemplazado por tarjetas
+        // const selectGroupBtn = document.getElementById('select-group-btn'); // Eliminado: Lógica en las tarjetas
+        // const deleteGroupBtn = document.getElementById('delete-group-btn'); // Eliminado: Lógica en las tarjetas
         const studentMessageBox = document.getElementById('student-message-box');
 
         // Referencias para el nuevo módulo de gestión de niveles
@@ -562,13 +614,12 @@ Uso de la gramática</textarea>
         let studentGroups = {}; // { 'Group Name': ['Student 1', 'Student 2'], ... }
         let savedLevelGroups = {}; // { 'Group Name': ['Level 1', 'Level 2'], ... }
         let currentStudents = []; // The currently selected group of students for evaluation
+        let currentSelectedGroupName = ''; // Variable para almacenar el nombre del grupo seleccionado
         let currentStudentIndex = 0;
         let savedInstitutions = [];
         let savedCourses = [];
         let savedTeachers = [];
-        // savedLevels ya no es una lista plana, se gestiona por grupos
-
-
+        
         let rubric = {
             institution: '',
             course: '',
@@ -577,12 +628,23 @@ Uso de la gramática</textarea>
             date: '',
             generalObservations: '',
             aspects: [],
-            selectedLevelGroupName: '', // Nuevo: almacena el nombre del grupo de niveles seleccionado
-            levels: [], // Estos niveles se cargarán desde savedLevelGroups[selectedLevelGroupName]
-            descriptors: {}, // { aspect: { level: descriptor_text, ... }, ... }
-            levelScores: {} // { level: score, ... }
+            selectedLevelGroupName: '', 
+            levels: [], 
+            descriptors: {}, 
+            levelScores: {} 
         };
         let evaluations = {}; // { 'GroupName_StudentName': { aspect: level_selected, ... }, ... }
+
+        // Colores de tarjetas predefinidos para rotación
+        const cardColors = [
+            'bg-blue-100 border-blue-300',
+            'bg-green-100 border-green-300',
+            'bg-purple-100 border-purple-300',
+            'bg-yellow-100 border-yellow-300',
+            'bg-teal-100 border-teal-300',
+            'bg-red-100 border-red-300',
+        ];
+        let colorIndex = 0; // Para rotar los colores de las tarjetas
 
         // --- Funciones de Utilidad ---
 
@@ -611,14 +673,14 @@ Uso de la gramática</textarea>
         function showScreen(screenId) {
             // Oculta todas las pantallas
             studentsScreen.classList.add('hidden');
-            levelManagementScreen.classList.add('hidden'); // Nueva pantalla
+            levelManagementScreen.classList.add('hidden'); 
             rubricConfigScreen.classList.add('hidden');
             evaluationScreen.classList.add('hidden');
             reportScreen.classList.add('hidden');
 
             // Quita la clase 'active' de todos los botones de navegación
             navStudentsBtn.classList.remove('active');
-            navLevelsBtn.classList.remove('active'); // Nuevo
+            navLevelsBtn.classList.remove('active'); 
             navRubricBtn.classList.remove('active');
             navEvaluationBtn.classList.remove('active');
             navReportsBtn.classList.remove('active');
@@ -627,20 +689,18 @@ Uso de la gramática</textarea>
             if (screenId === 'students-screen') {
                 studentsScreen.classList.remove('hidden');
                 navStudentsBtn.classList.add('active');
-            } else if (screenId === 'level-management-screen') { // Nueva pantalla
+            } else if (screenId === 'level-management-screen') { 
                 levelManagementScreen.classList.remove('hidden');
                 navLevelsBtn.classList.add('active');
-                // Al entrar a la gestión de niveles, asegurarse de cargar los grupos
                 renderLevelGroupSelectForManagement();
             } else if (screenId === 'rubric-config-screen') {
                 rubricConfigScreen.classList.remove('hidden');
                 navRubricBtn.classList.add('active');
-                // Al entrar a la configuración de rúbrica, asegurarse de cargar los grupos de niveles
                 renderRubricLevelGroupSelect();
             } else if (screenId === 'evaluation-screen') {
                 evaluationScreen.classList.remove('hidden');
                 navEvaluationBtn.classList.add('active');
-                renderStudentEvaluation(); // Asegura que la evaluación se renderice al entrar
+                renderStudentEvaluation();
             } else if (screenId === 'report-screen') {
                 reportScreen.classList.remove('hidden');
                 navReportsBtn.classList.add('active');
@@ -655,7 +715,7 @@ Uso de la gramática</textarea>
 
         // Event listeners para la navegación
         navStudentsBtn.addEventListener('click', () => showScreen('students-screen'));
-        navLevelsBtn.addEventListener('click', () => showScreen('level-management-screen')); // Nuevo
+        navLevelsBtn.addEventListener('click', () => showScreen('level-management-screen'));
         navRubricBtn.addEventListener('click', () => showScreen('rubric-config-screen'));
         navEvaluationBtn.addEventListener('click', () => {
             if (currentStudents.length === 0 || rubric.aspects.length === 0 || rubric.levels.length === 0 || Object.keys(rubric.descriptors).length === 0 || Object.keys(rubric.levelScores).length === 0) {
@@ -669,7 +729,6 @@ Uso de la gramática</textarea>
         // Lógica para el botón de menú móvil (hamburguesa)
         mobileMenuToggle.addEventListener('click', () => {
             navLinksContainer.classList.toggle('hidden');
-            // Cuando se abre, añade clases para posicionamiento y estilo de columna
             if (!navLinksContainer.classList.contains('hidden')) {
                 navLinksContainer.classList.add('flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10');
             } else {
@@ -679,10 +738,10 @@ Uso de la gramática</textarea>
 
         // Asegura que el menú de navegación se muestre/oculte correctamente al redimensionar la ventana
         window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) { // Si el ancho es de escritorio (md breakpoint)
+            if (window.innerWidth >= 768) { 
                 navLinksContainer.classList.remove('hidden', 'flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10');
-            } else { // Si el ancho es de móvil
-                navLinksContainer.classList.add('hidden'); // Ocultar el menú por defecto en móvil si no está abierto
+            } else { 
+                navLinksContainer.classList.add('hidden');
                 navLinksContainer.classList.remove('flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10');
             }
         });
@@ -696,25 +755,20 @@ Uso de la gramática</textarea>
                 const storedStudentGroups = localStorage.getItem('studentGroups');
                 if (storedStudentGroups) {
                     studentGroups = JSON.parse(storedStudentGroups);
-                    renderGroupSelect(); // Rellenar el selector de grupos
+                    renderGroupCards(); // Usar la nueva función de renderizado de tarjetas
                 }
 
-                const storedLevelGroups = localStorage.getItem('savedLevelGroups'); // Carga de grupos de niveles
+                const storedLevelGroups = localStorage.getItem('savedLevelGroups'); 
                 if (storedLevelGroups) {
                     savedLevelGroups = JSON.parse(storedLevelGroups);
-                    // Llama a renderLevelGroupSelectForManagement solo si la pantalla de gestión de niveles está visible,
-                    // o de forma segura si los elementos existen.
-                    // Para evitar ReferenceError, no intentamos ocultar `newLevelInput` y `addLevelBtn` aquí.
-                    renderLevelGroupSelectForManagement(); 
-                    renderRubricLevelGroupSelect(); // Rellenar el selector de grupos de niveles en rúbrica
+                    // No llamamos a renderLevelGroupSelectForManagement ni renderRubricLevelGroupSelect aquí
+                    // ya que showScreen() las llamará al entrar a sus respectivos módulos.
                 } else {
                     // Si no hay grupos de niveles guardados, añadir un grupo por defecto
-                    savedLevelGroups['Cualitativo:Destacado,Logrado,Proceso,Inicio,Previo al Inicio'] = ['Destacado', 'Logrado', 'Proceso', 'Inicio', 'Previo al Inicio'];
-                    renderLevelGroupSelectForManagement();
-                    renderRubricLevelGroupSelect();
-                    saveData(); // Guardar el grupo por defecto
+                    savedLevelGroups['Cualitativo'] = ['Destacado', 'Logrado', 'Proceso', 'Inicio', 'Previo al Inicio'];
+                    savedLevelGroups['Escala'] = ['Deficiente', 'Regular', 'Bueno', 'Excelente'];
+                    saveData(); 
                 }
-
 
                 const storedInstitutions = localStorage.getItem('savedInstitutions');
                 if (storedInstitutions) {
@@ -732,7 +786,6 @@ Uso de la gramática</textarea>
                     renderDropdownOptions(teacherSelect, savedTeachers);
                 }
                 
-
                 const storedRubric = localStorage.getItem('rubric');
                 if (storedRubric) {
                     const parsedRubric = JSON.parse(storedRubric);
@@ -745,9 +798,7 @@ Uso de la gramática</textarea>
                     courseSelect.value = rubric.course;
                     teacherSelect.value = rubric.teacher;
 
-                    // Seleccionar el grupo de niveles en el select de la rúbrica
                     if (rubric.selectedLevelGroupName) {
-                        rubricLevelsGroupSelect.value = rubric.selectedLevelGroupName;
                         rubric.levels = savedLevelGroups[rubric.selectedLevelGroupName] || [];
                     }
                 }
@@ -757,23 +808,21 @@ Uso de la gramática</textarea>
                     evaluations = JSON.parse(storedEvaluations);
                 }
 
-                const storedCurrentGroup = localStorage.getItem('currentSelectedGroup');
+                const storedCurrentGroup = localStorage.getItem('currentSelectedGroupName'); // Ahora es currentSelectedGroupName
                 if(storedCurrentGroup && studentGroups[storedCurrentGroup]) {
                     currentStudents = studentGroups[storedCurrentGroup];
-                    groupSelect.value = storedCurrentGroup;
+                    currentSelectedGroupName = storedCurrentGroup; // Actualizar la variable global
+                    highlightSelectedGroupCard(currentSelectedGroupName); // Resaltar la tarjeta
                 }
 
                 sessionTitleInput.value = rubric.sessionTitle;
                 generalObservationsInput.value = rubric.generalObservations;
                 aspectsInput.value = rubric.aspects.join('\n');
                 
-                showScreen('students-screen');
-
+                showScreen('students-screen'); // Siempre inicia en la pantalla de estudiantes
             } catch (e) {
                 console.error("Error al cargar datos de localStorage:", e);
                 showMessage(studentMessageBox, "Error al cargar datos guardados. Los datos pueden estar corruptos.", 'error');
-                // Opcional: limpiar localStorage si los datos son irrecuperables
-                // localStorage.clear();
             }
         }
 
@@ -783,13 +832,13 @@ Uso de la gramática</textarea>
         function saveData() {
             try {
                 localStorage.setItem('studentGroups', JSON.stringify(studentGroups));
-                localStorage.setItem('savedLevelGroups', JSON.stringify(savedLevelGroups)); // Guarda grupos de niveles
+                localStorage.setItem('savedLevelGroups', JSON.stringify(savedLevelGroups)); 
                 localStorage.setItem('savedInstitutions', JSON.stringify(savedInstitutions));
                 localStorage.setItem('savedCourses', JSON.stringify(savedCourses));
                 localStorage.setItem('savedTeachers', JSON.stringify(savedTeachers));
                 localStorage.setItem('rubric', JSON.stringify(rubric));
                 localStorage.setItem('evaluations', JSON.stringify(evaluations));
-                localStorage.setItem('currentSelectedGroup', groupSelect.value); // Guardar el grupo actualmente seleccionado
+                localStorage.setItem('currentSelectedGroupName', currentSelectedGroupName); // Guardar el nombre del grupo seleccionado
             } catch (e) {
                 console.error("Error al guardar datos en localStorage:", e);
                 showMessage(studentMessageBox, "No se pudieron guardar los datos. Verifique el espacio disponible en su navegador.", 'error');
@@ -816,12 +865,9 @@ Uso de la gramática</textarea>
          * Resetea la RÚBRICA y las EVALUACIONES, pero mantiene los grupos de estudiantes y los datos institucionales.
          */
         function resetApp() {
-            // Borrar solo los datos de la rúbrica actual y las evaluaciones
             localStorage.removeItem('rubric');
             localStorage.removeItem('evaluations');
-            // NO borrar 'studentGroups', 'savedInstitutions', 'savedCourses', 'savedTeachers', 'savedLevelGroups'
 
-            // Restablecer variables a su estado inicial solo para la rúbrica y evaluaciones
             rubric = {
                 institution: '',
                 course: '',
@@ -837,70 +883,167 @@ Uso de la gramática</textarea>
             };
             evaluations = {};
 
-            // Restablecer campos de input de la rúbrica en la UI
             sessionTitleInput.value = '';
             dateInput.value = '';
-            aspectsInput.value = 'Coherencia\nClaridad\nUso de la gramática'; // Valores por defecto
+            aspectsInput.value = 'Coherencia\nClaridad\nUso de la gramática';
             generalObservationsInput.value = '';
 
-            // Asegurarse de que los dropdowns institucionales reflejen la selección guardada
             institutionSelect.value = '';
             courseSelect.value = '';
             teacherSelect.value = '';
-            // Restablecer el selector de grupo de niveles en la rúbrica
             rubricLevelsGroupSelect.value = '';
 
-            // Esconder los inputs de añadir nuevos elementos
-            // Añadir comprobaciones de existencia de los elementos antes de acceder a ellos
             if (newInstitutionInput) newInstitutionInput.classList.add('hidden');
             if (newInstitutionInput) newInstitutionInput.value = '';
             if (newCourseInput) newCourseInput.classList.add('hidden');
             if (newCourseInput) newCourseInput.value = '';
             if (newTeacherInput) newTeacherInput.classList.add('hidden');
             if (newTeacherInput) newTeacherInput.value = '';
-
-            // Aquí estaba el error. `newLevelInput` y `addLevelBtn` solo existen en `level-management-screen`
-            // que está `hidden` por defecto, por lo que no se pueden acceder directamente al inicio.
-            // Los quitamos de aquí, ya que el estado inicial ya es "hidden" en el HTML.
-            // if (newLevelInput) newLevelInput.classList.add('hidden');
-            // if (newLevelInput) newLevelInput.value = '';
-            // if (addLevelBtn) addLevelBtn.classList.add('hidden');
-
-            // Ocultar todas las secciones excepto la inicial (students-screen)
+            
             rubricConfigScreen.classList.add('hidden');
-            levelManagementScreen.classList.add('hidden'); // Nueva pantalla
+            levelManagementScreen.classList.add('hidden');
             evaluationScreen.classList.add('hidden');
             reportScreen.classList.add('hidden');
             rubricDescriptorsEditor.classList.add('hidden');
             
-            showScreen('students-screen'); // Volver a la pantalla de estudiantes
+            showScreen('students-screen');
             showMessage(reportMessageBox, "La rúbrica y las evaluaciones han sido reiniciadas. Tus grupos y datos institucionales y de niveles permanecen guardados.", 'success');
         }
 
 
-        // --- Lógica de Añadir y Gestionar Estudiantes ---
+        // --- Lógica de Añadir y Gestionar Estudiantes (con tarjetas) ---
 
         /**
-         * Rellena el selector de grupos con los grupos guardados.
+         * Renderiza las tarjetas de grupo de estudiantes.
          */
-        function renderGroupSelect() {
-            groupSelect.innerHTML = '<option value="">-- Seleccionar Grupo --</option>';
+        function renderGroupCards() {
+            groupCardsContainer.innerHTML = ''; // Limpiar el contenedor
+            colorIndex = 0; // Resetear el índice de color cada vez que se renderiza
+
+            if (Object.keys(studentGroups).length === 0) {
+                groupCardsContainer.innerHTML = '<p class="text-center text-gray-500 col-span-full">No hay grupos de estudiantes guardados.</p>';
+                return;
+            }
+
             for (const groupName in studentGroups) {
-                const option = document.createElement('option');
-                option.value = groupName;
-                option.textContent = groupName;
-                groupSelect.appendChild(option);
+                const groupStudents = studentGroups[groupName];
+                const card = document.createElement('div');
+                const currentColorClass = cardColors[colorIndex % cardColors.length];
+                colorIndex++; // Avanzar al siguiente color
+
+                card.className = `group-card ${currentColorClass} border-2 border-transparent`; // Añadir border-2 para el active
+                card.dataset.groupName = groupName;
+
+                // Resaltar la tarjeta si es el grupo actualmente seleccionado
+                if (groupName === currentSelectedGroupName) {
+                    card.classList.add('active');
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-users text-2xl text-indigo-700 mr-3"></i>
+                        <h4 class="text-lg font-semibold text-gray-800">${groupName}</h4>
+                    </div>
+                    <p class="text-sm text-gray-600">${groupStudents.length} estudiantes</p>
+                    <div class="group-actions">
+                        <button class="load-group-card-btn bg-indigo-500 text-white hover:bg-indigo-600">
+                            <i class="fas fa-folder-open"></i> Cargar
+                        </button>
+                        <button class="delete-group-card-btn bg-red-500 text-white hover:bg-red-600">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </button>
+                    </div>
+                `;
+                groupCardsContainer.appendChild(card);
+            }
+            attachGroupCardEventListeners(); // Adjuntar listeners después de renderizar
+        }
+
+        /**
+         * Adjunta event listeners a las tarjetas de grupo (usando delegación).
+         */
+        function attachGroupCardEventListeners() {
+            groupCardsContainer.addEventListener('click', (event) => {
+                const targetButton = event.target.closest('button');
+                if (!targetButton) return; // No es un botón
+
+                const card = targetButton.closest('.group-card');
+                if (!card) return; // El botón no está dentro de una tarjeta de grupo
+
+                const groupName = card.dataset.groupName;
+
+                if (targetButton.classList.contains('load-group-card-btn')) {
+                    loadGroupForEvaluation(groupName);
+                } else if (targetButton.classList.contains('delete-group-card-btn')) {
+                    deleteGroup(groupName);
+                }
+            });
+        }
+
+        /**
+         * Carga un grupo de estudiantes para la evaluación.
+         * @param {string} groupName - El nombre del grupo a cargar.
+         */
+        function loadGroupForEvaluation(groupName) {
+            if (currentStudents.length > 0 && rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
+                const confirmChangeGroup = window.confirm("Ya tienes una rúbrica activa. ¿Estás seguro de que quieres cambiar a este grupo? Se perderán las evaluaciones no guardadas de la rúbrica actual (si las hay) y se cargarán las evaluaciones de este grupo.");
+                if (!confirmChangeGroup) {
+                    return;
+                }
+            }
+
+            currentStudents = studentGroups[groupName];
+            currentSelectedGroupName = groupName; // Actualizar la variable global del grupo seleccionado
+            saveData();
+            highlightSelectedGroupCard(groupName); // Resaltar la tarjeta activa
+            showMessage(studentMessageBox, `¡Grupo "${groupName}" cargado para evaluación!`, 'success');
+
+            showScreen('rubric-config-screen');
+            currentStudentIndex = 0; // Resetear el índice del estudiante al cargar un nuevo grupo
+
+            if (rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
+                showScreen('evaluation-screen');
             }
         }
 
         /**
-         * Maneja el clic en el botón "Guardar Lista de Estudiantes".
-         * Guarda los estudiantes en un nuevo grupo, los añade a uno existente o los reemplaza.
+         * Resalta la tarjeta del grupo seleccionado y desactiva las demás.
+         * @param {string} selectedGroupName - El nombre del grupo cuya tarjeta se va a resaltar.
          */
+        function highlightSelectedGroupCard(selectedGroupName) {
+            const allCards = groupCardsContainer.querySelectorAll('.group-card');
+            allCards.forEach(card => {
+                card.classList.remove('active');
+                if (card.dataset.groupName === selectedGroupName) {
+                    card.classList.add('active');
+                }
+            });
+        }
+
+        /**
+         * Elimina un grupo de estudiantes.
+         * @param {string} groupName - El nombre del grupo a eliminar.
+         */
+        function deleteGroup(groupName) {
+            const confirmDelete = window.confirm(`¿Estás seguro de que quieres eliminar el grupo "${groupName}"? Ten en cuenta que esto NO eliminará las evaluaciones asociadas a este grupo si ya se han realizado. Para borrar evaluaciones individuales, necesitarías reiniciar la rúbrica.`);
+            if (confirmDelete) {
+                delete studentGroups[groupName];
+                if (currentSelectedGroupName === groupName) {
+                    currentSelectedGroupName = ''; // Deseleccionar si el grupo actual es el eliminado
+                    currentStudents = [];
+                    localStorage.removeItem('currentSelectedGroupName');
+                }
+                saveData();
+                renderGroupCards(); // Volver a renderizar las tarjetas
+                showMessage(studentMessageBox, `Grupo "${groupName}" eliminado.`, 'success');
+            }
+        }
+
+
+        // Event listener para el botón principal de guardar lista de estudiantes
         addStudentsBtn.addEventListener('click', () => {
             const rawList = studentListInput.value.trim();
             let groupName = groupNameInput.value.trim();
-            const selectedGroup = groupSelect.value;
 
             if (!rawList) {
                 showMessage(studentMessageBox, "Por favor, introduce la lista de estudiantes.", 'error');
@@ -910,7 +1053,7 @@ Uso de la gramática</textarea>
             const newStudents = rawList.split('\n')
                                       .map(name => name.trim())
                                       .filter(name => name !== '')
-                                      .filter((name, index, self) => self.indexOf(name) === index); // Filtrar duplicados
+                                      .filter((name, index, self) => self.indexOf(name) === index);
 
             if (newStudents.length === 0) {
                 showMessage(studentMessageBox, "No se encontraron nombres de estudiantes válidos en la lista.", 'error');
@@ -920,19 +1063,11 @@ Uso de la gramática</textarea>
             let targetGroupName;
             let actionMessage = "";
 
-            if (groupName) { // Si se ha introducido un nombre de grupo explícito
+            if (groupName) {
                 targetGroupName = groupName;
-                // Si el grupo ya existe, se sobrescribe; si no, se crea
                 studentGroups[targetGroupName] = newStudents;
                 actionMessage = `¡Grupo "${targetGroupName}" con ${newStudents.length} estudiantes guardado (o actualizado)!`;
-            } else if (selectedGroup) { // Si no se introdujo nombre de grupo, pero hay uno seleccionado
-                targetGroupName = selectedGroup;
-                // Añadir estudiantes al grupo existente, evitando duplicados
-                const existingStudents = studentGroups[targetGroupName] || [];
-                const combinedStudents = [...new Set([...existingStudents, ...newStudents])];
-                studentGroups[targetGroupName] = combinedStudents;
-                actionMessage = `¡${newStudents.length} estudiantes añadidos al grupo "${targetGroupName}"! Total: ${combinedStudents.length} estudiantes.`;
-            } else { // Ni nombre de grupo explícito ni grupo seleccionado, crear uno nuevo anónimo
+            } else { // Crear nuevo grupo anónimo o añadir a uno existente si hay selección
                 targetGroupName = `Grupo - ${new Date().toLocaleDateString('es-ES')}`;
                 let counter = 1;
                 while(studentGroups[targetGroupName]) {
@@ -943,70 +1078,22 @@ Uso de la gramática</textarea>
                 actionMessage = `¡Nuevo grupo anónimo "${targetGroupName}" con ${newStudents.length} estudiantes creado!`;
             }
 
-            currentStudents = studentGroups[targetGroupName]; // Establecer este como el grupo actual
-            renderGroupSelect(); // Actualizar el selector de grupos
-            groupSelect.value = targetGroupName; // Seleccionar el grupo trabajado
+            currentStudents = studentGroups[targetGroupName];
+            currentSelectedGroupName = targetGroupName; // Actualizar la variable global del grupo seleccionado
             saveData();
+            renderGroupCards(); // Volver a renderizar las tarjetas para mostrar el nuevo/actualizado
+            highlightSelectedGroupCard(targetGroupName); // Resaltar el grupo recién guardado
             showMessage(studentMessageBox, actionMessage, 'success');
 
-            // Limpiar los campos de entrada para permitir añadir otro grupo
             groupNameInput.value = '';
             studentListInput.value = '';
         });
 
-        /**
-         * Maneja el clic en el botón "Cargar Grupo Seleccionado".
-         */
-        selectGroupBtn.addEventListener('click', () => {
-            const selectedGroup = groupSelect.value;
-            if (!selectedGroup) {
-                showMessage(studentMessageBox, "Por favor, selecciona un grupo de estudiantes.", 'error');
-                return;
-            }
-            if (currentStudents.length > 0 && rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
-                const confirmChangeGroup = window.confirm("Ya tienes una rúbrica activa. ¿Estás seguro de que quieres cambiar a este grupo? Se perderán las evaluaciones no guardadas de la rúbrica actual (si las hay) y se cargarán las evaluaciones de este grupo.");
-                if (!confirmChangeGroup) {
-                    return;
-                }
-            }
+        // El botón "Cargar Grupo Seleccionado y Continuar" ahora usa loadGroupForEvaluation directamente
+        // selectGroupBtn.addEventListener('click', () => { /* ... */ }); // Eliminado
 
-
-            currentStudents = studentGroups[selectedGroup];
-            saveData(); // Guardar el grupo actualmente seleccionado
-            showMessage(studentMessageBox, `¡Grupo "${selectedGroup}" cargado para evaluación!`, 'success');
-
-            // Ocultar sección de estudiantes y mostrar configuración de rúbrica
-            showScreen('rubric-config-screen');
-            currentStudentIndex = 0; // Resetear el índice del estudiante al cargar un nuevo grupo
-
-            // Si ya hay una rúbrica configurada, ir directamente a la evaluación
-            if (rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
-                showScreen('evaluation-screen');
-            }
-        });
-
-        /**
-         * Maneja el clic en el botón "Eliminar Grupo Seleccionado".
-         */
-        deleteGroupBtn.addEventListener('click', () => {
-            const selectedGroup = groupSelect.value;
-            if (!selectedGroup) {
-                showMessage(studentMessageBox, "Por favor, selecciona un grupo para eliminar.", 'error');
-                return;
-            }
-
-            const confirmDelete = window.confirm(`¿Estás seguro de que quieres eliminar el grupo "${selectedGroup}"? Ten en cuenta que esto NO eliminará las evaluaciones asociadas a este grupo si ya se han realizado. Para borrar evaluaciones individuales, necesitarías reiniciar la rúbrica.`);
-            if (confirmDelete) {
-                delete studentGroups[selectedGroup];
-                if (localStorage.getItem('currentSelectedGroup') === selectedGroup) {
-                    localStorage.removeItem('currentSelectedGroup');
-                    currentStudents = []; // Limpiar el grupo actual si es el eliminado
-                }
-                renderGroupSelect();
-                saveData();
-                showMessage(studentMessageBox, `Grupo "${selectedGroup}" eliminado.`, 'success');
-            }
-        });
+        // El botón "Eliminar Grupo Seleccionado" ahora usa deleteGroup directamente
+        // deleteGroupBtn.addEventListener('click', () => { /* ... */ }); // Eliminado
 
 
         // --- Lógica de Gestión de Niveles de Desempeño ---
@@ -1021,8 +1108,6 @@ Uso de la gramática</textarea>
                 option.textContent = groupName;
                 levelGroupSelectForManagement.appendChild(option);
             }
-            // Asegurarse de que el input y botón de añadir nuevo nivel estén ocultos por defecto
-            // Ya no intentamos ocultarlos aquí, ya que el HTML los oculta por defecto.
         }
 
         /**
@@ -1044,7 +1129,7 @@ Uso de la gramática</textarea>
             const newLevels = rawLevels.split('\n')
                                        .map(level => level.trim())
                                        .filter(level => level !== '')
-                                       .filter((level, index, self) => self.indexOf(level) === index); // Filtrar duplicados
+                                       .filter((level, index, self) => self.indexOf(level) === index);
 
             if (newLevels.length === 0) {
                 showMessage(levelManagementMessageBox, "No se encontraron niveles de desempeño válidos en la lista.", 'error');
@@ -1054,8 +1139,8 @@ Uso de la gramática</textarea>
             savedLevelGroups[groupName] = newLevels;
             saveData();
             renderLevelGroupSelectForManagement();
-            renderRubricLevelGroupSelect(); // Actualizar el select en la configuración de rúbrica
-            levelGroupSelectForManagement.value = groupName; // Seleccionar el grupo recién guardado/actualizado
+            renderRubricLevelGroupSelect(); 
+            levelGroupSelectForManagement.value = groupName;
             levelGroupNameInput.value = '';
             levelListInput.value = '';
             showMessage(levelManagementMessageBox, `¡Grupo de niveles "${groupName}" guardado (${newLevels.length} niveles)!`, 'success');
@@ -1090,7 +1175,7 @@ Uso de la gramática</textarea>
                 delete savedLevelGroups[selectedGroup];
                 saveData();
                 renderLevelGroupSelectForManagement();
-                renderRubricLevelGroupSelect(); // Actualizar el select en la configuración de rúbrica
+                renderRubricLevelGroupSelect(); 
                 levelGroupNameInput.value = '';
                 levelListInput.value = '';
                 showMessage(levelManagementMessageBox, `Grupo de niveles "${selectedGroup}" eliminado.`, 'success');
@@ -1110,7 +1195,6 @@ Uso de la gramática</textarea>
                 option.textContent = groupName;
                 rubricLevelsGroupSelect.appendChild(option);
             }
-            // Intentar seleccionar el grupo de niveles que estaba guardado en la rúbrica actual
             if (rubric.selectedLevelGroupName && savedLevelGroups[rubric.selectedLevelGroupName]) {
                 rubricLevelsGroupSelect.value = rubric.selectedLevelGroupName;
             }
@@ -1119,13 +1203,13 @@ Uso de la gramática</textarea>
         // Función auxiliar para añadir y renderizar elementos en listas guardadas
         function addAndRenderItem(inputElement, dataArray, selectElement, messageBox, storageKey, messageType) {
             const newItem = inputElement.value.trim();
-            if (newItem) { // Asegurarse de que no sea vacío
-                if (!dataArray.includes(newItem)) { // Verificar si el elemento ya existe
+            if (newItem) { 
+                if (!dataArray.includes(newItem)) { 
                     dataArray.push(newItem);
-                    dataArray.sort(); // Mantener orden alfabético
+                    dataArray.sort(); 
                     renderDropdownOptions(selectElement, dataArray);
-                    selectElement.value = newItem; // Seleccionar el nuevo elemento (si es un select simple)
-                    inputElement.value = ''; // Limpiar input
+                    selectElement.value = newItem; 
+                    inputElement.value = ''; 
                     localStorage.setItem(storageKey, JSON.stringify(dataArray));
                     showMessage(messageBox, messageType, 'success');
                 } else {
@@ -1172,20 +1256,20 @@ Uso de la gramática</textarea>
 
 
             const rawAspects = aspectsInput.value.trim();
-            rubric.selectedLevelGroupName = rubricLevelsGroupSelect.value; // Obtener el nombre del grupo de niveles seleccionado
+            rubric.selectedLevelGroupName = rubricLevelsGroupSelect.value; 
             
             if (!rubric.selectedLevelGroupName) {
                 showMessage(rubricConfigMessageBox, "Por favor, selecciona un Grupo de Niveles de Desempeño.", 'error');
                 return;
             }
 
-            rubric.levels = savedLevelGroups[rubric.selectedLevelGroupName]; // Cargar los niveles reales del grupo seleccionado
+            rubric.levels = savedLevelGroups[rubric.selectedLevelGroupName]; 
 
             if (!rawAspects) {
                 showMessage(rubricConfigMessageBox, "Por favor, introduce los aspectos a evaluar.", 'error');
                 return;
             }
-            if (rubric.levels.length === 0) { // Validar que el grupo seleccionado tenga niveles
+            if (rubric.levels.length === 0) { 
                 showMessage(rubricConfigMessageBox, "El grupo de niveles seleccionado no contiene niveles. Por favor, edítalo o selecciona otro.", 'error');
                 return;
             }
@@ -1193,7 +1277,7 @@ Uso de la gramática</textarea>
             rubric.aspects = rawAspects.split('\n')
                                        .map(aspect => aspect.trim())
                                        .filter(aspect => aspect !== '')
-                                       .filter((aspect, index, self) => self.indexOf(aspect) === index); // Filtrar duplicados
+                                       .filter((aspect, index, self) => self.indexOf(aspect) === index); 
             
             if (rubric.aspects.length === 0) {
                 showMessage(rubricConfigMessageBox, "No se encontraron aspectos válidos a evaluar.", 'error');
@@ -1205,7 +1289,6 @@ Uso de la gramática</textarea>
             rubric.aspects.forEach(aspect => {
                 newDescriptors[aspect] = {};
                 rubric.levels.forEach(level => {
-                    // Preservar descriptores existentes si los aspectos/niveles coinciden
                     newDescriptors[aspect][level] = (rubric.descriptors[aspect] && rubric.descriptors[aspect][level]) || '';
                 });
             });
@@ -1290,16 +1373,14 @@ Uso de la gramática</textarea>
          * Guarda los descriptores editados y pasa a la sección de evaluación.
          */
         saveRubricBtn.addEventListener('click', () => {
-            // Recopilar los campos generales de la rúbrica
             rubric.institution = institutionSelect.value;
             rubric.course = courseSelect.value;
             rubric.sessionTitle = sessionTitleInput.value.trim();
             rubric.teacher = teacherSelect.value;
             rubric.date = dateInput.value.trim();
             rubric.generalObservations = generalObservationsInput.value.trim();
-            rubric.selectedLevelGroupName = rubricLevelsGroupSelect.value; // Asegurarse de guardar el grupo de niveles seleccionado
+            rubric.selectedLevelGroupName = rubricLevelsGroupSelect.value;
 
-            // Recopilar los puntajes de los niveles
             let allScoresValid = true;
             rubric.levels.forEach(level => {
                 const scoreInputId = `score-${level.replace(/\s/g, '-')}`;
@@ -1309,14 +1390,13 @@ Uso de la gramática</textarea>
                 } else {
                     showMessage(rubricConfigMessageBox, `Por favor, ingresa un puntaje válido para el nivel '${level}'.`, 'error');
                     allScoresValid = false;
-                    return; // Detener el forEach si hay un puntaje inválido
+                    return;
                 }
             });
 
-            if (!allScoresValid) return; // Detener la función si algún puntaje no es válido
+            if (!allScoresValid) return;
 
 
-            // Recopilar los descriptores actualizados de la tabla
             rubric.aspects.forEach(aspect => {
                 rubric.levels.forEach(level => {
                     const textareaId = `descriptor-${aspect.replace(/\s/g, '-')}-${level.replace(/\s/g, '-')}`;
@@ -1327,14 +1407,13 @@ Uso de la gramática</textarea>
                 });
             });
 
-            // Inicializar las evaluaciones para cada estudiante (con la clave única del grupo)
-            const currentGroupName = groupSelect.value;
+            const currentGroupName = currentSelectedGroupName; // Usar la variable global
             currentStudents.forEach(student => {
                 const evaluationKey = `${currentGroupName}_${student}`;
                 if (!evaluations[evaluationKey]) {
                     evaluations[evaluationKey] = {};
                     rubric.aspects.forEach(aspect => {
-                        evaluations[evaluationKey][aspect] = null; // Establecer un valor por defecto
+                        evaluations[evaluationKey][aspect] = null;
                     });
                 }
             });
@@ -1342,9 +1421,8 @@ Uso de la gramática</textarea>
             saveData();
             showMessage(rubricConfigMessageBox, "¡Rúbrica guardada y lista para la evaluación!", 'success');
 
-            // Ocultar configuración de rúbrica y mostrar sección de evaluación
             showScreen('evaluation-screen');
-            currentStudentIndex = 0; // Reiniciar al primer estudiante
+            currentStudentIndex = 0;
             renderStudentEvaluation();
         });
 
@@ -1365,7 +1443,7 @@ Uso de la gramática</textarea>
             studentIndexSpan.textContent = currentStudentIndex + 1;
             totalStudentsSpan.textContent = currentStudents.length;
 
-            const evaluationKey = `${groupSelect.value}_${studentName}`; // Clave de evaluación para el estudiante actual
+            const evaluationKey = `${currentSelectedGroupName}_${studentName}`; // Usar currentSelectedGroupName
 
             let tableHTML = `
                 <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm">
@@ -1381,8 +1459,8 @@ Uso de la gramática</textarea>
             `;
 
             rubric.aspects.forEach(aspect => {
-                const currentLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] : null; // Check if evaluationKey exists
-                const currentScore = currentLevel ? rubric.levelScores[currentLevel] || 0 : 0; // Obtener puntaje
+                const currentLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] : null; 
+                const currentScore = currentLevel ? rubric.levelScores[currentLevel] || 0 : 0; 
                 tableHTML += `
                     <tr>
                         <td class="py-3 px-4 border-b text-gray-800 font-medium">${aspect}</td>
@@ -1426,7 +1504,6 @@ Uso de la gramática</textarea>
             `;
             studentRubricDisplay.innerHTML = tableHTML;
 
-            // Añadir event listeners a los botones de descriptor
             studentRubricDisplay.querySelectorAll('button[data-aspect][data-level]').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const aspect = event.currentTarget.dataset.aspect;
@@ -1435,12 +1512,11 @@ Uso de la gramática</textarea>
                 });
             });
 
-            // Mostrar/ocultar botones de navegación y finalizar
             prevStudentBtn.disabled = currentStudentIndex === 0;
             nextStudentBtn.disabled = currentStudentIndex === currentStudents.length - 1;
             if (currentStudentIndex === currentStudents.length - 1) {
                 finishEvaluationBtn.classList.remove('hidden');
-                nextStudentBtn.classList.add('hidden'); // Ocultar "Siguiente" si es el último
+                nextStudentBtn.classList.add('hidden'); 
             } else {
                 finishEvaluationBtn.classList.add('hidden');
                 nextStudentBtn.classList.remove('hidden');
@@ -1454,13 +1530,13 @@ Uso de la gramática</textarea>
          * @param {string} level - Nivel de desempeño asignado.
          */
         function evaluateAspect(studentName, aspect, level) {
-            const evaluationKey = `${groupSelect.value}_${studentName}`;
+            const evaluationKey = `${currentSelectedGroupName}_${studentName}`;
             if (!evaluations[evaluationKey]) {
                 evaluations[evaluationKey] = {};
             }
             evaluations[evaluationKey][aspect] = level;
-            saveData(); // Guardar después de cada cambio
-            renderStudentEvaluation(); // Volver a renderizar para actualizar la UI
+            saveData(); 
+            renderStudentEvaluation(); 
             showMessage(evaluationMessageBox, `Evaluación para '${aspect}' del estudiante '${studentName}' actualizada a '${level}'.`, 'success');
         }
 
@@ -1531,12 +1607,12 @@ Uso de la gramática</textarea>
             doc.setFontSize(22);
             doc.setTextColor(40, 40, 40);
             doc.text("Rúbrica de Evaluación", doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 10; // Espacio después del título principal
+            yOffset += 10; 
 
-            doc.setFontSize(14); // Un poco más grande para el nombre del grupo
+            doc.setFontSize(14); 
             doc.setTextColor(50, 50, 50);
             doc.text(`Grupo: ${groupName || 'N/A'}`, doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 10; // Espacio después del grupo
+            yOffset += 10; 
 
             doc.setFontSize(10);
             doc.setTextColor(80, 80, 80);
@@ -1590,7 +1666,6 @@ Uso de la gramática</textarea>
                 }
             });
 
-            // Calcular puntaje total posible y máximo
             let maxPossibleScore = 0;
             rubric.aspects.forEach(aspect => {
                 let maxAspectScore = 0;
@@ -1644,7 +1719,6 @@ Uso de la gramática</textarea>
             doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10);
             yOffset += 20;
 
-            // Asegurarse de que el nombre del archivo sea compatible con sistemas de archivos
             const safeStudentName = studentName.replace(/[^a-z0-9]/gi, '_');
             const safeGroupName = groupName.replace(/[^a-z0-9]/gi, '_');
             doc.save(`rubrica_${safeStudentName}_${safeGroupName}.pdf`);
@@ -1663,7 +1737,7 @@ Uso de la gramática</textarea>
                 return;
             }
 
-            const currentGroupName = groupSelect.value;
+            const currentGroupName = currentSelectedGroupName;
             for (const student of currentStudents) {
                 generateSingleStudentPdf(student, currentGroupName);
             }
@@ -1692,19 +1766,18 @@ Uso de la gramática</textarea>
 
             doc.setFont("helvetica");
 
-            let yOffset = 20; // Posición vertical inicial
-            const margin = 20; // Márgenes
+            let yOffset = 20; 
+            const margin = 20; 
 
-            // Información general de la rúbrica (una sola vez al inicio del documento general)
             doc.setFontSize(22);
             doc.setTextColor(40, 40, 40);
             doc.text("Reporte General de Evaluación de Estudiantes", doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 10; // Espacio después del título principal
+            yOffset += 10; 
 
-            doc.setFontSize(14); // Un poco más grande para el nombre del grupo
+            doc.setFontSize(14); 
             doc.setTextColor(50, 50, 50);
-            doc.text(`Grupo: ${groupSelect.value || 'N/A'}`, doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 10; // Espacio después del grupo
+            doc.text(`Grupo: ${currentSelectedGroupName || 'N/A'}`, doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
+            yOffset += 10; 
 
             doc.setFontSize(10);
             doc.setTextColor(80, 80, 80);
@@ -1728,10 +1801,7 @@ Uso de la gramática</textarea>
                 doc.text(splitObservations, margin, yOffset);
                 yOffset += (splitObservations.length * 4) + 10;
             }
-            // Eliminado: doc.text(`Grupo de Estudiantes: ${groupSelect.value || 'N/A'}`, margin, yOffset); // Se movió arriba
-            // Eliminado: yOffset += 10;
 
-            // Calcular puntaje total posible y máximo
             let maxPossibleScore = 0;
             rubric.aspects.forEach(aspect => {
                 let maxAspectScore = 0;
@@ -1747,14 +1817,12 @@ Uso de la gramática</textarea>
             let totalSumOfFinalScores = 0;
             let evaluatedStudentCount = 0;
 
-            const currentGroupName = groupSelect.value;
+            const currentGroupName = currentSelectedGroupName;
 
-            for (const student of currentStudents) { // Iterar sobre el grupo de estudiantes actual
-                // Verificar si hay espacio para el siguiente estudiante, si no, añadir nueva página
+            for (const student of currentStudents) { 
                 if (yOffset > 270) {
                     doc.addPage();
                     yOffset = 20;
-                    // Añadir información de la rúbrica al inicio de cada nueva página si es necesario
                     doc.setFontSize(10);
                     doc.setTextColor(80, 80, 80);
                     doc.text(`Institución Educativa: ${rubric.institution || 'N/A'}`, margin, yOffset);
@@ -1767,7 +1835,7 @@ Uso de la gramática</textarea>
                     yOffset += 5;
                     doc.text(`Fecha: ${rubric.date || 'N/A'}`, margin, yOffset);
                     yOffset += 5;
-                    doc.text(`Grupo de Estudiantes: ${groupSelect.value || 'N/A'}`, margin, yOffset);
+                    doc.text(`Grupo de Estudiantes: ${currentSelectedGroupName || 'N/A'}`, margin, yOffset);
                     yOffset += 10;
                 }
 
@@ -1847,7 +1915,6 @@ Uso de la gramática</textarea>
                 yOffset += 20;
             }
 
-            // Puntaje promedio global (si hay estudiantes evaluados)
             if (evaluatedStudentCount > 0) {
                 const globalAverageScore = (totalSumOfFinalScores / evaluatedStudentCount).toFixed(2);
                 doc.addPage();
@@ -1865,7 +1932,6 @@ Uso de la gramática</textarea>
                 yOffset += 10;
                 doc.text(`Puntaje Máximo Posible por estudiante: ${maxPossibleScore} pts`, margin, yOffset);
             }
-
 
             doc.save('reporte_general_evaluacion_grupo.pdf');
             showMessage(reportMessageBox, "¡Reporte PDF generado y descargado!", 'success');
