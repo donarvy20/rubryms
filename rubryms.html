@@ -226,21 +226,21 @@
 
         @media (min-width: 768px) and (max-width: 1023px) { /* Tablets (768px a 1023px) */
             #nav-links-container {
-                display: flex; /* Mostrar como flex */
-                flex-direction: column; /* En columna */
+                display: flex; /* Oculto por defecto, pero flexible cuando visible */
+                flex-direction: column; /* Siempre en columna en este rango */
                 flex-grow: 1;
-                justify-content: center; /* Centrar elementos verticalmente */
-                gap: 0; /* Eliminar el gap horizontal */
+                justify-content: center;
+                gap: 0;
             }
             .nav-item {
-                width: auto; /* Ancho automático para los elementos */
-                margin: 5px auto; /* Centrar elementos con margen automático */
+                width: auto;
+                margin: 5px auto;
             }
         }
 
         @media (min-width: 1024px) { /* Escritorio (1024px y más) */
             #nav-links-container {
-                display: flex; /* Mostrar como flex */
+                display: flex; /* Siempre visible como flex en desktop */
                 flex-direction: row; /* En fila */
                 flex-grow: 1;
                 justify-content: flex-end; /* Alinear a la derecha */
@@ -268,7 +268,9 @@
             </div>
 
             <!-- Contenedor de enlaces de navegación (visible en md y más grande, o cuando el menú móvil está abierto) -->
-            <div id="nav-links-container" class="hidden md:flex flex-col md:flex-row flex-grow justify-end gap-2 md:gap-4 w-full md:w-auto">
+            <!-- La clase 'hidden' inicial hace que esté oculto por defecto en móviles y tablets. -->
+            <!-- Las media queries en CSS lo controlarán para md y lg. -->
+            <div id="nav-links-container" class="hidden flex-grow justify-end gap-2 md:gap-4 w-full md:w-auto">
                 <button id="nav-students" class="nav-item active"><i class="fas fa-users mr-2"></i> Gestión de Estudiantes</button>
                 <button id="nav-levels" class="nav-item"><i class="fas fa-list-ol mr-2"></i> Gestión de Niveles</button>
                 <button id="nav-rubric" class="nav-item"><i class="fas fa-cogs mr-2"></i> Configuración de Rúbrica</button>
@@ -766,8 +768,15 @@ Uso de la gramática</textarea>
                 navLinksContainer.classList.remove('hidden', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10');
                 navLinksContainer.classList.add('flex', 'flex-row');
             } else if (window.innerWidth >= 768) { /* Usar md breakpoint para flex-col */
-                navLinksContainer.classList.remove('hidden', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10', 'flex-row');
-                navLinksContainer.classList.add('flex', 'flex-col');
+                // Para 768px a 1023px, el menú debe estar oculto por defecto como hamburguesa.
+                // Si estaba abierto (por toggle), queremos que siga visible pero en columna.
+                // Si estaba oculto, queremos que siga oculto.
+                // Por lo tanto, no removemos 'hidden' aquí si ya estaba presente.
+                // Simplemente aseguramos que no se le aplique flex-row si estaba en lg.
+                navLinksContainer.classList.remove('flex-row'); // Asegurarse de que no sea fila
+                navLinksContainer.classList.add('flex-col'); // Asegurarse de que sea columna
+                // NO agregar o remover 'hidden' aquí. Su estado debe ser el que el usuario eligió con el toggle,
+                // o el que viene por defecto si no ha interactuado.
             } else { /* Móvil */
                 navLinksContainer.classList.add('hidden');
                 navLinksContainer.classList.remove('flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10', 'flex-row');
@@ -789,10 +798,7 @@ Uso de la gramática</textarea>
                 const storedLevelGroups = localStorage.getItem('savedLevelGroups'); 
                 if (storedLevelGroups) {
                     savedLevelGroups = JSON.parse(storedLevelGroups);
-                    // No llamamos a renderLevelGroupSelectForManagement ni renderRubricLevelGroupSelect aquí
-                    // ya que showScreen() las llamará al entrar a sus respectivos módulos.
                 } else {
-                    // Si no hay grupos de niveles guardados, añadir un grupo por defecto
                     savedLevelGroups['Cualitativo'] = ['Destacado', 'Logrado', 'Proceso', 'Inicio', 'Previo al Inicio'];
                     savedLevelGroups['Escala'] = ['Deficiente', 'Regular', 'Bueno', 'Excelente'];
                     saveData(); 
@@ -836,18 +842,18 @@ Uso de la gramática</textarea>
                     evaluations = JSON.parse(storedEvaluations);
                 }
 
-                const storedCurrentGroup = localStorage.getItem('currentSelectedGroupName'); // Ahora es currentSelectedGroupName
+                const storedCurrentGroup = localStorage.getItem('currentSelectedGroupName'); 
                 if(storedCurrentGroup && studentGroups[storedCurrentGroup]) {
                     currentStudents = studentGroups[storedCurrentGroup];
-                    currentSelectedGroupName = storedCurrentGroup; // Actualizar la variable global
-                    // highlightSelectedGroupCard(currentSelectedGroupName); // Ya se llama desde renderGroupCards
+                    currentSelectedGroupName = storedCurrentGroup; 
+                    // highlightSelectedGroupCard se llama en renderGroupCards
                 }
 
                 sessionTitleInput.value = rubric.sessionTitle;
                 generalObservationsInput.value = rubric.generalObservations;
                 aspectsInput.value = rubric.aspects.join('\n');
                 
-                showScreen('students-screen'); // Siempre inicia en la pantalla de estudiantes
+                showScreen('students-screen'); 
             } catch (e) {
                 console.error("Error al cargar datos de localStorage:", e);
                 showMessage(studentMessageBox, "Error al cargar datos guardados. Los datos pueden estar corruptos.", 'error');
@@ -866,7 +872,7 @@ Uso de la gramática</textarea>
                 localStorage.setItem('savedTeachers', JSON.stringify(savedTeachers));
                 localStorage.setItem('rubric', JSON.stringify(rubric));
                 localStorage.setItem('evaluations', JSON.stringify(evaluations));
-                localStorage.setItem('currentSelectedGroupName', currentSelectedGroupName); // Guardar el nombre del grupo seleccionado
+                localStorage.setItem('currentSelectedGroupName', currentSelectedGroupName); 
             } catch (e) {
                 console.error("Error al guardar datos en localStorage:", e);
                 showMessage(studentMessageBox, "No se pudieron guardar los datos. Verifique el espacio disponible en su navegador.", 'error');
@@ -957,12 +963,11 @@ Uso de la gramática</textarea>
                 const groupStudents = studentGroups[groupName];
                 const card = document.createElement('div');
                 const currentColorClass = cardColors[colorIndex % cardColors.length];
-                colorIndex++; // Avanzar al siguiente color
+                colorIndex++; 
 
-                card.className = `group-card ${currentColorClass} border-2 border-transparent`; // Añadir border-2 para el active
+                card.className = `group-card ${currentColorClass} border-2 border-transparent`; 
                 card.dataset.groupName = groupName;
 
-                // Resaltar la tarjeta si es el grupo actualmente seleccionado
                 if (groupName === currentSelectedGroupName) {
                     card.classList.add('active');
                 }
@@ -984,7 +989,7 @@ Uso de la gramática</textarea>
                 `;
                 groupCardsContainer.appendChild(card);
             }
-            attachGroupCardEventListeners(); // Adjuntar listeners después de renderizar
+            attachGroupCardEventListeners(); 
         }
 
         /**
@@ -993,10 +998,10 @@ Uso de la gramática</textarea>
         function attachGroupCardEventListeners() {
             groupCardsContainer.addEventListener('click', (event) => {
                 const targetButton = event.target.closest('button');
-                if (!targetButton) return; // No es un botón
+                if (!targetButton) return; 
 
                 const card = targetButton.closest('.group-card');
-                if (!card) return; // El botón no está dentro de una tarjeta de grupo
+                if (!card) return; 
 
                 const groupName = card.dataset.groupName;
 
@@ -1021,13 +1026,13 @@ Uso de la gramática</textarea>
             }
 
             currentStudents = studentGroups[groupName];
-            currentSelectedGroupName = groupName; // Actualizar la variable global del grupo seleccionado
+            currentSelectedGroupName = groupName; 
             saveData();
-            highlightSelectedGroupCard(groupName); // Resaltar la tarjeta activa
+            highlightSelectedGroupCard(groupName); 
             showMessage(studentMessageBox, `¡Grupo "${groupName}" cargado para evaluación!`, 'success');
 
             showScreen('rubric-config-screen');
-            currentStudentIndex = 0; // Resetear el índice del estudiante al cargar un nuevo grupo
+            currentStudentIndex = 0; 
 
             if (rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
                 showScreen('evaluation-screen');
@@ -1057,12 +1062,12 @@ Uso de la gramática</textarea>
             if (confirmDelete) {
                 delete studentGroups[groupName];
                 if (currentSelectedGroupName === groupName) {
-                    currentSelectedGroupName = ''; // Deseleccionar si el grupo actual es el eliminado
+                    currentSelectedGroupName = ''; 
                     currentStudents = [];
                     localStorage.removeItem('currentSelectedGroupName');
                 }
                 saveData();
-                renderGroupCards(); // Volver a renderizar las tarjetas
+                renderGroupCards(); 
                 showMessage(studentMessageBox, `Grupo "${groupName}" eliminado.`, 'success');
             }
         }
@@ -1095,7 +1100,7 @@ Uso de la gramática</textarea>
                 targetGroupName = groupName;
                 studentGroups[targetGroupName] = newStudents;
                 actionMessage = `¡Grupo "${targetGroupName}" con ${newStudents.length} estudiantes guardado (o actualizado)!`;
-            } else { // Crear nuevo grupo anónimo o añadir a uno existente si hay selección
+            } else { 
                 targetGroupName = `Grupo - ${new Date().toLocaleDateString('es-ES')}`;
                 let counter = 1;
                 while(studentGroups[targetGroupName]) {
@@ -1107,10 +1112,10 @@ Uso de la gramática</textarea>
             }
 
             currentStudents = studentGroups[targetGroupName];
-            currentSelectedGroupName = targetGroupName; // Actualizar la variable global del grupo seleccionado
+            currentSelectedGroupName = targetGroupName; 
             saveData();
-            renderGroupCards(); // Volver a renderizar las tarjetas para mostrar el nuevo/actualizado
-            highlightSelectedGroupCard(targetGroupName); // Resaltar el grupo recién guardado
+            renderGroupCards(); 
+            highlightSelectedGroupCard(targetGroupName); 
             showMessage(studentMessageBox, actionMessage, 'success');
 
             groupNameInput.value = '';
@@ -1428,7 +1433,7 @@ Uso de la gramática</textarea>
                 });
             });
 
-            const currentGroupName = currentSelectedGroupName; // Usar la variable global
+            const currentGroupName = currentSelectedGroupName; 
             currentStudents.forEach(student => {
                 const evaluationKey = `${currentGroupName}_${student}`;
                 if (!evaluations[evaluationKey]) {
@@ -1464,7 +1469,7 @@ Uso de la gramática</textarea>
             studentIndexSpan.textContent = currentStudentIndex + 1;
             totalStudentsSpan.textContent = currentStudents.length;
 
-            const evaluationKey = `${currentSelectedGroupName}_${studentName}`; // Usar currentSelectedGroupName
+            const evaluationKey = `${currentSelectedGroupName}_${studentName}`; 
 
             let tableHTML = `
                 <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm">
