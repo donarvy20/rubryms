@@ -112,14 +112,55 @@
             max-height: 150px; /* Altura máxima para permitir el scroll interno */
             resize: vertical; /* Permitir redimensionar solo verticalmente */
         }
+
+        /* Estilos para el menú de navegación */
+        .nav-menu {
+            display: flex;
+            justify-content: space-around;
+            background-color: #e2e8f0; /* Color de fondo del menú */
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .nav-menu button {
+            background-color: transparent;
+            color: #4a5568; /* Color de texto normal */
+            font-weight: 600;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            flex-grow: 1; /* Para distribuir el espacio uniformemente */
+            margin: 0 5px; /* Pequeño margen entre botones */
+        }
+        .nav-menu button:hover {
+            background-color: #cbd5e0; /* Color al pasar el ratón */
+            color: #2d3748;
+        }
+        .nav-menu button.active {
+            background-color: #6366f1; /* Color de la pestaña activa (indigo-500) */
+            color: white;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px); /* Un ligero efecto de elevación */
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-6">Evaluador de Estudiantes</h1>
 
-        <!-- Sección de Añadir Estudiantes -->
-        <div id="add-students-section" class="bg-blue-50 p-6 rounded-xl border border-blue-200">
+        <!-- Menú de Navegación -->
+        <nav class="nav-menu">
+            <button id="nav-students" class="active"><i class="fas fa-users mr-2"></i> Gestión de Estudiantes</button>
+            <button id="nav-rubric"><i class="fas fa-cogs mr-2"></i> Configuración de Rúbrica</button>
+            <button id="nav-evaluation"><i class="fas fa-pencil-alt mr-2"></i> Evaluación</button>
+            <button id="nav-reports"><i class="fas fa-file-pdf mr-2"></i> Reportes y Exportación</button>
+        </nav>
+
+        <!-- Secciones de la Aplicación -->
+        <div id="students-screen" class="bg-blue-50 p-6 rounded-xl border border-blue-200">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
                 <i class="fas fa-users text-blue-600 mr-2"></i> 1. Agregar y Gestionar Estudiantes
             </h2>
@@ -169,8 +210,7 @@
             </div>
         </div>
 
-        <!-- Sección de Configuración de Rúbrica (Oculta inicialmente) -->
-        <div id="rubric-config-section" class="bg-green-50 p-6 rounded-xl border border-green-200 hidden">
+        <div id="rubric-config-screen" class="bg-green-50 p-6 rounded-xl border border-green-200 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
                 <i class="fas fa-cogs text-green-600 mr-2"></i> 2. Configuración de la Rúbrica
             </h2>
@@ -225,17 +265,21 @@ Claridad
 Uso de la gramática</textarea>
             </div>
 
+            <!-- Nueva sección para gestionar niveles de desempeño -->
             <div class="mb-6">
-                <label for="levels-input" class="block text-gray-700 font-medium mb-2">Niveles de Desempeño (separados por comas):</label>
-                <input
-                    type="text"
-                    id="levels-input"
-                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 transition duration-200"
-                    placeholder="Ejemplo: Destacado, Logrado, En Proceso, En Inicio"
-                    value="Destacado, Logrado, En Proceso, En Inicio"
-                />
+                <div class="input-group flex-col md:flex-row mb-2">
+                    <label for="levels-select" class="block text-gray-700 font-medium mb-2 md:mb-0">Niveles de Desempeño (seleccionar múltiples):</label>
+                    <select multiple id="levels-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 h-32 overflow-y-auto">
+                        <!-- Opciones se cargarán dinámicamente -->
+                    </select>
+                </div>
+                <div class="input-group flex-col md:flex-row">
+                    <input type="text" id="new-level-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 hidden" placeholder="Añadir nuevo nivel de desempeño">
+                    <button id="add-level-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600 hidden"><i class="fas fa-plus"></i> Añadir Nivel</button>
+                    <button id="toggle-level-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500"><i class="fas fa-exchange-alt"></i> Añadir/Alternar</button>
+                </div>
             </div>
-
+            
             <button
                 id="generate-rubric-btn"
                 class="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
@@ -274,7 +318,7 @@ Uso de la gramática</textarea>
             </div>
         </div>
 
-        <div id="evaluation-section" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 hidden">
+        <div id="evaluation-screen" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
                 <i class="fas fa-pencil-alt text-yellow-600 mr-2"></i> 3. Evaluación de Estudiantes
             </h2>
@@ -307,7 +351,7 @@ Uso de la gramática</textarea>
             <div id="evaluation-message-box" class="message-box"></div>
         </div>
 
-        <div id="report-section" class="bg-red-50 p-6 rounded-xl border border-red-200 hidden">
+        <div id="report-screen" class="bg-red-50 p-6 rounded-xl border border-red-200 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
                 <i class="fas fa-file-pdf text-red-600 mr-2"></i> 4. Reporte y Exportación a PDF
             </h2>
@@ -350,7 +394,16 @@ Uso de la gramática</textarea>
 
     <script>
         // Obtener referencias a los elementos del DOM
-        const addStudentsSection = document.getElementById('add-students-section');
+        const navStudentsBtn = document.getElementById('nav-students');
+        const navRubricBtn = document.getElementById('nav-rubric');
+        const navEvaluationBtn = document.getElementById('nav-evaluation');
+        const navReportsBtn = document.getElementById('nav-reports');
+
+        const studentsScreen = document.getElementById('students-screen');
+        const rubricConfigScreen = document.getElementById('rubric-config-screen');
+        const evaluationScreen = document.getElementById('evaluation-screen');
+        const reportScreen = document.getElementById('report-screen');
+
         const groupNameInput = document.getElementById('group-name-input');
         const studentListInput = document.getElementById('student-list-input');
         const addStudentsBtn = document.getElementById('add-students-btn');
@@ -359,7 +412,6 @@ Uso de la gramática</textarea>
         const deleteGroupBtn = document.getElementById('delete-group-btn');
         const studentMessageBox = document.getElementById('student-message-box');
 
-        const rubricConfigSection = document.getElementById('rubric-config-section');
         const institutionSelect = document.getElementById('institution-select');
         const newInstitutionInput = document.getElementById('new-institution-input');
         const addInstitutionBtn = document.getElementById('add-institution-btn');
@@ -375,7 +427,10 @@ Uso de la gramática</textarea>
         const sessionTitleInput = document.getElementById('session-title-input');
         const dateInput = document.getElementById('date-input');
         const aspectsInput = document.getElementById('aspects-input');
-        const levelsInput = document.getElementById('levels-input');
+        const levelsSelect = document.getElementById('levels-select'); // Cambiado a select
+        const newLevelInput = document.getElementById('new-level-input'); // Nuevo
+        const addLevelBtn = document.getElementById('add-level-btn'); // Nuevo
+        const toggleLevelInput = document.getElementById('toggle-level-input'); // Nuevo
         const generateRubricBtn = document.getElementById('generate-rubric-btn');
         const rubricConfigMessageBox = document.getElementById('rubric-config-message-box');
         const rubricDescriptorsEditor = document.getElementById('rubric-descriptors-editor');
@@ -384,7 +439,6 @@ Uso de la gramática</textarea>
         const generalObservationsInput = document.getElementById('general-observations-input');
         const saveRubricBtn = document.getElementById('save-rubric-btn');
 
-        const evaluationSection = document.getElementById('evaluation-section');
         const currentStudentName = document.getElementById('current-student-name');
         const studentIndexSpan = document.getElementById('student-index');
         const totalStudentsSpan = document.getElementById('total-students');
@@ -394,7 +448,6 @@ Uso de la gramática</textarea>
         const finishEvaluationBtn = document.getElementById('finish-evaluation-btn');
         const evaluationMessageBox = document.getElementById('evaluation-message-box');
 
-        const reportSection = document.getElementById('report-section');
         const exportPdfBtn = document.getElementById('export-pdf-btn');
         const exportIndividualRubricsBtn = document.getElementById('export-individual-rubrics-btn');
         const backToEvaluationBtn = document.getElementById('back-to-evaluation-btn');
@@ -408,6 +461,7 @@ Uso de la gramática</textarea>
         let savedInstitutions = [];
         let savedCourses = [];
         let savedTeachers = [];
+        let savedLevels = ["Destacado", "Logrado", "En Proceso", "En Inicio"]; // Niveles por defecto
 
         let rubric = {
             institution: '',
@@ -421,7 +475,6 @@ Uso de la gramática</textarea>
             descriptors: {}, // { aspect: { level: descriptor_text, ... }, ... }
             levelScores: {} // { level: score, ... }
         };
-        // Evaluations now store the group name, and then per-student data
         let evaluations = {}; // { 'GroupName_StudentName': { aspect: level_selected, ... }, ... }
 
         // --- Funciones de Utilidad ---
@@ -443,6 +496,52 @@ Uso de la gramática</textarea>
                 boxElement.style.display = 'none';
             }, 5000); // El mensaje desaparece después de 5 segundos
         }
+
+        /**
+         * Maneja la navegación entre pantallas.
+         * @param {string} screenId - El ID de la pantalla a mostrar.
+         */
+        function showScreen(screenId) {
+            // Oculta todas las pantallas
+            studentsScreen.classList.add('hidden');
+            rubricConfigScreen.classList.add('hidden');
+            evaluationScreen.classList.add('hidden');
+            reportScreen.classList.add('hidden');
+
+            // Quita la clase 'active' de todos los botones de navegación
+            navStudentsBtn.classList.remove('active');
+            navRubricBtn.classList.remove('active');
+            navEvaluationBtn.classList.remove('active');
+            navReportsBtn.classList.remove('active');
+
+            // Muestra la pantalla deseada y activa el botón de navegación correspondiente
+            if (screenId === 'students-screen') {
+                studentsScreen.classList.remove('hidden');
+                navStudentsBtn.classList.add('active');
+            } else if (screenId === 'rubric-config-screen') {
+                rubricConfigScreen.classList.remove('hidden');
+                navRubricBtn.classList.add('active');
+            } else if (screenId === 'evaluation-screen') {
+                evaluationScreen.classList.remove('hidden');
+                navEvaluationBtn.classList.add('active');
+                renderStudentEvaluation(); // Asegura que la evaluación se renderice al entrar
+            } else if (screenId === 'report-screen') {
+                reportScreen.classList.remove('hidden');
+                navReportsBtn.classList.add('active');
+            }
+        }
+
+        // Event listeners para la navegación
+        navStudentsBtn.addEventListener('click', () => showScreen('students-screen'));
+        navRubricBtn.addEventListener('click', () => showScreen('rubric-config-screen'));
+        navEvaluationBtn.addEventListener('click', () => {
+            if (currentStudents.length === 0 || rubric.aspects.length === 0 || rubric.levels.length === 0 || Object.keys(rubric.descriptors).length === 0 || Object.keys(rubric.levelScores).length === 0) {
+                 showMessage(evaluationMessageBox, "Por favor, carga un grupo de estudiantes y configura la rúbrica antes de evaluar.", 'error');
+                 return;
+            }
+            showScreen('evaluation-screen');
+        });
+        navReportsBtn.addEventListener('click', () => showScreen('report-screen'));
 
         /**
          * Carga los datos de estudiantes, rúbrica y evaluaciones desde localStorage.
@@ -470,6 +569,11 @@ Uso de la gramática</textarea>
                     savedTeachers = JSON.parse(storedTeachers);
                     renderDropdownOptions(teacherSelect, savedTeachers);
                 }
+                const storedLevels = localStorage.getItem('savedLevels'); // Carga niveles
+                if (storedLevels) {
+                    savedLevels = JSON.parse(storedLevels);
+                    renderDropdownOptions(levelsSelect, savedLevels); // Rellena el select de niveles
+                }
 
 
                 const storedRubric = localStorage.getItem('rubric');
@@ -485,6 +589,13 @@ Uso de la gramática</textarea>
                     institutionSelect.value = rubric.institution;
                     courseSelect.value = rubric.course;
                     teacherSelect.value = rubric.teacher;
+
+                    // Seleccionar los niveles en el multi-select si existen
+                    if (rubric.levels && rubric.levels.length > 0) {
+                        Array.from(levelsSelect.options).forEach(option => {
+                            option.selected = rubric.levels.includes(option.value);
+                        });
+                    }
                 }
 
                 const storedEvaluations = localStorage.getItem('evaluations');
@@ -503,26 +614,12 @@ Uso de la gramática</textarea>
                 sessionTitleInput.value = rubric.sessionTitle;
                 generalObservationsInput.value = rubric.generalObservations;
                 aspectsInput.value = rubric.aspects.join('\n');
-                levelsInput.value = rubric.levels.join(', ');
+                // levelsInput.value ya no existe como textarea
+                // levelsSelect se llena arriba
 
 
-                // Si hay estudiantes en el grupo actual, pasar a la configuración de rúbrica o evaluación
-                if (currentStudents.length > 0) {
-                    addStudentsSection.classList.add('hidden');
-                    if (rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
-                        rubricConfigSection.classList.add('hidden');
-                        evaluationSection.classList.remove('hidden');
-                        renderStudentEvaluation();
-                    } else {
-                        rubricConfigSection.classList.remove('hidden');
-                        // Si la rúbrica está parcialmente configurada, mostrar la edición de descriptores/puntajes
-                        if (rubric.aspects.length > 0 && rubric.levels.length > 0) {
-                             renderDescriptorsTable();
-                             renderLevelScoresInputs();
-                             rubricDescriptorsEditor.classList.remove('hidden');
-                        }
-                    }
-                }
+                // Al cargar la app, se muestra la primera pantalla por defecto
+                showScreen('students-screen');
 
             } catch (e) {
                 console.error("Error al cargar datos de localStorage:", e);
@@ -541,6 +638,7 @@ Uso de la gramática</textarea>
                 localStorage.setItem('savedInstitutions', JSON.stringify(savedInstitutions));
                 localStorage.setItem('savedCourses', JSON.stringify(savedCourses));
                 localStorage.setItem('savedTeachers', JSON.stringify(savedTeachers));
+                localStorage.setItem('savedLevels', JSON.stringify(savedLevels)); // Guarda niveles
                 localStorage.setItem('rubric', JSON.stringify(rubric));
                 localStorage.setItem('evaluations', JSON.stringify(evaluations));
                 localStorage.setItem('currentSelectedGroup', groupSelect.value); // Guardar el grupo actualmente seleccionado
@@ -573,7 +671,7 @@ Uso de la gramática</textarea>
             // Borrar solo los datos de la rúbrica actual y las evaluaciones
             localStorage.removeItem('rubric');
             localStorage.removeItem('evaluations');
-            // NO borrar 'studentGroups', 'savedInstitutions', 'savedCourses', 'savedTeachers'
+            // NO borrar 'studentGroups', 'savedInstitutions', 'savedCourses', 'savedTeachers', 'savedLevels'
 
             // Restablecer variables a su estado inicial solo para la rúbrica y evaluaciones
             rubric = {
@@ -595,15 +693,19 @@ Uso de la gramática</textarea>
             sessionTitleInput.value = '';
             dateInput.value = '';
             aspectsInput.value = 'Coherencia\nClaridad\nUso de la gramática'; // Valores por defecto
-            levelsInput.value = 'Destacado, Logrado, En Proceso, En Inicio'; // Valores por defecto
+            // Deseleccionar todos los niveles en el multi-select
+            Array.from(levelsSelect.options).forEach(option => {
+                option.selected = false;
+            });
             generalObservationsInput.value = '';
 
-            // Ocultar todas las secciones excepto la inicial
-            evaluationSection.classList.add('hidden');
-            rubricConfigSection.classList.add('hidden');
-            reportSection.classList.add('hidden');
+            // Ocultar todas las secciones excepto la inicial (students-screen)
+            rubricConfigScreen.classList.add('hidden');
+            evaluationScreen.classList.add('hidden');
+            reportScreen.classList.add('hidden');
             rubricDescriptorsEditor.classList.add('hidden');
-            addStudentsSection.classList.remove('hidden');
+            
+            showScreen('students-screen'); // Volver a la pantalla de estudiantes
 
             // Asegurarse de que los dropdowns institucionales reflejen la selección guardada
             institutionSelect.value = '';
@@ -617,6 +719,9 @@ Uso de la gramática</textarea>
             newCourseInput.value = '';
             newTeacherInput.classList.add('hidden');
             newTeacherInput.value = '';
+            newLevelInput.classList.add('hidden'); // Ocultar input de niveles
+            newLevelInput.value = '';
+            addLevelBtn.classList.add('hidden'); // Ocultar botón añadir nivel
 
 
             showMessage(reportMessageBox, "La rúbrica y las evaluaciones han sido reiniciadas. Tus grupos y datos institucionales permanecen guardados.", 'success');
@@ -721,15 +826,12 @@ Uso de la gramática</textarea>
             showMessage(studentMessageBox, `¡Grupo "${selectedGroup}" cargado para evaluación!`, 'success');
 
             // Ocultar sección de estudiantes y mostrar configuración de rúbrica
-            addStudentsSection.classList.add('hidden');
-            rubricConfigSection.classList.remove('hidden');
+            showScreen('rubric-config-screen');
             currentStudentIndex = 0; // Resetear el índice del estudiante al cargar un nuevo grupo
 
             // Si ya hay una rúbrica configurada, ir directamente a la evaluación
             if (rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
-                rubricConfigSection.classList.add('hidden');
-                evaluationSection.classList.remove('hidden');
-                renderStudentEvaluation();
+                showScreen('evaluation-screen');
             }
         });
 
@@ -767,7 +869,8 @@ Uso de la gramática</textarea>
                     dataArray.push(newItem);
                     dataArray.sort(); // Mantener orden alfabético
                     renderDropdownOptions(selectElement, dataArray);
-                    selectElement.value = newItem; // Seleccionar el nuevo elemento
+                    selectElement.value = newItem; // Seleccionar el nuevo elemento (si es un select simple)
+                    // Para multi-select, no se selecciona automáticamente al añadir
                     inputElement.value = ''; // Limpiar input
                     localStorage.setItem(storageKey, JSON.stringify(dataArray));
                     showMessage(messageBox, messageType, 'success');
@@ -783,11 +886,17 @@ Uso de la gramática</textarea>
         addInstitutionBtn.addEventListener('click', () => addAndRenderItem(newInstitutionInput, savedInstitutions, institutionSelect, rubricConfigMessageBox, 'savedInstitutions', 'Institución añadida.'));
         addCourseBtn.addEventListener('click', () => addAndRenderItem(newCourseInput, savedCourses, courseSelect, rubricConfigMessageBox, 'savedCourses', 'Curso añadido.'));
         addTeacherBtn.addEventListener('click', () => addAndRenderItem(newTeacherInput, savedTeachers, teacherSelect, rubricConfigMessageBox, 'savedTeachers', 'Docente añadido.'));
+        addLevelBtn.addEventListener('click', () => addAndRenderItem(newLevelInput, savedLevels, levelsSelect, rubricConfigMessageBox, 'savedLevels', 'Nivel de desempeño añadido.'));
+
 
         // Event listeners para alternar inputs de añadir
         toggleInstitutionInput.addEventListener('click', () => newInstitutionInput.classList.toggle('hidden'));
         toggleCourseInput.addEventListener('click', () => newCourseInput.classList.toggle('hidden'));
         toggleTeacherInput.addEventListener('click', () => newTeacherInput.classList.toggle('hidden'));
+        toggleLevelInput.addEventListener('click', () => {
+            newLevelInput.classList.toggle('hidden');
+            addLevelBtn.classList.toggle('hidden');
+        });
 
 
         /**
@@ -815,14 +924,15 @@ Uso de la gramática</textarea>
 
 
             const rawAspects = aspectsInput.value.trim();
-            const rawLevels = levelsInput.value.trim();
+            // Obtener niveles seleccionados del multi-select
+            rubric.levels = Array.from(levelsSelect.selectedOptions).map(option => option.value);
 
             if (!rawAspects) {
                 showMessage(rubricConfigMessageBox, "Por favor, introduce los aspectos a evaluar.", 'error');
                 return;
             }
-            if (!rawLevels) {
-                showMessage(rubricConfigMessageBox, "Por favor, introduce los niveles de desempeño.", 'error');
+            if (rubric.levels.length === 0) {
+                showMessage(rubricConfigMessageBox, "Por favor, selecciona al menos un nivel de desempeño.", 'error');
                 return;
             }
 
@@ -830,13 +940,10 @@ Uso de la gramática</textarea>
                                        .map(aspect => aspect.trim())
                                        .filter(aspect => aspect !== '')
                                        .filter((aspect, index, self) => self.indexOf(aspect) === index); // Filtrar duplicados
-            rubric.levels = rawLevels.split(',')
-                                     .map(level => level.trim())
-                                     .filter(level => level !== '')
-                                     .filter((level, index, self) => self.indexOf(level) === index); // Filtrar duplicados
-
-            if (rubric.aspects.length === 0 || rubric.levels.length === 0) {
-                showMessage(rubricConfigMessageBox, "Asegúrate de tener al menos un aspecto y un nivel.", 'error');
+            
+            // Re-evaluar si los aspectos están vacíos después de filtrar
+            if (rubric.aspects.length === 0) {
+                showMessage(rubricConfigMessageBox, "No se encontraron aspectos válidos a evaluar.", 'error');
                 return;
             }
 
@@ -986,8 +1093,7 @@ Uso de la gramática</textarea>
             showMessage(rubricConfigMessageBox, "¡Rúbrica guardada y lista para la evaluación!", 'success');
 
             // Ocultar configuración de rúbrica y mostrar sección de evaluación
-            rubricConfigSection.classList.add('hidden');
-            evaluationSection.classList.remove('hidden');
+            showScreen('evaluation-screen');
             currentStudentIndex = 0; // Reiniciar al primer estudiante
             renderStudentEvaluation();
         });
@@ -1132,17 +1238,14 @@ Uso de la gramática</textarea>
          * Finaliza la evaluación y muestra la sección de reporte.
          */
         finishEvaluationBtn.addEventListener('click', () => {
-            evaluationSection.classList.add('hidden');
-            reportSection.classList.remove('hidden');
+            showScreen('report-screen');
         });
 
         /**
          * Vuelve a la sección de evaluación.
          */
         backToEvaluationBtn.addEventListener('click', () => {
-            reportSection.classList.add('hidden');
-            evaluationSection.classList.remove('hidden');
-            renderStudentEvaluation(); // Asegurarse de que la rúbrica del estudiante actual se renderice
+            showScreen('evaluation-screen');
         });
 
         /**
