@@ -217,7 +217,7 @@ Uso de la gramática</textarea>
 
                 <h3 class="text-xl font-semibold text-gray-700 mb-4">Descriptores de la Rúbrica</h3>
                 <p class="text-gray-600 mb-4">Edita los descriptores para cada aspecto y nivel.</p>
-                <div id="descriptors-table">
+                <div id="descriptors-table" class=""> <!-- Se eliminó la clase overflow-x-auto aquí -->
                     </div>
 
                 <div class="mt-6">
@@ -655,7 +655,6 @@ Uso de la gramática</textarea>
             saveData();
             showMessage(studentMessageBox, actionMessage, 'success');
 
-            // --- CAMBIO CLAVE AQUÍ: YA NO PASAMOS A LA SIGUIENTE PANTALLA AUTOMÁTICAMENTE ---
             // Limpiar los campos de entrada para permitir añadir otro grupo
             groupNameInput.value = '';
             studentListInput.value = '';
