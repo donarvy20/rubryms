@@ -224,27 +224,36 @@
             }
         }
 
-        @media (min-width: 768px) and (max-width: 1023px) { /* Tablets (768px a 1023px) */
+        @media (min-width: 768px) { /* Desde 768px (tablets y desktop) */
             #nav-links-container {
-                display: flex; /* Oculto por defecto, pero flexible cuando visible */
-                flex-direction: column; /* Siempre en columna en este rango */
+                /* Por defecto estará oculto en HTML. Aquí lo mostramos como flex. */
+                display: flex !important; /* !important para sobreescribir 'hidden' */
+                position: static; /* Eliminar posicionamiento absoluto */
+                flex-direction: column; /* Menú en columna por defecto para tablets */
                 flex-grow: 1;
                 justify-content: center;
                 gap: 0;
+                background-color: transparent; /* Fondo transparente */
+                box-shadow: none; /* Sin sombra */
+                padding: 0; /* Sin padding */
             }
             .nav-item {
                 width: auto;
-                margin: 5px auto;
+                margin: 5px auto; /* Centrar elementos en columna para tablets */
+            }
+            #mobile-menu-toggle { /* Ocultar botón de hamburguesa en tablet y desktop */
+                display: none !important;
             }
         }
 
         @media (min-width: 1024px) { /* Escritorio (1024px y más) */
             #nav-links-container {
-                display: flex; /* Siempre visible como flex en desktop */
-                flex-direction: row; /* En fila */
-                flex-grow: 1;
+                flex-direction: row; /* Volver a fila en desktop */
                 justify-content: flex-end; /* Alinear a la derecha */
                 gap: 8px; /* Restablecer el gap */
+            }
+            .nav-item {
+                margin: 0 5px; /* Restablecer el margen horizontal */
             }
         }
     </style>
@@ -267,11 +276,10 @@
                 </button>
             </div>
 
-            <!-- Contenedor de enlaces de navegación (visible en md y más grande, o cuando el menú móvil está abierto) -->
-            <!-- La clase 'hidden' inicial hace que esté oculto por defecto en móviles y tablets. -->
-            <!-- Las media queries en CSS lo controlarán para md y lg. -->
-            <div id="nav-links-container" class="hidden flex-grow justify-end gap-2 md:gap-4 w-full md:w-auto">
-                <button id="nav-students" class="nav-item active"><i class="fas fa-users mr-2"></i> Gestión de Estudiantes</button>
+            <!-- Contenedor de enlaces de navegación -->
+            <div id="nav-links-container" class="hidden">
+                <button id="nav-select-group" class="nav-item active"><i class="fas fa-folder-open mr-2"></i> Gestión de Grupos</button>
+                <button id="nav-add-students" class="nav-item"><i class="fas fa-users-cog mr-2"></i> Añadir Estudiantes</button>
                 <button id="nav-levels" class="nav-item"><i class="fas fa-list-ol mr-2"></i> Gestión de Niveles</button>
                 <button id="nav-rubric" class="nav-item"><i class="fas fa-cogs mr-2"></i> Configuración de Rúbrica</button>
                 <button id="nav-evaluation" class="nav-item"><i class="fas fa-pencil-alt mr-2"></i> Evaluación</button>
@@ -280,13 +288,30 @@
         </nav>
 
         <!-- Secciones de la Aplicación -->
-        <div id="students-screen" class="bg-blue-50 p-6 rounded-xl border border-blue-200">
+
+        <!-- Nueva pantalla: Seleccionar Grupo para Evaluación (PRIMERA PANTALLA) -->
+        <div id="select-group-screen" class="bg-blue-50 p-6 rounded-xl border border-blue-200">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
-                <i class="fas fa-users text-blue-600 mr-2"></i> 1. Agregar y Gestionar Estudiantes
+                <i class="fas fa-folder-open text-blue-600 mr-2"></i> Seleccionar Grupo para Evaluación
             </h2>
-            
+            <p class="text-gray-600 mb-4 text-center">Haz clic en una tarjeta para cargar o editar un grupo:</p>
+            <div id="group-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Las tarjetas de grupo se renderizarán aquí -->
+            </div>
+            <div id="select-group-message-box" class="message-box"></div>
+            <!-- Botón para ir a la pantalla de añadir estudiantes -->
+            <button id="go-to-add-students-btn" class="w-full bg-green-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300">
+                <i class="fas fa-plus"></i> Añadir o Modificar Estudiantes en un Grupo
+            </button>
+        </div>
+
+        <!-- Nueva pantalla: Añadir y Gestionar Estudiantes (contenía antes parte de students-screen) -->
+        <div id="add-students-screen" class="bg-blue-50 p-6 rounded-xl border border-blue-200 hidden">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
+                <i class="fas fa-users-cog text-blue-600 mr-2"></i> Añadir y Gestionar Estudiantes
+            </h2>
             <div class="mb-4">
-                <label for="group-name-input" class="block text-gray-700 font-medium mb-2">Nombre del Nuevo Grupo de Estudiantes (opcional):</label>
+                <label for="group-name-input" class="block text-gray-700 font-medium mb-2">Nombre del Grupo (existente o nuevo):</label>
                 <input
                     type="text"
                     id="group-name-input"
@@ -294,45 +319,23 @@
                     placeholder="Ej: Grupo A, Ciencias Sociales"
                 />
             </div>
-
-            <p class="text-gray-600 mb-2 text-center">Pega aquí la lista de nombres de tus estudiantes (uno por línea).</p>
+            <p class="text-gray-600 mb-2 text-center">Pega aquí la lista de nombres de tus estudiantes (uno por línea). Si el grupo ya existe, se actualizará.</p>
             <textarea
                 id="student-list-input"
                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                 placeholder="Ejemplo:&#10;Juan Pérez&#10;María García&#10;Carlos López"
             ></textarea>
             <button
-                id="add-students-btn"
+                id="save-students-list-btn"
                 class="w-full bg-blue-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
             >
                 <i class="fas fa-save"></i> Guardar Lista de Estudiantes
             </button>
-            <div id="student-message-box" class="message-box"></div>
-
-            <div class="mt-6 border-t pt-4 border-gray-200">
-                <h3 class="text-xl font-semibold text-gray-700 mb-4 text-center">Seleccionar Grupo para Evaluación</h3>
-                <p class="text-gray-600 mb-4 text-center">Haz clic en una tarjeta para cargar o editar un grupo:</p>
-                <div id="group-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Las tarjetas de grupo se renderizarán aquí -->
-                </div>
-                <!-- Los botones Cargar y Eliminar ya no son necesarios aquí directamente si están en las tarjetas
-                <button
-                    id="select-group-from-cards-btn"
-                    class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 hidden"
-                >
-                    <i class="fas fa-folder-open"></i> Cargar Grupo Seleccionado y Continuar
-                </button>
-                <button
-                    id="delete-group-from-cards-btn"
-                    class="w-full bg-red-500 text-white font-semibold py-3 px-6 mt-2 rounded-xl shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 hidden"
-                >
-                    <i class="fas fa-trash-alt"></i> Eliminar Grupo Seleccionado
-                </button>
-                -->
-            </div>
+            <div id="add-students-message-box" class="message-box"></div>
         </div>
 
-        <!-- Nuevo módulo de Gestión de Niveles de Desempeño -->
+
+        <!-- Módulo de Gestión de Niveles de Desempeño (existente, sin cambios en el contenido) -->
         <div id="level-management-screen" class="bg-purple-50 p-6 rounded-xl border border-purple-200 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
                 <i class="fas fa-list-ol text-purple-600 mr-2"></i> Gestión de Niveles de Desempeño
@@ -384,6 +387,7 @@
             </div>
         </div>
 
+        <!-- Módulo de Configuración de Rúbrica (existente, sin cambios en el contenido) -->
         <div id="rubric-config-screen" class="bg-green-50 p-6 rounded-xl border border-green-200 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
                 <i class="fas fa-cogs text-green-600 mr-2"></i> 2. Configuración de la Rúbrica
@@ -565,13 +569,15 @@ Uso de la gramática</textarea>
 
     <script>
         // Obtener referencias a los elementos del DOM
-        const navStudentsBtn = document.getElementById('nav-students');
+        const navSelectGroupBtn = document.getElementById('nav-select-group'); // Nuevo botón de navegación
+        const navAddStudentsBtn = document.getElementById('nav-add-students'); // Nuevo botón de navegación
         const navLevelsBtn = document.getElementById('nav-levels'); 
         const navRubricBtn = document.getElementById('nav-rubric');
         const navEvaluationBtn = document.getElementById('nav-evaluation');
         const navReportsBtn = document.getElementById('nav-reports');
 
-        const studentsScreen = document.getElementById('students-screen');
+        const selectGroupScreen = document.getElementById('select-group-screen'); // Nueva pantalla principal
+        const addStudentsScreen = document.getElementById('add-students-screen'); // Nueva pantalla para añadir
         const levelManagementScreen = document.getElementById('level-management-screen'); 
         const rubricConfigScreen = document.getElementById('rubric-config-screen');
         const evaluationScreen = document.getElementById('evaluation-screen');
@@ -584,9 +590,11 @@ Uso de la gramática</textarea>
 
         const groupNameInput = document.getElementById('group-name-input');
         const studentListInput = document.getElementById('student-list-input');
-        const addStudentsBtn = document.getElementById('add-students-btn');
+        const saveStudentsListBtn = document.getElementById('save-students-list-btn'); // Renombrado de addStudentsBtn
         const groupCardsContainer = document.getElementById('group-cards-container'); 
-        const studentMessageBox = document.getElementById('student-message-box');
+        const addStudentsMessageBox = document.getElementById('add-students-message-box'); // Renombrado de studentMessageBox
+        const selectGroupMessageBox = document.getElementById('select-group-message-box'); // Nuevo para la pantalla de selección
+        const goToAddStudentsBtn = document.getElementById('go-to-add-students-btn'); // Botón para ir a la pantalla de añadir
 
         // Referencias para el nuevo módulo de gestión de niveles
         const levelGroupNameInput = document.getElementById('level-group-name-input');
@@ -698,24 +706,31 @@ Uso de la gramática</textarea>
          */
         function showScreen(screenId) {
             // Oculta todas las pantallas
-            studentsScreen.classList.add('hidden');
+            selectGroupScreen.classList.add('hidden');
+            addStudentsScreen.classList.add('hidden'); // Nueva pantalla de añadir
             levelManagementScreen.classList.add('hidden'); 
             rubricConfigScreen.classList.add('hidden');
             evaluationScreen.classList.add('hidden');
             reportScreen.classList.add('hidden');
 
             // Quita la clase 'active' de todos los botones de navegación
-            navStudentsBtn.classList.remove('active');
+            navSelectGroupBtn.classList.remove('active'); // Nuevo
+            navAddStudentsBtn.classList.remove('active'); // Nuevo
             navLevelsBtn.classList.remove('active'); 
             navRubricBtn.classList.remove('active');
             navEvaluationBtn.classList.remove('active');
             navReportsBtn.classList.remove('active');
 
             // Muestra la pantalla deseada y activa el botón de navegación correspondiente
-            if (screenId === 'students-screen') {
-                studentsScreen.classList.remove('hidden');
-                navStudentsBtn.classList.add('active');
-            } else if (screenId === 'level-management-screen') { 
+            if (screenId === 'select-group-screen') {
+                selectGroupScreen.classList.remove('hidden');
+                navSelectGroupBtn.classList.add('active');
+                renderGroupCards(); // Asegurarse de renderizar las tarjetas al volver a esta pantalla
+            } else if (screenId === 'add-students-screen') { // Nueva pantalla de añadir
+                addStudentsScreen.classList.remove('hidden');
+                navAddStudentsBtn.classList.add('active');
+            }
+            else if (screenId === 'level-management-screen') { 
                 levelManagementScreen.classList.remove('hidden');
                 navLevelsBtn.classList.add('active');
                 renderLevelGroupSelectForManagement();
@@ -740,7 +755,9 @@ Uso de la gramática</textarea>
         }
 
         // Event listeners para la navegación
-        navStudentsBtn.addEventListener('click', () => showScreen('students-screen'));
+        navSelectGroupBtn.addEventListener('click', () => showScreen('select-group-screen')); // Nuevo
+        navAddStudentsBtn.addEventListener('click', () => showScreen('add-students-screen')); // Nuevo
+        goToAddStudentsBtn.addEventListener('click', () => showScreen('add-students-screen')); // Botón de la pantalla principal para ir a añadir estudiantes
         navLevelsBtn.addEventListener('click', () => showScreen('level-management-screen'));
         navRubricBtn.addEventListener('click', () => showScreen('rubric-config-screen'));
         navEvaluationBtn.addEventListener('click', () => {
@@ -767,18 +784,8 @@ Uso de la gramática</textarea>
             if (window.innerWidth >= 1024) { /* Usar lg breakpoint para flex-row */
                 navLinksContainer.classList.remove('hidden', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10');
                 navLinksContainer.classList.add('flex', 'flex-row');
-            } else if (window.innerWidth >= 768) { /* Usar md breakpoint para flex-col */
-                // Para 768px a 1023px, el menú debe estar oculto por defecto como hamburguesa.
-                // Si estaba abierto (por toggle), queremos que siga visible pero en columna.
-                // Si estaba oculto, queremos que siga oculto.
-                // Por lo tanto, no removemos 'hidden' aquí si ya estaba presente.
-                // Simplemente aseguramos que no se le aplique flex-row si estaba en lg.
-                navLinksContainer.classList.remove('flex-row'); // Asegurarse de que no sea fila
-                navLinksContainer.classList.add('flex-col'); // Asegurarse de que sea columna
-                // NO agregar o remover 'hidden' aquí. Su estado debe ser el que el usuario eligió con el toggle,
-                // o el que viene por defecto si no ha interactuado.
-            } else { /* Móvil */
-                navLinksContainer.classList.add('hidden');
+            } else { /* Para 768px a 1023px (md) y móviles (max-767px) */
+                navLinksContainer.classList.add('hidden'); // Ocultar por defecto para el comportamiento de hamburguesa
                 navLinksContainer.classList.remove('flex', 'flex-col', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-gray-200', 'p-4', 'rounded-b-xl', 'z-10', 'flex-row');
             }
         });
@@ -792,7 +799,7 @@ Uso de la gramática</textarea>
                 const storedStudentGroups = localStorage.getItem('studentGroups');
                 if (storedStudentGroups) {
                     studentGroups = JSON.parse(storedStudentGroups);
-                    renderGroupCards(); // Usar la nueva función de renderizado de tarjetas
+                    renderGroupCards(); 
                 }
 
                 const storedLevelGroups = localStorage.getItem('savedLevelGroups'); 
@@ -853,10 +860,10 @@ Uso de la gramática</textarea>
                 generalObservationsInput.value = rubric.generalObservations;
                 aspectsInput.value = rubric.aspects.join('\n');
                 
-                showScreen('students-screen'); 
+                showScreen('select-group-screen'); // Inicia en la pantalla de selección de grupos
             } catch (e) {
                 console.error("Error al cargar datos de localStorage:", e);
-                showMessage(studentMessageBox, "Error al cargar datos guardados. Los datos pueden estar corruptos.", 'error');
+                showMessage(selectGroupMessageBox, "Error al cargar datos guardados. Los datos pueden estar corruptos.", 'error');
             }
         }
 
@@ -875,7 +882,7 @@ Uso de la gramática</textarea>
                 localStorage.setItem('currentSelectedGroupName', currentSelectedGroupName); 
             } catch (e) {
                 console.error("Error al guardar datos en localStorage:", e);
-                showMessage(studentMessageBox, "No se pudieron guardar los datos. Verifique el espacio disponible en su navegador.", 'error');
+                showMessage(selectGroupMessageBox, "No se pudieron guardar los datos. Verifique el espacio disponible en su navegador.", 'error');
             }
         }
 
@@ -934,13 +941,15 @@ Uso de la gramática</textarea>
             if (newTeacherInput) newTeacherInput.classList.add('hidden');
             if (newTeacherInput) newTeacherInput.value = '';
             
+            // Ocultar todas las pantallas excepto la inicial (select-group-screen)
+            addStudentsScreen.classList.add('hidden');
             rubricConfigScreen.classList.add('hidden');
             levelManagementScreen.classList.add('hidden');
             evaluationScreen.classList.add('hidden');
             reportScreen.classList.add('hidden');
             rubricDescriptorsEditor.classList.add('hidden');
             
-            showScreen('students-screen');
+            showScreen('select-group-screen'); // Volver a la pantalla de selección de grupos
             showMessage(reportMessageBox, "La rúbrica y las evaluaciones han sido reiniciadas. Tus grupos y datos institucionales y de niveles permanecen guardados.", 'success');
         }
 
@@ -996,30 +1005,35 @@ Uso de la gramática</textarea>
          * Adjunta event listeners a las tarjetas de grupo (usando delegación).
          */
         function attachGroupCardEventListeners() {
-            groupCardsContainer.addEventListener('click', (event) => {
-                const targetButton = event.target.closest('button');
-                if (!targetButton) return; 
-
-                const card = targetButton.closest('.group-card');
-                if (!card) return; 
-
-                const groupName = card.dataset.groupName;
-
-                if (targetButton.classList.contains('load-group-card-btn')) {
-                    loadGroupForEvaluation(groupName);
-                } else if (targetButton.classList.contains('delete-group-card-btn')) {
-                    deleteGroup(groupName);
-                }
-            });
+            // Eliminar listener antiguo para evitar duplicados si se llama renderGroupCards varias veces
+            groupCardsContainer.removeEventListener('click', handleGroupCardClick);
+            groupCardsContainer.addEventListener('click', handleGroupCardClick);
         }
+
+        function handleGroupCardClick(event) {
+            const targetButton = event.target.closest('button');
+            if (!targetButton) return; 
+
+            const card = targetButton.closest('.group-card');
+            if (!card) return; 
+
+            const groupName = card.dataset.groupName;
+
+            if (targetButton.classList.contains('load-group-card-btn')) {
+                loadGroupForEvaluation(groupName);
+            } else if (targetButton.classList.contains('delete-group-card-btn')) {
+                deleteGroup(groupName);
+            }
+        }
+
 
         /**
          * Carga un grupo de estudiantes para la evaluación.
          * @param {string} groupName - El nombre del grupo a cargar.
          */
         function loadGroupForEvaluation(groupName) {
-            if (currentStudents.length > 0 && rubric.aspects.length > 0 && rubric.levels.length > 0 && Object.keys(rubric.descriptors).length > 0 && Object.keys(rubric.levelScores).length > 0) {
-                const confirmChangeGroup = window.confirm("Ya tienes una rúbrica activa. ¿Estás seguro de que quieres cambiar a este grupo? Se perderán las evaluaciones no guardadas de la rúbrica actual (si las hay) y se cargarán las evaluaciones de este grupo.");
+            if (currentSelectedGroupName && currentSelectedGroupName !== groupName && (rubric.aspects.length > 0 || Object.keys(evaluations).some(key => key.startsWith(currentSelectedGroupName)))) {
+                const confirmChangeGroup = window.confirm("Ya tienes un grupo cargado con una rúbrica o evaluaciones. ¿Estás seguro de que quieres cambiar a este grupo? Se perderán las evaluaciones o configuraciones no guardadas de la rúbrica/grupo actual (si las hay) y se cargarán las de este grupo.");
                 if (!confirmChangeGroup) {
                     return;
                 }
@@ -1029,8 +1043,9 @@ Uso de la gramática</textarea>
             currentSelectedGroupName = groupName; 
             saveData();
             highlightSelectedGroupCard(groupName); 
-            showMessage(studentMessageBox, `¡Grupo "${groupName}" cargado para evaluación!`, 'success');
+            showMessage(selectGroupMessageBox, `¡Grupo "${groupName}" cargado para evaluación!`, 'success');
 
+            // Intenta ir a la configuración de rúbrica. Si la rúbrica ya está completa, va directo a evaluación.
             showScreen('rubric-config-screen');
             currentStudentIndex = 0; 
 
@@ -1068,18 +1083,18 @@ Uso de la gramática</textarea>
                 }
                 saveData();
                 renderGroupCards(); 
-                showMessage(studentMessageBox, `Grupo "${groupName}" eliminado.`, 'success');
+                showMessage(selectGroupMessageBox, `Grupo "${groupName}" eliminado.`, 'success');
             }
         }
 
 
         // Event listener para el botón principal de guardar lista de estudiantes
-        addStudentsBtn.addEventListener('click', () => {
+        saveStudentsListBtn.addEventListener('click', () => { // Renombrado de addStudentsBtn
             const rawList = studentListInput.value.trim();
             let groupName = groupNameInput.value.trim();
 
             if (!rawList) {
-                showMessage(studentMessageBox, "Por favor, introduce la lista de estudiantes.", 'error');
+                showMessage(addStudentsMessageBox, "Por favor, introduce la lista de estudiantes.", 'error');
                 return;
             }
 
@@ -1089,7 +1104,7 @@ Uso de la gramática</textarea>
                                       .filter((name, index, self) => self.indexOf(name) === index);
 
             if (newStudents.length === 0) {
-                showMessage(studentMessageBox, "No se encontraron nombres de estudiantes válidos en la lista.", 'error');
+                showMessage(addStudentsMessageBox, "No se encontraron nombres de estudiantes válidos en la lista.", 'error');
                 return;
             }
 
@@ -1100,7 +1115,14 @@ Uso de la gramática</textarea>
                 targetGroupName = groupName;
                 studentGroups[targetGroupName] = newStudents;
                 actionMessage = `¡Grupo "${targetGroupName}" con ${newStudents.length} estudiantes guardado (o actualizado)!`;
-            } else { 
+            } else if (currentSelectedGroupName && studentGroups[currentSelectedGroupName]) { // Añadir a grupo ya seleccionado si no se dio nuevo nombre
+                targetGroupName = currentSelectedGroupName;
+                const existingStudents = studentGroups[targetGroupName] || [];
+                const combinedStudents = [...new Set([...existingStudents, ...newStudents])];
+                studentGroups[targetGroupName] = combinedStudents;
+                actionMessage = `¡${newStudents.length} estudiantes añadidos al grupo "${targetGroupName}"! Total: ${combinedStudents.length} estudiantes.`;
+            }
+            else { // Crear nuevo grupo anónimo si no hay nombre ni selección
                 targetGroupName = `Grupo - ${new Date().toLocaleDateString('es-ES')}`;
                 let counter = 1;
                 while(studentGroups[targetGroupName]) {
@@ -1114,9 +1136,9 @@ Uso de la gramática</textarea>
             currentStudents = studentGroups[targetGroupName];
             currentSelectedGroupName = targetGroupName; 
             saveData();
-            renderGroupCards(); 
+            renderGroupCards(); // Renderiza las tarjetas en la pantalla de selección de grupo
             highlightSelectedGroupCard(targetGroupName); 
-            showMessage(studentMessageBox, actionMessage, 'success');
+            showMessage(addStudentsMessageBox, actionMessage, 'success');
 
             groupNameInput.value = '';
             studentListInput.value = '';
