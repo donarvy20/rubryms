@@ -89,7 +89,7 @@
             margin-bottom: 0;
         }
         /* Estilo para el textarea con líneas de fondo */
-        #aspects-input {
+        #aspects-input, #level-list-input {
             background-image: linear-gradient(to bottom, #d1d5db 1px, transparent 1px);
             background-size: 100% 1.5em; /* Ajusta la altura de la línea según el line-height del texto */
             background-position: 0 0.8em; /* Ajusta la posición de la primera línea */
@@ -153,6 +153,31 @@
             box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
             transform: translateY(-2px); /* Un ligero efecto de elevación */
         }
+
+        @media (max-width: 767px) {
+            .nav-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            #nav-links-container {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: #e2e8f0; /* Mismo color que la barra */
+                border-radius: 0 0 10px 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                z-index: 10; /* Asegura que esté por encima del contenido */
+            }
+            #nav-links-container.flex-col { /* Tailwind's flex-col for mobile */
+                display: flex;
+            }
+            .nav-item {
+                width: 100%; /* Ocupar todo el ancho disponible */
+                margin: 5px 0; /* Espaciado vertical */
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -173,6 +198,7 @@
             <!-- Contenedor de enlaces de navegación (visible en md y más grande, o cuando el menú móvil está abierto) -->
             <div id="nav-links-container" class="hidden md:flex flex-col md:flex-row flex-grow justify-end gap-2 md:gap-4 w-full md:w-auto">
                 <button id="nav-students" class="nav-item active"><i class="fas fa-users mr-2"></i> Gestión de Estudiantes</button>
+                <button id="nav-levels" class="nav-item"><i class="fas fa-list-ol mr-2"></i> Gestión de Niveles</button>
                 <button id="nav-rubric" class="nav-item"><i class="fas fa-cogs mr-2"></i> Configuración de Rúbrica</button>
                 <button id="nav-evaluation" class="nav-item"><i class="fas fa-pencil-alt mr-2"></i> Evaluación</button>
                 <button id="nav-reports" class="nav-item"><i class="fas fa-file-pdf mr-2"></i> Reportes y Exportación</button>
@@ -230,11 +256,63 @@
             </div>
         </div>
 
+        <!-- Nuevo módulo de Gestión de Niveles de Desempeño -->
+        <div id="level-management-screen" class="bg-purple-50 p-6 rounded-xl border border-purple-200 hidden">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
+                <i class="fas fa-list-ol text-purple-600 mr-2"></i> Gestión de Niveles de Desempeño
+            </h2>
+            <p class="text-gray-600 mb-4 text-center">Crea y gestiona tus grupos de niveles de desempeño.</p>
+
+            <div class="mb-4">
+                <label for="level-group-name-input" class="block text-gray-700 font-medium mb-2">Nombre del Grupo de Niveles:</label>
+                <input
+                    type="text"
+                    id="level-group-name-input"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                    placeholder="Ej: Cualitativo, Escala Numérica"
+                />
+            </div>
+
+            <p class="text-gray-600 mb-2 text-center">Pega aquí los niveles de desempeño (uno por línea).</p>
+            <textarea
+                id="level-list-input"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                placeholder="Ejemplo:&#10;Destacado&#10;Logrado&#10;En Proceso&#10;En Inicio"
+            ></textarea>
+            <button
+                id="save-level-group-btn"
+                class="w-full bg-purple-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-300"
+            >
+                <i class="fas fa-save"></i> Guardar Grupo de Niveles
+            </button>
+            <div id="level-management-message-box" class="message-box"></div>
+
+            <div class="mt-6 border-t pt-4 border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4 text-center">Seleccionar Grupo de Niveles</h3>
+                <p class="text-gray-600 mb-2 text-center">O elige un grupo existente para editar o usar:</p>
+                <select id="level-group-select-for-management" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 transition duration-200">
+                    <option value="">-- Seleccionar Grupo de Niveles --</option>
+                </select>
+                <button
+                    id="load-level-group-btn"
+                    class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                >
+                    <i class="fas fa-edit"></i> Cargar Grupo para Editar
+                </button>
+                <button
+                    id="delete-level-group-btn"
+                    class="w-full bg-red-500 text-white font-semibold py-3 px-6 mt-2 rounded-xl shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"
+                >
+                    <i class="fas fa-trash-alt"></i> Eliminar Grupo Seleccionado
+                </button>
+            </div>
+        </div>
+
         <div id="rubric-config-screen" class="bg-green-50 p-6 rounded-xl border border-green-200 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">
                 <i class="fas fa-cogs text-green-600 mr-2"></i> 2. Configuración de la Rúbrica
             </h2>
-            <p class="text-gray-600 mb-4 text-center">Define los detalles de la sesión, aspectos a evaluar y los niveles de desempeño con sus puntajes.</p>
+            <p class="text-gray-600 mb-4 text-center">Define los detalles de la sesión, aspectos a evaluar y el grupo de niveles de desempeño a utilizar.</p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div class="input-group flex-col md:flex-row">
@@ -285,19 +363,12 @@ Claridad
 Uso de la gramática</textarea>
             </div>
 
-            <!-- Nueva sección para gestionar niveles de desempeño -->
+            <!-- Selector de Grupos de Niveles para la Rúbrica -->
             <div class="mb-6">
-                <div class="input-group flex-col md:flex-row mb-2">
-                    <label for="levels-select" class="block text-gray-700 font-medium mb-2 md:mb-0">Niveles de Desempeño (seleccionar múltiples):</label>
-                    <select multiple id="levels-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 h-32 overflow-y-auto">
-                        <!-- Opciones se cargarán dinámicamente -->
-                    </select>
-                </div>
-                <div class="input-group flex-col md:flex-row">
-                    <input type="text" id="new-level-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 hidden" placeholder="Añadir nuevo nivel de desempeño">
-                    <button id="add-level-btn" class="bg-green-500 text-white rounded-md hover:bg-green-600 hidden"><i class="fas fa-plus"></i> Añadir Nivel</button>
-                    <button id="toggle-level-input" class="bg-gray-400 text-white rounded-md hover:bg-gray-500"><i class="fas fa-exchange-alt"></i> Añadir/Alternar</button>
-                </div>
+                <label for="rubric-levels-group-select" class="block text-gray-700 font-medium mb-2">Seleccionar Grupo de Niveles de Desempeño:</label>
+                <select id="rubric-levels-group-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                    <option value="">-- Seleccionar Grupo de Niveles --</option>
+                </select>
             </div>
             
             <button
@@ -415,11 +486,13 @@ Uso de la gramática</textarea>
     <script>
         // Obtener referencias a los elementos del DOM
         const navStudentsBtn = document.getElementById('nav-students');
+        const navLevelsBtn = document.getElementById('nav-levels'); // Nuevo botón de navegación
         const navRubricBtn = document.getElementById('nav-rubric');
         const navEvaluationBtn = document.getElementById('nav-evaluation');
         const navReportsBtn = document.getElementById('nav-reports');
 
         const studentsScreen = document.getElementById('students-screen');
+        const levelManagementScreen = document.getElementById('level-management-screen'); // Nueva pantalla
         const rubricConfigScreen = document.getElementById('rubric-config-screen');
         const evaluationScreen = document.getElementById('evaluation-screen');
         const reportScreen = document.getElementById('report-screen');
@@ -437,6 +510,15 @@ Uso de la gramática</textarea>
         const deleteGroupBtn = document.getElementById('delete-group-btn');
         const studentMessageBox = document.getElementById('student-message-box');
 
+        // Referencias para el nuevo módulo de gestión de niveles
+        const levelGroupNameInput = document.getElementById('level-group-name-input');
+        const levelListInput = document.getElementById('level-list-input');
+        const saveLevelGroupBtn = document.getElementById('save-level-group-btn');
+        const levelGroupSelectForManagement = document.getElementById('level-group-select-for-management');
+        const loadLevelGroupBtn = document.getElementById('load-level-group-btn');
+        const deleteLevelGroupBtn = document.getElementById('delete-level-group-btn');
+        const levelManagementMessageBox = document.getElementById('level-management-message-box');
+
         const institutionSelect = document.getElementById('institution-select');
         const newInstitutionInput = document.getElementById('new-institution-input');
         const addInstitutionBtn = document.getElementById('add-institution-btn');
@@ -452,10 +534,7 @@ Uso de la gramática</textarea>
         const sessionTitleInput = document.getElementById('session-title-input');
         const dateInput = document.getElementById('date-input');
         const aspectsInput = document.getElementById('aspects-input');
-        const levelsSelect = document.getElementById('levels-select'); // Cambiado a select
-        const newLevelInput = document.getElementById('new-level-input'); // Nuevo
-        const addLevelBtn = document.getElementById('add-level-btn'); // Nuevo
-        const toggleLevelInput = document.getElementById('toggle-level-input'); // Nuevo
+        const rubricLevelsGroupSelect = document.getElementById('rubric-levels-group-select'); // Cambiado a select de grupos de niveles
         const generateRubricBtn = document.getElementById('generate-rubric-btn');
         const rubricConfigMessageBox = document.getElementById('rubric-config-message-box');
         const rubricDescriptorsEditor = document.getElementById('rubric-descriptors-editor');
@@ -481,12 +560,14 @@ Uso de la gramática</textarea>
 
         // Variables globales para la aplicación
         let studentGroups = {}; // { 'Group Name': ['Student 1', 'Student 2'], ... }
+        let savedLevelGroups = {}; // { 'Group Name': ['Level 1', 'Level 2'], ... }
         let currentStudents = []; // The currently selected group of students for evaluation
         let currentStudentIndex = 0;
         let savedInstitutions = [];
         let savedCourses = [];
         let savedTeachers = [];
-        let savedLevels = ["Destacado", "Logrado", "En Proceso", "En Inicio"]; // Niveles por defecto
+        // savedLevels ya no es una lista plana, se gestiona por grupos
+
 
         let rubric = {
             institution: '',
@@ -496,7 +577,8 @@ Uso de la gramática</textarea>
             date: '',
             generalObservations: '',
             aspects: [],
-            levels: [],
+            selectedLevelGroupName: '', // Nuevo: almacena el nombre del grupo de niveles seleccionado
+            levels: [], // Estos niveles se cargarán desde savedLevelGroups[selectedLevelGroupName]
             descriptors: {}, // { aspect: { level: descriptor_text, ... }, ... }
             levelScores: {} // { level: score, ... }
         };
@@ -529,12 +611,14 @@ Uso de la gramática</textarea>
         function showScreen(screenId) {
             // Oculta todas las pantallas
             studentsScreen.classList.add('hidden');
+            levelManagementScreen.classList.add('hidden'); // Nueva pantalla
             rubricConfigScreen.classList.add('hidden');
             evaluationScreen.classList.add('hidden');
             reportScreen.classList.add('hidden');
 
             // Quita la clase 'active' de todos los botones de navegación
             navStudentsBtn.classList.remove('active');
+            navLevelsBtn.classList.remove('active'); // Nuevo
             navRubricBtn.classList.remove('active');
             navEvaluationBtn.classList.remove('active');
             navReportsBtn.classList.remove('active');
@@ -543,9 +627,16 @@ Uso de la gramática</textarea>
             if (screenId === 'students-screen') {
                 studentsScreen.classList.remove('hidden');
                 navStudentsBtn.classList.add('active');
+            } else if (screenId === 'level-management-screen') { // Nueva pantalla
+                levelManagementScreen.classList.remove('hidden');
+                navLevelsBtn.classList.add('active');
+                // Al entrar a la gestión de niveles, asegurarse de cargar los grupos
+                renderLevelGroupSelectForManagement();
             } else if (screenId === 'rubric-config-screen') {
                 rubricConfigScreen.classList.remove('hidden');
                 navRubricBtn.classList.add('active');
+                // Al entrar a la configuración de rúbrica, asegurarse de cargar los grupos de niveles
+                renderRubricLevelGroupSelect();
             } else if (screenId === 'evaluation-screen') {
                 evaluationScreen.classList.remove('hidden');
                 navEvaluationBtn.classList.add('active');
@@ -564,6 +655,7 @@ Uso de la gramática</textarea>
 
         // Event listeners para la navegación
         navStudentsBtn.addEventListener('click', () => showScreen('students-screen'));
+        navLevelsBtn.addEventListener('click', () => showScreen('level-management-screen')); // Nuevo
         navRubricBtn.addEventListener('click', () => showScreen('rubric-config-screen'));
         navEvaluationBtn.addEventListener('click', () => {
             if (currentStudents.length === 0 || rubric.aspects.length === 0 || rubric.levels.length === 0 || Object.keys(rubric.descriptors).length === 0 || Object.keys(rubric.levelScores).length === 0) {
@@ -607,6 +699,23 @@ Uso de la gramática</textarea>
                     renderGroupSelect(); // Rellenar el selector de grupos
                 }
 
+                const storedLevelGroups = localStorage.getItem('savedLevelGroups'); // Carga de grupos de niveles
+                if (storedLevelGroups) {
+                    savedLevelGroups = JSON.parse(storedLevelGroups);
+                    // Llama a renderLevelGroupSelectForManagement solo si la pantalla de gestión de niveles está visible,
+                    // o de forma segura si los elementos existen.
+                    // Para evitar ReferenceError, no intentamos ocultar `newLevelInput` y `addLevelBtn` aquí.
+                    renderLevelGroupSelectForManagement(); 
+                    renderRubricLevelGroupSelect(); // Rellenar el selector de grupos de niveles en rúbrica
+                } else {
+                    // Si no hay grupos de niveles guardados, añadir un grupo por defecto
+                    savedLevelGroups['Cualitativo:Destacado,Logrado,Proceso,Inicio,Previo al Inicio'] = ['Destacado', 'Logrado', 'Proceso', 'Inicio', 'Previo al Inicio'];
+                    renderLevelGroupSelectForManagement();
+                    renderRubricLevelGroupSelect();
+                    saveData(); // Guardar el grupo por defecto
+                }
+
+
                 const storedInstitutions = localStorage.getItem('savedInstitutions');
                 if (storedInstitutions) {
                     savedInstitutions = JSON.parse(storedInstitutions);
@@ -622,32 +731,24 @@ Uso de la gramática</textarea>
                     savedTeachers = JSON.parse(storedTeachers);
                     renderDropdownOptions(teacherSelect, savedTeachers);
                 }
-                const storedLevels = localStorage.getItem('savedLevels'); // Carga niveles
-                if (storedLevels) {
-                    savedLevels = JSON.parse(storedLevels);
-                    renderDropdownOptions(levelsSelect, savedLevels); // Rellena el select de niveles
-                }
-
+                
 
                 const storedRubric = localStorage.getItem('rubric');
                 if (storedRubric) {
                     const parsedRubric = JSON.parse(storedRubric);
-                    // Fusionar propiedades para manejar la adición de nuevos campos
                     rubric = { ...rubric, ...parsedRubric };
-                    // Asegurarse de que date se formatee correctamente para el input type="date"
+                    
                     if (rubric.date) {
                          dateInput.value = rubric.date;
                     }
-                    // Seleccionar valores de dropdown
                     institutionSelect.value = rubric.institution;
                     courseSelect.value = rubric.course;
                     teacherSelect.value = rubric.teacher;
 
-                    // Seleccionar los niveles en el multi-select si existen
-                    if (rubric.levels && rubric.levels.length > 0) {
-                        Array.from(levelsSelect.options).forEach(option => {
-                            option.selected = rubric.levels.includes(option.value);
-                        });
+                    // Seleccionar el grupo de niveles en el select de la rúbrica
+                    if (rubric.selectedLevelGroupName) {
+                        rubricLevelsGroupSelect.value = rubric.selectedLevelGroupName;
+                        rubric.levels = savedLevelGroups[rubric.selectedLevelGroupName] || [];
                     }
                 }
 
@@ -662,16 +763,10 @@ Uso de la gramática</textarea>
                     groupSelect.value = storedCurrentGroup;
                 }
 
-
-                // Pre-llenar campos de configuración si hay datos guardados
                 sessionTitleInput.value = rubric.sessionTitle;
                 generalObservationsInput.value = rubric.generalObservations;
                 aspectsInput.value = rubric.aspects.join('\n');
-                // levelsInput.value ya no existe como textarea
-                // levelsSelect se llena arriba
-
-
-                // Al cargar la app, se muestra la primera pantalla por defecto
+                
                 showScreen('students-screen');
 
             } catch (e) {
@@ -688,10 +783,10 @@ Uso de la gramática</textarea>
         function saveData() {
             try {
                 localStorage.setItem('studentGroups', JSON.stringify(studentGroups));
+                localStorage.setItem('savedLevelGroups', JSON.stringify(savedLevelGroups)); // Guarda grupos de niveles
                 localStorage.setItem('savedInstitutions', JSON.stringify(savedInstitutions));
                 localStorage.setItem('savedCourses', JSON.stringify(savedCourses));
                 localStorage.setItem('savedTeachers', JSON.stringify(savedTeachers));
-                localStorage.setItem('savedLevels', JSON.stringify(savedLevels)); // Guarda niveles
                 localStorage.setItem('rubric', JSON.stringify(rubric));
                 localStorage.setItem('evaluations', JSON.stringify(evaluations));
                 localStorage.setItem('currentSelectedGroup', groupSelect.value); // Guardar el grupo actualmente seleccionado
@@ -724,7 +819,7 @@ Uso de la gramática</textarea>
             // Borrar solo los datos de la rúbrica actual y las evaluaciones
             localStorage.removeItem('rubric');
             localStorage.removeItem('evaluations');
-            // NO borrar 'studentGroups', 'savedInstitutions', 'savedCourses', 'savedTeachers', 'savedLevels'
+            // NO borrar 'studentGroups', 'savedInstitutions', 'savedCourses', 'savedTeachers', 'savedLevelGroups'
 
             // Restablecer variables a su estado inicial solo para la rúbrica y evaluaciones
             rubric = {
@@ -735,6 +830,7 @@ Uso de la gramática</textarea>
                 date: '',
                 generalObservations: '',
                 aspects: [],
+                selectedLevelGroupName: '',
                 levels: [],
                 descriptors: {},
                 levelScores: {}
@@ -742,42 +838,43 @@ Uso de la gramática</textarea>
             evaluations = {};
 
             // Restablecer campos de input de la rúbrica en la UI
-            // Las selecciones de institución, curso, docente se mantienen si estaban cargadas
             sessionTitleInput.value = '';
             dateInput.value = '';
             aspectsInput.value = 'Coherencia\nClaridad\nUso de la gramática'; // Valores por defecto
-            // Deseleccionar todos los niveles en el multi-select
-            Array.from(levelsSelect.options).forEach(option => {
-                option.selected = false;
-            });
             generalObservationsInput.value = '';
-
-            // Ocultar todas las secciones excepto la inicial (students-screen)
-            rubricConfigScreen.classList.add('hidden');
-            evaluationScreen.classList.add('hidden');
-            reportScreen.classList.add('hidden');
-            rubricDescriptorsEditor.classList.add('hidden');
-            
-            showScreen('students-screen'); // Volver a la pantalla de estudiantes
 
             // Asegurarse de que los dropdowns institucionales reflejen la selección guardada
             institutionSelect.value = '';
             courseSelect.value = '';
             teacherSelect.value = '';
+            // Restablecer el selector de grupo de niveles en la rúbrica
+            rubricLevelsGroupSelect.value = '';
 
             // Esconder los inputs de añadir nuevos elementos
-            newInstitutionInput.classList.add('hidden');
-            newInstitutionInput.value = '';
-            newCourseInput.classList.add('hidden');
-            newCourseInput.value = '';
-            newTeacherInput.classList.add('hidden');
-            newTeacherInput.value = '';
-            newLevelInput.classList.add('hidden'); // Ocultar input de niveles
-            newLevelInput.value = '';
-            addLevelBtn.classList.add('hidden'); // Ocultar botón añadir nivel
+            // Añadir comprobaciones de existencia de los elementos antes de acceder a ellos
+            if (newInstitutionInput) newInstitutionInput.classList.add('hidden');
+            if (newInstitutionInput) newInstitutionInput.value = '';
+            if (newCourseInput) newCourseInput.classList.add('hidden');
+            if (newCourseInput) newCourseInput.value = '';
+            if (newTeacherInput) newTeacherInput.classList.add('hidden');
+            if (newTeacherInput) newTeacherInput.value = '';
 
+            // Aquí estaba el error. `newLevelInput` y `addLevelBtn` solo existen en `level-management-screen`
+            // que está `hidden` por defecto, por lo que no se pueden acceder directamente al inicio.
+            // Los quitamos de aquí, ya que el estado inicial ya es "hidden" en el HTML.
+            // if (newLevelInput) newLevelInput.classList.add('hidden');
+            // if (newLevelInput) newLevelInput.value = '';
+            // if (addLevelBtn) addLevelBtn.classList.add('hidden');
 
-            showMessage(reportMessageBox, "La rúbrica y las evaluaciones han sido reiniciadas. Tus grupos y datos institucionales permanecen guardados.", 'success');
+            // Ocultar todas las secciones excepto la inicial (students-screen)
+            rubricConfigScreen.classList.add('hidden');
+            levelManagementScreen.classList.add('hidden'); // Nueva pantalla
+            evaluationScreen.classList.add('hidden');
+            reportScreen.classList.add('hidden');
+            rubricDescriptorsEditor.classList.add('hidden');
+            
+            showScreen('students-screen'); // Volver a la pantalla de estudiantes
+            showMessage(reportMessageBox, "La rúbrica y las evaluaciones han sido reiniciadas. Tus grupos y datos institucionales y de niveles permanecen guardados.", 'success');
         }
 
 
@@ -912,7 +1009,112 @@ Uso de la gramática</textarea>
         });
 
 
-        // --- Lógica de Configuración de Rúbrica ---
+        // --- Lógica de Gestión de Niveles de Desempeño ---
+        /**
+         * Rellena el selector de grupos de niveles con los grupos guardados.
+         */
+        function renderLevelGroupSelectForManagement() {
+            levelGroupSelectForManagement.innerHTML = '<option value="">-- Seleccionar Grupo de Niveles --</option>';
+            for (const groupName in savedLevelGroups) {
+                const option = document.createElement('option');
+                option.value = groupName;
+                option.textContent = groupName;
+                levelGroupSelectForManagement.appendChild(option);
+            }
+            // Asegurarse de que el input y botón de añadir nuevo nivel estén ocultos por defecto
+            // Ya no intentamos ocultarlos aquí, ya que el HTML los oculta por defecto.
+        }
+
+        /**
+         * Guarda un nuevo grupo de niveles o actualiza uno existente.
+         */
+        saveLevelGroupBtn.addEventListener('click', () => {
+            const groupName = levelGroupNameInput.value.trim();
+            const rawLevels = levelListInput.value.trim();
+
+            if (!groupName) {
+                showMessage(levelManagementMessageBox, "Por favor, introduce un nombre para el grupo de niveles.", 'error');
+                return;
+            }
+            if (!rawLevels) {
+                showMessage(levelManagementMessageBox, "Por favor, introduce los niveles de desempeño (uno por línea).", 'error');
+                return;
+            }
+
+            const newLevels = rawLevels.split('\n')
+                                       .map(level => level.trim())
+                                       .filter(level => level !== '')
+                                       .filter((level, index, self) => self.indexOf(level) === index); // Filtrar duplicados
+
+            if (newLevels.length === 0) {
+                showMessage(levelManagementMessageBox, "No se encontraron niveles de desempeño válidos en la lista.", 'error');
+                return;
+            }
+
+            savedLevelGroups[groupName] = newLevels;
+            saveData();
+            renderLevelGroupSelectForManagement();
+            renderRubricLevelGroupSelect(); // Actualizar el select en la configuración de rúbrica
+            levelGroupSelectForManagement.value = groupName; // Seleccionar el grupo recién guardado/actualizado
+            levelGroupNameInput.value = '';
+            levelListInput.value = '';
+            showMessage(levelManagementMessageBox, `¡Grupo de niveles "${groupName}" guardado (${newLevels.length} niveles)!`, 'success');
+        });
+
+        /**
+         * Carga los niveles de un grupo seleccionado en el textarea para edición.
+         */
+        loadLevelGroupBtn.addEventListener('click', () => {
+            const selectedGroup = levelGroupSelectForManagement.value;
+            if (!selectedGroup) {
+                showMessage(levelManagementMessageBox, "Por favor, selecciona un grupo de niveles para cargar.", 'error');
+                return;
+            }
+            levelGroupNameInput.value = selectedGroup;
+            levelListInput.value = savedLevelGroups[selectedGroup].join('\n');
+            showMessage(levelManagementMessageBox, `Grupo de niveles "${selectedGroup}" cargado para edición.`, 'success');
+        });
+
+        /**
+         * Elimina un grupo de niveles seleccionado.
+         */
+        deleteLevelGroupBtn.addEventListener('click', () => {
+            const selectedGroup = levelGroupSelectForManagement.value;
+            if (!selectedGroup) {
+                showMessage(levelManagementMessageBox, "Por favor, selecciona un grupo de niveles para eliminar.", 'error');
+                return;
+            }
+
+            const confirmDelete = window.confirm(`¿Estás seguro de que quieres eliminar el grupo de niveles "${selectedGroup}"? Esto no afectará las rúbricas ya creadas, pero no podrás seleccionarlo para nuevas rúbricas.`);
+            if (confirmDelete) {
+                delete savedLevelGroups[selectedGroup];
+                saveData();
+                renderLevelGroupSelectForManagement();
+                renderRubricLevelGroupSelect(); // Actualizar el select en la configuración de rúbrica
+                levelGroupNameInput.value = '';
+                levelListInput.value = '';
+                showMessage(levelManagementMessageBox, `Grupo de niveles "${selectedGroup}" eliminado.`, 'success');
+            }
+        });
+
+
+        // --- Lógica de Configuración de Rúbrica (parte de selección de niveles) ---
+        /**
+         * Rellena el selector de grupos de niveles en la pantalla de configuración de rúbrica.
+         */
+        function renderRubricLevelGroupSelect() {
+            rubricLevelsGroupSelect.innerHTML = '<option value="">-- Seleccionar Grupo de Niveles --</option>';
+            for (const groupName in savedLevelGroups) {
+                const option = document.createElement('option');
+                option.value = groupName;
+                option.textContent = groupName;
+                rubricLevelsGroupSelect.appendChild(option);
+            }
+            // Intentar seleccionar el grupo de niveles que estaba guardado en la rúbrica actual
+            if (rubric.selectedLevelGroupName && savedLevelGroups[rubric.selectedLevelGroupName]) {
+                rubricLevelsGroupSelect.value = rubric.selectedLevelGroupName;
+            }
+        }
 
         // Función auxiliar para añadir y renderizar elementos en listas guardadas
         function addAndRenderItem(inputElement, dataArray, selectElement, messageBox, storageKey, messageType) {
@@ -923,7 +1125,6 @@ Uso de la gramática</textarea>
                     dataArray.sort(); // Mantener orden alfabético
                     renderDropdownOptions(selectElement, dataArray);
                     selectElement.value = newItem; // Seleccionar el nuevo elemento (si es un select simple)
-                    // Para multi-select, no se selecciona automáticamente al añadir
                     inputElement.value = ''; // Limpiar input
                     localStorage.setItem(storageKey, JSON.stringify(dataArray));
                     showMessage(messageBox, messageType, 'success');
@@ -935,30 +1136,24 @@ Uso de la gramática</textarea>
             }
         }
 
-        // Event listeners para añadir nuevas opciones permanentes
+        // Event listeners para añadir nuevas opciones permanentes (Institución, Curso, Docente)
         addInstitutionBtn.addEventListener('click', () => addAndRenderItem(newInstitutionInput, savedInstitutions, institutionSelect, rubricConfigMessageBox, 'savedInstitutions', 'Institución añadida.'));
         addCourseBtn.addEventListener('click', () => addAndRenderItem(newCourseInput, savedCourses, courseSelect, rubricConfigMessageBox, 'savedCourses', 'Curso añadido.'));
         addTeacherBtn.addEventListener('click', () => addAndRenderItem(newTeacherInput, savedTeachers, teacherSelect, rubricConfigMessageBox, 'savedTeachers', 'Docente añadido.'));
-        addLevelBtn.addEventListener('click', () => addAndRenderItem(newLevelInput, savedLevels, levelsSelect, rubricConfigMessageBox, 'savedLevels', 'Nivel de desempeño añadido.'));
 
-
-        // Event listeners para alternar inputs de añadir
+        // Event listeners para alternar inputs de añadir (Institución, Curso, Docente)
         toggleInstitutionInput.addEventListener('click', () => newInstitutionInput.classList.toggle('hidden'));
         toggleCourseInput.addEventListener('click', () => newCourseInput.classList.toggle('hidden'));
         toggleTeacherInput.addEventListener('click', () => newTeacherInput.classList.toggle('hidden'));
-        toggleLevelInput.addEventListener('click', () => {
-            newLevelInput.classList.toggle('hidden');
-            addLevelBtn.classList.toggle('hidden');
-        });
 
 
         /**
          * Genera la tabla de descriptores de la rúbrica para edición y los inputs de puntaje.
          */
         generateRubricBtn.addEventListener('click', () => {
-            rubric.institution = institutionSelect.value; // Obtener del select
-            rubric.course = courseSelect.value;           // Obtener del select
-            rubric.teacher = teacherSelect.value;         // Obtener del select
+            rubric.institution = institutionSelect.value;
+            rubric.course = courseSelect.value;
+            rubric.teacher = teacherSelect.value;
             rubric.sessionTitle = sessionTitleInput.value.trim();
             rubric.date = dateInput.value.trim();
 
@@ -977,15 +1172,21 @@ Uso de la gramática</textarea>
 
 
             const rawAspects = aspectsInput.value.trim();
-            // Obtener niveles seleccionados del multi-select
-            rubric.levels = Array.from(levelsSelect.selectedOptions).map(option => option.value);
+            rubric.selectedLevelGroupName = rubricLevelsGroupSelect.value; // Obtener el nombre del grupo de niveles seleccionado
+            
+            if (!rubric.selectedLevelGroupName) {
+                showMessage(rubricConfigMessageBox, "Por favor, selecciona un Grupo de Niveles de Desempeño.", 'error');
+                return;
+            }
+
+            rubric.levels = savedLevelGroups[rubric.selectedLevelGroupName]; // Cargar los niveles reales del grupo seleccionado
 
             if (!rawAspects) {
                 showMessage(rubricConfigMessageBox, "Por favor, introduce los aspectos a evaluar.", 'error');
                 return;
             }
-            if (rubric.levels.length === 0) {
-                showMessage(rubricConfigMessageBox, "Por favor, selecciona al menos un nivel de desempeño.", 'error');
+            if (rubric.levels.length === 0) { // Validar que el grupo seleccionado tenga niveles
+                showMessage(rubricConfigMessageBox, "El grupo de niveles seleccionado no contiene niveles. Por favor, edítalo o selecciona otro.", 'error');
                 return;
             }
 
@@ -994,7 +1195,6 @@ Uso de la gramática</textarea>
                                        .filter(aspect => aspect !== '')
                                        .filter((aspect, index, self) => self.indexOf(aspect) === index); // Filtrar duplicados
             
-            // Re-evaluar si los aspectos están vacíos después de filtrar
             if (rubric.aspects.length === 0) {
                 showMessage(rubricConfigMessageBox, "No se encontraron aspectos válidos a evaluar.", 'error');
                 return;
@@ -1014,7 +1214,6 @@ Uso de la gramática</textarea>
             // Inicializar puntajes de niveles si no existen
             const newLevelScores = {};
             rubric.levels.forEach((level, index) => {
-                // Asignar un puntaje por defecto (decreciente desde el número total de niveles)
                 newLevelScores[level] = rubric.levelScores[level] || (rubric.levels.length - index);
             });
             rubric.levelScores = newLevelScores;
@@ -1051,9 +1250,6 @@ Uso de la gramática</textarea>
          * Renderiza la tabla para editar los descriptores de la rúbrica.
          */
         function renderDescriptorsTable() {
-            // Se utiliza una clase "table-fixed" para mantener el ancho de las columnas.
-            // Se define un ancho mínimo para toda la tabla para asegurar que no se encoja demasiado
-            // Y se define un ancho explícito para la primera columna y para las celdas de descriptor.
             let tableHTML = `
                 <table class="w-full table-fixed bg-white border border-gray-300 rounded-lg shadow-sm">
                     <thead class="bg-gray-100">
@@ -1101,6 +1297,7 @@ Uso de la gramática</textarea>
             rubric.teacher = teacherSelect.value;
             rubric.date = dateInput.value.trim();
             rubric.generalObservations = generalObservationsInput.value.trim();
+            rubric.selectedLevelGroupName = rubricLevelsGroupSelect.value; // Asegurarse de guardar el grupo de niveles seleccionado
 
             // Recopilar los puntajes de los niveles
             let allScoresValid = true;
