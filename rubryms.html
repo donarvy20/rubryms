@@ -242,9 +242,9 @@
             #mobile-menu-toggle { /* Mostrar botón de hamburguesa en tablets */
                 display: block !important;
             }
-            #nav-links-container:not(.md-forced-display) { /* Ocultar si no está forzado a mostrarse */
-                display: none !important;
-            }
+            /* Ocultar el menú por defecto en tablets, se despliega con la hamburguesa */
+            /* Se ha movido esta regla de CSS a una más específica en el JavaScript para evitar conflicto */
+            /* con el estado de 'hidden' inicial que se quita con la media query general. */
         }
 
         @media (min-width: 1024px) { /* Escritorio (1024px y más) */
