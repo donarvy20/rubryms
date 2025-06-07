@@ -8,7 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Carga de Font Awesome para iconos llamativos -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Se elimina la carga de jspdf aquí, se hará dinámicamente en el script principal -->
+    <!-- Carga de jspdf de forma tradicional (no como módulo) para que esté disponible globalmente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* Estilo general para la fuente Inter y el fondo de la página */
         body {
@@ -128,6 +129,7 @@
                 <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
                     <i class="fas fa-cogs mr-2 text-indigo-600"></i> Configuración Básica
                 </h2>
+                <!-- Input fields for current session config -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="institution" class="block text-sm font-medium text-gray-700 mb-1">
@@ -162,7 +164,33 @@
                 </div>
                 <div class="mt-8">
                     <button id="save-config-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-save mr-2"></i> Guardar Configuración
+                        <i class="fas fa-save mr-2"></i> Guardar Configuración Actual
+                    </button>
+                </div>
+
+                <hr class="my-8 border-gray-300">
+
+                <!-- Section for managing saved configurations/presets -->
+                <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                    <i class="fas fa-bookmark mr-2 text-green-600"></i> Configuraciones Guardadas (Presets)
+                </h3>
+                <div class="mb-4">
+                    <label for="saved-configs-select" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-list-alt mr-1 text-teal-500"></i> Seleccionar Preset:
+                    </label>
+                    <select id="saved-configs-select" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
+                        <option value="">-- No hay presets guardados --</option>
+                    </select>
+                </div>
+                <div class="flex flex-wrap gap-4 mt-4">
+                    <button id="load-preset-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-download mr-2"></i> Cargar Preset
+                    </button>
+                    <button id="save-as-new-preset-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Guardar como Nuevo Preset
+                    </button>
+                    <button id="delete-preset-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-trash-alt mr-2"></i> Eliminar Preset
                     </button>
                 </div>
             </section>
@@ -391,7 +419,8 @@ Carlos López"></textarea>
             currentEvaluationListId: null, // ID de la lista de estudiantes actualmente seleccionada para evaluar
             currentStudentIndex: 0, // Índice del estudiante actual en la lista de evaluación
             evaluatedRubrics: {}, // Objeto de rúbricas evaluadas por estudiante: { studentId: { rubricData: {}, totalScore: 0, averageScore: 0, listName: '', config: {} } }
-            listEvaluations: {} // Objeto para organizar las evaluaciones por lista: { listId: { studentId: evaluationData } }
+            listEvaluations: {}, // Objeto para organizar las evaluaciones por lista: { listId: { studentId: evaluationData } }
+            savedConfigPresets: {} // Nuevo: Objeto para almacenar configuraciones preestablecidas de Institución/Curso/Docente
         };
 
         // --- Funciones de Utilidad para Modales (mensajes y confirmaciones) ---
@@ -475,7 +504,12 @@ Carlos López"></textarea>
                 document.getElementById('finish-evaluation-btn'),
                 document.getElementById('export-student-list'),
                 document.getElementById('export-pdf-btn'),
-                document.getElementById('export-odf-btn') // Este botón ya está disabled en HTML por ahora
+                document.getElementById('export-odf-btn'), // Este botón ya está disabled en HTML por ahora
+                // Nuevos elementos para presets de configuración
+                document.getElementById('saved-configs-select'),
+                document.getElementById('load-preset-btn'),
+                document.getElementById('save-as-new-preset-btn'),
+                document.getElementById('delete-preset-btn')
             ];
 
             interactiveElements.forEach(el => {
@@ -651,6 +685,17 @@ Carlos López"></textarea>
                 populateStudentListSelects(); // Rellena los selectores de listas de estudiantes
                 console.log("Listas de estudiantes cargadas:", appState.studentLists);
 
+                // Cargar configuraciones preestablecidas (presets)
+                appState.savedConfigPresets = {};
+                const configPresetsColRef = collection(db, `artifacts/${__app_id}/users/${currentUserId}/configPresets`);
+                const configPresetsSnap = await getDocs(configPresetsColRef);
+                configPresetsSnap.forEach(docSnap => {
+                    appState.savedConfigPresets[docSnap.id] = docSnap.data();
+                });
+                renderConfigPresetsSelect(); // Actualiza el selector de presets
+                console.log("Configuraciones preestablecidas cargadas:", appState.savedConfigPresets);
+
+
                 // Cargar todas las evaluaciones guardadas
                 appState.evaluatedRubrics = {};
                 appState.listEvaluations = {};
@@ -702,6 +747,130 @@ Carlos López"></textarea>
             }
         }
 
+        // --- Funciones para gestionar configuraciones preestablecidas (Presets) ---
+        // Renderiza el selector de presets de configuración
+        function renderConfigPresetsSelect() {
+            const selectElement = document.getElementById('saved-configs-select');
+            selectElement.innerHTML = '<option value="">-- No hay presets guardados --</option>';
+
+            const presetIds = Object.keys(appState.savedConfigPresets).sort((a, b) => {
+                const nameA = appState.savedConfigPresets[a].name.toLowerCase();
+                const nameB = appState.savedConfigPresets[b].name.toLowerCase();
+                if (nameA < nameB) return -1;
+                if (nameA > nameB) return 1;
+                return 0;
+            });
+
+            if (presetIds.length > 0) {
+                selectElement.innerHTML = '<option value="">-- Seleccionar Preset --</option>';
+            }
+
+            presetIds.forEach(presetId => {
+                const preset = appState.savedConfigPresets[presetId];
+                const option = document.createElement('option');
+                option.value = presetId;
+                option.textContent = preset.name;
+                selectElement.appendChild(option);
+            });
+        }
+
+        // Carga un preset seleccionado en los campos de configuración
+        document.getElementById('load-preset-btn').addEventListener('click', () => {
+            const selectedPresetId = document.getElementById('saved-configs-select').value;
+            if (!selectedPresetId) {
+                showMessage("Por favor, seleccione un preset para cargar.");
+                return;
+            }
+
+            const preset = appState.savedConfigPresets[selectedPresetId];
+            if (preset) {
+                document.getElementById('institution').value = preset.institution || '';
+                document.getElementById('course').value = preset.course || '';
+                document.getElementById('teacher').value = preset.teacher || '';
+                // No se cargan fecha y título de sesión, ya que son temporales.
+                showMessage(`Preset '${preset.name}' cargado exitosamente.`);
+            } else {
+                showMessage("No se encontró el preset seleccionado.");
+            }
+        });
+
+        // Guarda la configuración actual como un nuevo preset
+        document.getElementById('save-as-new-preset-btn').addEventListener('click', () => {
+            const presetName = prompt("Ingrese un nombre para el nuevo preset:");
+            if (!presetName || presetName.trim() === "") {
+                showMessage("El nombre del preset no puede estar vacío.");
+                return;
+            }
+
+            // Verificar si el nombre del preset ya existe
+            const existingNames = Object.values(appState.savedConfigPresets).map(p => p.name.toLowerCase());
+            if (existingNames.includes(presetName.trim().toLowerCase())) {
+                showMessage(`Ya existe un preset con el nombre '${presetName}'. Por favor, elija otro nombre.`);
+                return;
+            }
+
+            const newPreset = {
+                name: presetName.trim(),
+                institution: document.getElementById('institution').value,
+                course: document.getElementById('course').value,
+                teacher: document.getElementById('teacher').value
+            };
+            saveConfigPreset(newPreset);
+        });
+
+        // Elimina un preset de configuración
+        document.getElementById('delete-preset-btn').addEventListener('click', () => {
+            const selectedPresetId = document.getElementById('saved-configs-select').value;
+            if (!selectedPresetId) {
+                showMessage("Por favor, seleccione un preset para eliminar.");
+                return;
+            }
+
+            const presetName = appState.savedConfigPresets[selectedPresetId]?.name;
+            showConfirmation(`¿Está seguro que desea eliminar el preset '${presetName}'?`, (confirmed) => {
+                if (confirmed) {
+                    deleteConfigPreset(selectedPresetId);
+                }
+            });
+        });
+
+        // Guarda un preset de configuración en Firestore
+        async function saveConfigPreset(presetData) {
+            if (!currentUserId || !isAuthReady) {
+                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
+                return;
+            }
+            try {
+                const presetId = `preset_${Date.now()}`; // Genera un ID único para el preset
+                const presetDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/configPresets`, presetId);
+                await setDoc(presetDocRef, presetData);
+                appState.savedConfigPresets[presetId] = presetData; // Agrega al estado local
+                renderConfigPresetsSelect(); // Actualiza el selector
+                showMessage(`Preset '${presetData.name}' guardado exitosamente!`);
+            } catch (error) {
+                console.error("Error al guardar el preset de configuración:", error);
+                showMessage("Error al guardar el preset de configuración: " + error.message);
+            }
+        }
+
+        // Elimina un preset de configuración de Firestore
+        async function deleteConfigPreset(presetId) {
+            if (!currentUserId || !isAuthReady) {
+                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
+                return;
+            }
+            try {
+                const presetDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/configPresets`, presetId);
+                await deleteDoc(presetDocRef);
+                delete appState.savedConfigPresets[presetId]; // Elimina del estado local
+                renderConfigPresetsSelect(); // Actualiza el selector
+                showMessage("Preset eliminado exitosamente!");
+            } catch (error) {
+                console.error("Error al eliminar el preset de configuración:", error);
+                showMessage("Error al eliminar el preset de configuración: " + error.message);
+            }
+        }
+
         // Guarda la rúbrica actual en Firestore
         async function saveRubric() {
             if (!currentUserId || !isAuthReady) {
@@ -726,107 +895,8 @@ Carlos López"></textarea>
             }
         }
 
-        // Guarda una nueva lista de estudiantes en Firestore
-        async function saveStudentList(listName, students) {
-            if (!currentUserId || !isAuthReady) {
-                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
-                return;
-            }
-            if (!listName || students.length === 0) {
-                showMessage("El nombre de la lista y los estudiantes son obligatorios.");
-                return;
-            }
-
-            // Genera un ID único para la lista de estudiantes
-            const listId = `list_${Date.now()}`;
-            try {
-                const listDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/studentLists`, listId);
-                await setDoc(listDocRef, { name: listName, students: students });
-                appState.studentLists[listId] = { name: listName, students: students };
-                renderStudentLists(); // Actualiza la visualización de listas
-                populateStudentListSelects(); // Actualiza los selectores de listas
-                showMessage(`Lista '${listName}' guardada exitosamente!`);
-                console.log("Lista de estudiantes guardada:", appState.studentLists[listId]);
-            } catch (error) {
-                console.error("Error al guardar la lista de estudiantes:", error);
-                showMessage("Error al guardar la lista de estudiantes: " + error.message);
-            }
-        }
-
-        // Elimina una lista de estudiantes de Firestore
-        async function deleteStudentList(listId) {
-            if (!currentUserId || !isAuthReady) {
-                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
-                return;
-            }
-            // Solicita confirmación antes de eliminar
-            showConfirmation(`¿Está seguro que desea eliminar la lista de estudiantes '${appState.studentLists[listId].name}'?`, async (confirmed) => {
-                if (confirmed) {
-                    try {
-                        const listDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/studentLists`, listId);
-                        await deleteDoc(listDocRef); // Elimina el documento de Firestore
-                        delete appState.studentLists[listId]; // Elimina del estado de la aplicación
-                        renderStudentLists(); // Actualiza la visualización
-                        populateStudentListSelects(); // Actualiza los selectores
-                        showMessage("Lista eliminada exitosamente!");
-                        console.log("Lista de estudiantes eliminada:", listId);
-                    } catch (error) {
-                        console.error("Error al eliminar la lista de estudiantes:", error);
-                        showMessage("Error al eliminar la lista de estudiantes: " + error.message);
-                    }
-                }
-            });
-        }
-
-        // Guarda la evaluación de un estudiante en Firestore
-        async function saveStudentEvaluation(studentId, evaluationData) {
-            if (!currentUserId || !isAuthReady) {
-                // No mostrar mensaje, ya que esto se llamará automáticamente
-                console.warn("Intento de guardar evaluación sin usuario autenticado. Skipping.");
-                return;
-            }
-            try {
-                const evaluationDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/evaluations`, studentId);
-                await setDoc(evaluationDocRef, JSON.parse(JSON.stringify(evaluationData))); // Guarda una copia profunda
-                appState.evaluatedRubrics[studentId] = evaluationData; // Actualiza el estado global
-                // Organiza la evaluación por lista para facilitar el acceso
-                if (!appState.listEvaluations[evaluationData.listId]) {
-                    appState.listEvaluations[evaluationData.listId] = {};
-                }
-                appState.listEvaluations[evaluationData.listId][studentId] = evaluationData;
-                console.log("Evaluación guardada automáticamente para el estudiante:", studentId, evaluationData);
-            } catch (error) {
-                console.error("Error al guardar la evaluación automáticamente:", error);
-                // Mostrar mensaje de error si el guardado automático falla
-                showMessage("Error al guardar la evaluación automáticamente: " + error.message);
-            }
-        }
-
-        // --- Navegación entre Pestañas ---
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', () => {
-                // Elimina la clase 'active' de todos los botones y oculta todos los contenidos
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
-
-                // Agrega la clase 'active' al botón clickeado y muestra su contenido
-                button.classList.add('active');
-                document.getElementById(button.dataset.tab).classList.remove('hidden');
-
-                // Acciones específicas al cambiar de pestaña
-                if (button.dataset.tab === 'evaluate') {
-                    populateStudentListSelects(); // Actualiza el selector de listas para evaluación
-                } else if (button.dataset.tab === 'export') {
-                    populateStudentListSelects('export'); // Actualiza los selectores de listas para exportación
-                }
-            });
-        });
-
-        // --- Módulo: Configuración Básica ---
-        document.getElementById('save-config-btn').addEventListener('click', saveConfig);
-
         // --- Módulo: CSV a Rúbrica Editable ---
-        document.getElementById('load-csv-btn').addEventListener('click', () => { // Se corrige el event listener para que incluya 'click'
+        document.getElementById('load-csv-btn').addEventListener('click', () => {
             const csvText = document.getElementById('csv-input').value;
             if (!csvText) {
                 showMessage("Por favor, pegue el texto CSV en el campo.");
