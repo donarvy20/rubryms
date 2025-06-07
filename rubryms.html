@@ -435,7 +435,9 @@ Carlos López"></textarea>
         // --- Inicialización de Firebase y Autenticación ---
         window.onload = async function () {
             // Se obtienen las variables globales de configuración de Firebase
+            // Provee un objeto vacío si __firebase_config no está definido (para entornos fuera de Canvas)
             const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            // Provee null si __initial_auth_token no está definido
             const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
@@ -462,12 +464,12 @@ Carlos López"></textarea>
                         if (initialAuthToken) {
                             await signInWithCustomToken(auth, initialAuthToken);
                         } else {
-                            await signInAnonymously(auth);
+                            await signInAnonymously(auth); // Inicia sesión anónimamente si no hay token
                         }
                         console.log("Signed in anonymously or with custom token.");
                     } catch (error) {
                         console.error("Error signing in:", error);
-                        showMessage("Error al iniciar sesión. Algunas funciones podrían no estar disponibles.");
+                        showMessage("Error al iniciar sesión. Algunas funciones podrían no estar disponibles. Detalles: " + error.message);
                     }
                 }
             });
@@ -1265,6 +1267,7 @@ Carlos López"></textarea>
             }
 
             // Importa jsPDF dinámicamente justo antes de usarlo
+            // Usamos un import asincrónico para jsPDF
             const { jsPDF } = await import("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
 
             const doc = new jsPDF({ 
