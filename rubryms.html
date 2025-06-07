@@ -364,6 +364,19 @@ Carlos López"></textarea>
         // Variable global para el editor de rúbricas
         let rubricEditor; 
 
+        // ESTA ES TU CONFIGURACIÓN DE FIREBASE.
+        // SI ESTÁS DESPLEGANDO EN GITHUB PAGES (O FUERA DEL ENTORNO DE DESARROLLO DE GOOGLE),
+        // DEBES REEMPLAZAR ESTE OBJETO CON LA CONFIGURACIÓN REAL DE TU PROYECTO FIREBASE.
+        // Puedes encontrar esta configuración en la Consola de Firebase -> Configuración del proyecto.
+        const firebaseConfigForDeployment = {
+            apiKey: "TU_API_KEY", // Reemplaza con tu clave de API
+            authDomain: "TU_AUTH_DOMAIN", // Reemplaza con tu dominio de autenticación
+            projectId: "TU_PROJECT_ID", // Reemplaza con tu ID de proyecto
+            storageBucket: "TU_STORAGE_BUCKET", // Reemplaza con tu bucket de almacenamiento
+            messagingSenderId: "TU_MESSAGING_SENDER_ID", // Reemplaza con tu ID de remitente de mensajes
+            appId: "TU_APP_ID" // Reemplaza con tu ID de aplicación
+        };
+
         // Estado global de la aplicación para gestionar los datos
         let appState = {
             config: {
@@ -504,17 +517,47 @@ Carlos López"></textarea>
 
         // --- Inicialización de Firebase y Autenticación ---
         window.onload = async function () {
-            // Se obtienen las variables globales de configuración de Firebase
-            // Provee un objeto vacío si __firebase_config no está definido (para entornos fuera de Canvas)
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-            // Provee null si __initial_auth_token no está definido
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            let usedFirebaseConfig;
+            let usedAppId;
 
+            // Detectar si estamos en el entorno Canvas o en un despliegue externo (como GitHub Pages)
+            // Se usa el typeof para verificar si las variables globales existen
+            if (typeof __firebase_config !== 'undefined' && typeof __app_id !== 'undefined') {
+                // Entorno Canvas: usar las variables globales proporcionadas
+                usedFirebaseConfig = JSON.parse(__firebase_config);
+                usedAppId = __app_id;
+                console.log("Detectado entorno Canvas. Usando configuración proporcionada.");
+            } else {
+                // Entorno externo: usar la configuración definida manualmente para despliegue
+                // Se verifica que la API Key no sea el placeholder inicial para asegurar que el usuario la ha configurado
+                if (firebaseConfigForDeployment.apiKey && firebaseConfigForDeployment.apiKey !== "TU_API_KEY") {
+                    usedFirebaseConfig = firebaseConfigForDeployment;
+                    usedAppId = firebaseConfigForDeployment.projectId; // Usar el project ID como app ID para Firestore
+                    console.log("Detectado entorno externo. Usando configuración de despliegue manual.");
+                } else {
+                    // Fallback si la configuración manual no está completa o es la placeholder
+                    // La aplicación intentará inicializar Firebase, pero las operaciones de DB fallarán
+                    usedFirebaseConfig = {}; // Configuración vacía para inicializar Firebase sin un proyecto real
+                    usedAppId = 'fallback-app-id'; // ID de app de respaldo para Firestore
+                    showMessage("Advertencia: No se detectó configuración de Firebase o está incompleta. La persistencia de datos NO funcionará. Por favor, asegúrate de configurar 'firebaseConfigForDeployment' en el código.");
+                    console.warn("Firebase configuration is missing or incomplete for external deployment. Data persistence will not work.");
+                }
+            }
+            
             // Inicializa la aplicación de Firebase
-            app = initializeApp(firebaseConfig);
+            app = initializeApp(usedFirebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
+
+            // Importante: redefinir __app_id aquí para que Firestore lo use correctamente
+            // Esto es crucial para la ruta de la colección en Firestore (`artifacts/${__app_id}/...`)
+            // Si el user no ha puesto su ID de proyecto, esto seguirá siendo 'fallback-app-id'
+            // Object.defineProperty es solo para hacerla de solo lectura como en Canvas
+            Object.defineProperty(window, '__app_id', {
+                value: usedAppId,
+                writable: false,
+                configurable: false
+            });
 
             // Inicializa rubricEditor como una variable global aquí
             rubricEditor = document.getElementById('rubric-editor');
@@ -537,18 +580,27 @@ Carlos López"></textarea>
                 } else {
                     // Si no hay usuario autenticado, intenta iniciar sesión anónimamente o con un token personalizado
                     try {
+                        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
                         if (initialAuthToken) {
                             await signInWithCustomToken(auth, initialAuthToken);
                         } else {
-                            await signInAnonymously(auth); // Inicia sesión anónimamente si no hay token
+                            // Intenta iniciar sesión anónimamente solo si hay una configuración de Firebase válida
+                            // y no es la configuración de placeholder.
+                            if (usedFirebaseConfig.projectId && usedFirebaseConfig.projectId !== "TU_PROJECT_ID") {
+                                await signInAnonymously(auth);
+                            } else {
+                                // Si no hay configuración de Firebase para despliegue, lanzamos un error para la UI
+                                throw new Error("Firebase no está configurado correctamente para la autenticación anónima. La persistencia de datos no funcionará.");
+                            }
                         }
                         // La reautenticación activará onAuthStateChanged nuevamente
                         // y el bloque 'if (user)' se ejecutará
                     } catch (error) {
                         console.error("Error signing in:", error);
-                        showMessage("Error al iniciar sesión. Algunas funciones podrían no estar disponibles. Detalles: " + error.message);
-                        isAuthReady = true; // Establecer a true para que la UI no se quede deshabilitada indefinidamente, aunque haya fallado la autenticación.
-                        document.getElementById('user-id-display').textContent = "Falló la autenticación";
+                        showMessage("Error al iniciar sesión. Algunas funciones podrían no estar disponibles. Para la persistencia de datos, asegúrate de configurar Firebase. Detalles: " + error.message);
+                        isAuthReady = false; // Mantener como false si la autenticación falla, para mantener UI deshabilitada si no hay acceso a DB.
+                        document.getElementById('user-id-display').textContent = "Autenticación Fallida";
+                        setUIState(false); // Mantener UI deshabilitada si la autenticación falla por completo
                     }
                 }
             });
