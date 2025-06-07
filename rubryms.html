@@ -3,1252 +3,1397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creador de Rúbricas de Evaluación</title>
+    <title>Evaluador de Rúbricas</title>
     <!-- Carga de Tailwind CSS para estilos modernos y responsivos -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carga de jsPDF para la generación de PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Carga de jspdf-autotable para un mejor manejo de tablas en PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.21/jspdf.plugin.autotable.min.js"></script>
-    <!-- Carga de Font Awesome para iconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <!-- Carga de Font Awesome para iconos llamativos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Se elimina la carga de jspdf aquí, se hará dinámicamente en el script principal -->
     <style>
-        /* Definición de la paleta de colores personalizada */
-        :root {
-            --color-primary-light: #5CCBFA; /* Azul claro */
-            --color-primary-light-hover: #45b2e0;
-            --color-primary-dark: #5C67FA;  /* Azul más oscuro/púrpura */
-            --color-primary-dark-hover: #454ecf;
-            --color-accent-light: #95FAF8;  /* Cian muy claro */
-            --color-accent-light-hover: #7cdbdb;
-            --color-accent-medium: #B0CCFA; /* Azul pálido */
-            --color-accent-medium-hover: #9bb7e0;
-
-            --color-gray-dark: #6B7280; /* Para botones deshabilitados o de fondo gris */
-            --color-gray-text: #F9FAFB; /* Texto en botones deshabilitados */
-        }
-
-        /* Estilos generales para el cuerpo de la página y la fuente Inter */
+        /* Estilo general para la fuente Inter y el fondo de la página */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Color de fondo suave */
-            color: #2d3748; /* Color de texto principal */
-            height: 100vh; /* Asegura que el body ocupe toda la altura del viewport */
-            margin: 0;
-            display: flex;
-            flex-direction: column;
+            background-color: #f3f4f6; /* Fondo gris claro */
         }
-        html {
-            height: 100%; /* Asegura que html ocupe toda la altura */
+        /* Estilo para el botón de pestaña activo en la navegación */
+        .tab-button.active {
+            background-color: #4f46e5; /* Indigo-600 */
+            color: white;
         }
-        /* Estilos para celdas editables al enfocarse */
-        [contenteditable]:focus {
-            outline: 2px solid var(--color-primary-light); /* Borde azul de Tailwind */
-            background-color: #ebf8ff; /* Fondo azul claro de Tailwind */
+        /* Estilo para la celda de la rúbrica seleccionada durante la evaluación */
+        .rubric-cell.selected {
+            background-color: #a78bfa; /* Violet-400 */
+            transition: background-color 0.2s ease-in-out; /* Transición suave al seleccionar */
         }
-        /* Estilos para celdas de puntuación en modo de evaluación */
-        .rubric-score-cell {
-            text-align: center; /* Centrar texto en celdas de puntuación */
+        /* Estilos personalizados para la barra de desplazamiento (webkit) */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .rubric-score-cell:hover {
-            background-color: var(--color-accent-medium-hover); /* Color de fondo al pasar el ratón (hover) */
-            cursor: pointer; /* Cambiar cursor a puntero para indicar interactividad */
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
         }
-        /* Estilo para la celda de puntuación seleccionada */
-        .rubric-score-cell.selected {
-            background-color: var(--color-accent-medium); /* Color azul más oscuro para la celda seleccionada */
-            font-weight: bold; /* Texto en negrita para la celda seleccionada */
-            border: 2px solid var(--color-primary-dark); /* Borde más pronunciado para la selección */
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
         }
-        /* Clase base para todas las pantallas, inicialmente oculta */
-        .screen {
-            display: none;
-        }
-        /* Clase para la pantalla activa */
-        .screen.active {
-            display: block;
-        }
-        /* Estilo para resaltar el div del grupo cargado */
-        .student-group-item.selected-group {
-            border-color: var(--color-primary-light) !important;
-            background-color: #ebf8ff !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
-        /* Contenedor de grupos de estudiantes - ahora es un <div> que contendrá divs de grupo */
-        #studentGroupsListContainer { /* Nuevo ID para el contenedor de la lista de grupos */
-            background-color: var(--color-accent-light); /* Fondo suave */
-            padding: 1rem; /* Relleno */
-            border-radius: 0.5rem;
-            overflow: auto; /* Permite scroll si hay muchos grupos */
-            border: 1px solid var(--color-accent-medium); /* Borde suave */
-            display: flex; /* Contenedor flex para los items de grupo */
-            flex-direction: column; /* Apila los items verticalmente */
-            gap: 0.75rem; /* Espacio entre los items */
+        /* Estilos para el modal de mensajes */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed; /* Posición fija para cubrir toda la pantalla */
+            z-index: 1000; /* Se superpone a otros elementos */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Habilita el scroll si el contenido es grande */
+            background-color: rgba(0,0,0,0.4); /* Fondo semi-transparente */
+            align-items: center; /* Centrar verticalmente */
+            justify-content: center; /* Centrar horizontalmente */
         }
 
-        /* Estilos para los items individuales de grupo (ahora son divs, con estilo mínimo) */
-        .student-group-item {
-            background-color: #fff; /* Fondo blanco */
-            border-bottom: 1px solid #e2e8f0; /* Separador sutil */
-            padding: 0.75rem 0; /* Relleno vertical */
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 0.5rem; /* Bordes redondeados */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Sombra */
+            width: 80%;
+            max-width: 500px; /* Ancho máximo */
+            position: relative;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
             cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .student-group-item:first-child {
-            padding-top: 0; /* No padding-top para el primer elemento si el contenedor ya tiene padding */
-        }
-        .student-group-item:last-child {
-            border-bottom: none; /* Sin borde inferior para el último elemento */
-            padding-bottom: 0;
-        }
-
-        @media (min-width: 768px) {
-            .student-group-item {
-                flex-direction: row;
-                align-items: center;
-            }
-        }
-        .student-group-item:hover {
-            background-color: #f7fafc; /* Efecto hover en las filas */
-        }
-        .student-group-item .ml-auto {
-            margin-left: auto;
-            margin-top: 0.5rem; /* Ajuste para espacio entre texto y botones en móvil */
-        }
-        @media (min-width: 768px) {
-            .student-group-item .ml-auto {
-                margin-top: 0;
-            }
-        }
-
-        /* Oculta el mensaje "No hay grupos" si hay grupos */
-        #studentGroupsListContainer:not(:empty):not(:has(p:not(#noGroupsMessage))) #noGroupsMessage {
-            display: none; /* Oculta el mensaje si hay otros elementos (grupos) */
-        }
-        #noGroupsMessage {
-            text-align: center;
-            padding: 1rem;
-            color: #6B7280;
-            display: block; /* Asegura que el mensaje por defecto siempre sea display: block */
         }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-lg p-6 space-y-8">
-        <h1 class="text-3xl font-bold text-center text-blue-700 mb-6">Herramienta de Evaluación de Rúbricas</h1>
+<body>
+    <!-- Encabezado de la aplicación -->
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 shadow-md rounded-b-lg">
+        <h1 class="text-3xl font-bold text-center flex items-center justify-center">
+            <i class="fas fa-clipboard-check mr-3"></i> Sistema de Evaluación de Rúbricas
+        </h1>
+    </header>
 
-        <!-- Menú de Navegación -->
-        <nav class="mb-8 bg-gray-100 p-4 rounded-md shadow-sm flex flex-wrap justify-center gap-4">
-            <button id="navRubric" class="nav-button bg-[color:var(--color-primary-dark)] text-white py-2 px-4 rounded-md hover:bg-[color:var(--color-primary-dark-hover)] transition duration-200 font-semibold" data-screen="rubricScreen"><i class="fas fa-edit mr-2"></i>Rúbrica</button>
-            <button id="navStudents" class="nav-button bg-[color:var(--color-gray-dark)] text-[color:var(--color-gray-text)] py-2 px-4 rounded-md cursor-not-allowed font-semibold" disabled data-screen="studentsScreen"><i class="fas fa-users mr-2"></i>Gestionar</button>
-            <button id="navGroupsList" class="nav-button bg-[color:var(--color-gray-dark)] text-[color:var(--color-gray-text)] py-2 px-4 rounded-md cursor-not-allowed font-semibold" disabled data-screen="listGroupsScreen"><i class="fas fa-list-alt mr-2"></i>Grupos</button>
-            <button id="navEvaluate" class="nav-button bg-[color:var(--color-gray-dark)] text-[color:var(--color-gray-text)] py-2 px-4 rounded-md cursor-not-allowed font-semibold" disabled data-screen="evaluationScreen"><i class="fas fa-check-circle mr-2"></i>Evaluar</button>
-            <button id="navExport" class="nav-button bg-[color:var(--color-gray-dark)] text-[color:var(--color-gray-text)] py-2 px-4 rounded-md cursor-not-allowed font-semibold" disabled data-screen="exportScreen"><i class="fas fa-file-pdf mr-2"></i>Exportar</button>
+    <div class="flex flex-col md:flex-row flex-1">
+        <!-- Barra lateral de navegación (pestañas de módulos) -->
+        <nav class="bg-gray-800 text-white p-4 md:w-64 flex flex-col space-y-2 rounded-r-lg shadow-lg">
+            <button class="tab-button w-full text-left py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-200 ease-in-out flex items-center active" data-tab="config">
+                <i class="fas fa-cogs mr-3"></i> Configuración Básica
+            </button>
+            <button class="tab-button w-full text-left py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-200 ease-in-out flex items-center" data-tab="rubric">
+                <i class="fas fa-table mr-3"></i> Gestionar Rúbrica
+            </button>
+            <button class="tab-button w-full text-left py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-200 ease-in-out flex items-center" data-tab="students">
+                <i class="fas fa-users mr-3"></i> Gestionar Estudiantes
+            </button>
+            <button class="tab-button w-full text-left py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 ease-in-out flex items-center" data-tab="evaluate">
+                <i class="fas fa-edit mr-3"></i> Evaluar Alumnos
+            </button>
+            <button class="tab-button w-full text-left py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 ease-in-out flex items-center" data-tab="export">
+                <i class="fas fa-file-export mr-3"></i> Exportar Rúbricas
+            </button>
+            <!-- Muestra el ID de usuario actual para fines de depuración y referencia -->
+            <div class="mt-auto pt-4 text-xs text-gray-400">
+                <p>ID de Usuario: <span id="user-id-display">Cargando...</span></p>
+            </div>
         </nav>
 
-        <!-- Sección de Cargar Rúbrica desde CSV (Pantalla 1) -->
-        <div id="rubricScreen" class="screen active bg-[color:var(--color-accent-light)] p-6 rounded-lg border border-[color:var(--color-accent-medium)]">
-            <h2 class="text-2xl font-semibold text-[color:var(--color-primary-dark)] mb-4"><i class="fas fa-clipboard-list mr-2"></i>1. Configurar Rúbrica</h2>
-
-            <!-- Campos de metadatos de la rúbrica -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label for="institutionInput" class="block text-gray-700 font-medium mb-1">Institución Educativa:</label>
-                    <div class="flex space-x-2">
-                        <select id="institutionSelect" class="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary-light)]"></select>
-                        <input type="text" id="newInstitutionInput" class="p-2 border border-gray-300 rounded-md flex-grow" placeholder="Nueva institución">
-                        <button id="addInstitutionBtn" class="bg-[color:var(--color-primary-light)] text-white p-2 rounded-md hover:bg-[color:var(--color-primary-light-hover)] transition duration-200"><i class="fas fa-plus"></i></button>
+        <!-- Área principal de contenido (módulos) -->
+        <main class="flex-1 p-6 bg-white rounded-l-lg shadow-inner overflow-auto">
+            <!-- Módulo de Configuración Básica -->
+            <section id="config" class="tab-content active">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                    <i class="fas fa-cogs mr-2 text-indigo-600"></i> Configuración Básica
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="institution" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-school mr-1 text-blue-500"></i> Institución Educativa
+                        </label>
+                        <input type="text" id="institution" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
+                    </div>
+                    <div>
+                        <label for="course" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-book mr-1 text-green-500"></i> Curso/Módulo
+                        </label>
+                        <input type="text" id="course" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
+                    </div>
+                    <div>
+                        <label for="teacher" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-chalkboard-teacher mr-1 text-purple-500"></i> Docente
+                        </label>
+                        <input type="text" id="teacher" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
+                    </div>
+                    <div>
+                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-calendar-alt mr-1 text-red-500"></i> Fecha
+                        </label>
+                        <input type="date" id="date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="session-title" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-heading mr-1 text-orange-500"></i> Título de la Sesión (No persistente)
+                        </label>
+                        <input type="text" id="session-title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
                     </div>
                 </div>
-                <div>
-                    <label for="courseInput" class="block text-gray-700 font-medium mb-1">Curso/Módulo:</label>
-                    <div class="flex space-x-2">
-                        <select id="courseSelect" class="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary-light)]"></select>
-                        <input type="text" id="newCourseInput" class="p-2 border border-gray-300 rounded-md flex-grow" placeholder="Nuevo curso">
-                        <button id="addCourseBtn" class="bg-[color:var(--color-primary-light)] text-white p-2 rounded-md hover:bg-[color:var(--color-primary-light-hover)] transition duration-200"><i class="fas fa-plus"></i></button>
-                    </div>
+                <div class="mt-8">
+                    <button id="save-config-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-save mr-2"></i> Guardar Configuración
+                    </button>
                 </div>
-                <div>
-                    <label for="teacherInput" class="block text-gray-700 font-medium mb-1">Docente:</label>
-                    <div class="flex space-x-2">
-                        <select id="teacherSelect" class="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary-light)]"></select>
-                        <input type="text" id="newTeacherInput" class="p-2 border border-gray-300 rounded-md flex-grow" placeholder="Nuevo docente">
-                        <button id="addTeacherBtn" class="bg-[color:var(--color-primary-light)] text-white p-2 rounded-md hover:bg-[color:var(--color-primary-light-hover)] transition duration-200"><i class="fas fa-plus"></i></button>
-                    </div>
-                </div>
-                <div>
-                    <label for="sessionTitleInput" class="block text-gray-700 font-medium mb-1">Título de la Sesión:</label>
-                    <input type="text" id="sessionTitleInput" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary-light)]">
-                </div>
-                <div>
-                    <label for="dateInput" class="block text-gray-700 font-medium mb-1">Fecha:</label>
-                    <input type="date" id="dateInput" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary-light)]">
-                </div>
-            </div>
+            </section>
 
-            <label for="rubricInput" class="block text-gray-700 font-medium mb-2">Pega aquí el texto CSV de tu rúbrica:</label>
-            <textarea id="rubricInput"
-                      class="w-full h-32 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary-light)] mb-4 text-sm"
-                      placeholder="Aspectos;Destacado (5);Logrado (4);Proceso (3);Inicio (2);Previo al Inicio (1)
-Contenido;La información es completa...;La información es clara...;..."></textarea>
-            <button id="loadRubricBtn"
-                    class="w-full bg-[color:var(--color-primary-dark)] text-white py-3 px-6 rounded-md shadow-md hover:bg-[color:var(--color-primary-dark-hover)] transition duration-300 ease-in-out font-semibold">
-                <i class="fas fa-file-import mr-2"></i>Cargar Rúbrica
-            </button>
-            <div id="rubricDisplay" class="mt-6 overflow-x-auto">
-                <!-- La rúbrica cargada y editable se mostrará aquí -->
-            </div>
-        </div>
+            <!-- Módulo de Gestión de Rúbricas -->
+            <section id="rubric" class="tab-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                    <i class="fas fa-table mr-2 text-indigo-600"></i> Gestionar Rúbrica
+                </h2>
+                <div class="mb-6">
+                    <label for="csv-input" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-paste mr-1 text-teal-500"></i> Pegar texto CSV (delimitado por ',') aquí:
+                    </label>
+                    <textarea id="csv-input" rows="8" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg" placeholder="Ejemplo:
+Aspectos,Destacado (5),Logrado (4),Proceso (3),Inicio (2),Previo al Inicio (1)
+Contenido,&quot;La información es completa, precisa, actualizada y altamente relevante para el tema tratado.&quot;,La información es clara...,Diseño funcional...,El mensaje es claro...,No contiene errores ortográficos...,Las fuentes están presentes...">
+</textarea>
+                    <button id="load-csv-btn" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-upload mr-2"></i> Cargar Rúbrica desde CSV
+                    </button>
+                    <button id="save-rubric-btn" class="mt-4 ml-3 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-save mr-2"></i> Guardar Rúbrica Actual
+                    </button>
+                </div>
 
-        <!-- Sección para Gestionar Lista de Estudiantes (Pantalla 2) -->
-        <div id="studentsScreen" class="screen bg-[color:var(--color-accent-light)] p-6 rounded-lg border border-[color:var(--color-accent-medium)]">
-            <h2 class="text-2xl font-semibold text-[color:var(--color-primary-dark)] mb-4"><i class="fas fa-users mr-2"></i>2. Gestionar Grupos de Estudiantes</h2>
+                <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                    <i class="fas fa-pencil-alt mr-2 text-blue-600"></i> Rúbrica Editable
+                </h3>
+                <div id="rubric-editor" class="overflow-x-auto bg-gray-50 p-4 rounded-lg shadow-inner">
+                    <!-- La tabla de la rúbrica se cargará aquí mediante JavaScript -->
+                    <p class="text-gray-500">Cargue una rúbrica desde CSV para empezar a editarla.</p>
+                </div>
+                <div class="mt-6 flex flex-wrap gap-4">
+                    <button id="add-aspect-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-plus-circle mr-2"></i> Añadir Aspecto
+                    </button>
+                    <button id="add-level-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-plus-circle mr-2"></i> Añadir Nivel
+                    </button>
+                    <button id="remove-last-aspect-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-minus-circle mr-2"></i> Eliminar Último Aspecto
+                    </button>
+                    <button id="remove-last-level-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-minus-circle mr-2"></i> Eliminar Último Nivel
+                    </button>
+                </div>
+            </section>
 
-            <div class="mb-6">
-                <label for="groupNameInput" class="block text-gray-700 font-medium mb-1">Nombre del Grupo:</label>
-                <input type="text" id="groupNameInput" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary-light)] mb-2" placeholder="Ej. Grupo A - 2025">
-                <label for="studentsInput" class="block text-gray-700 font-medium mb-1">Lista de Estudiantes (uno por línea):</label>
-                <textarea id="studentsInput"
-                          class="w-full h-24 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary-light)] mb-4 text-sm"
-                          placeholder="Juan Pérez
+            <!-- Módulo de Gestión de Estudiantes -->
+            <section id="students" class="tab-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                    <i class="fas fa-users mr-2 text-indigo-600"></i> Gestionar Listas de Estudiantes
+                </h2>
+                <div class="mb-6 p-4 border border-gray-200 rounded-lg shadow-sm">
+                    <label for="list-name" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-tag mr-1 text-purple-500"></i> Nombre de la Lista
+                    </label>
+                    <input type="text" id="list-name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg mb-4" placeholder="Ej: AULA 01">
+
+                    <label for="students-input" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-user-plus mr-1 text-green-500"></i> Pegar nombres de estudiantes (uno por línea o separados por coma):
+                    </label>
+                    <textarea id="students-input" rows="6" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg" placeholder="Juan Pérez
 María García
-Carlos Soto"></textarea>
-                <button id="saveStudentGroupBtn"
-                        class="w-full bg-[color:var(--color-primary-dark)] text-white py-3 px-6 rounded-md shadow-md hover:bg-[color:var(--color-primary-dark-hover)] transition duration-300 ease-in-out font-semibold">
-                    <i class="fas fa-save mr-2"></i>Guardar Grupo de Estudiantes
-                </button>
-                <p class="text-sm text-gray-600 mt-2">Puedes agregar o actualizar grupos. Se mostrarán en la pantalla "Lista Grupos".</p>
-            </div>
-        </div>
+Carlos López"></textarea>
+                    <button id="add-students-list-btn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Añadir Lista de Estudiantes
+                    </button>
+                </div>
 
-        <!-- Nueva Sección para Lista de Grupos (Pantalla 3) -->
-        <div id="listGroupsScreen" class="screen bg-[color:var(--color-accent-light)] p-6 rounded-lg border border-[color:var(--color-accent-medium)]">
-            <h2 class="text-2xl font-semibold text-[color:var(--color-primary-dark)] mb-4"><i class="fas fa-list-alt mr-2"></i>Lista de Grupos Guardados</h2>
-            <div id="studentGroupsListContainer"> <!-- Contenedor específico para la lista de grupos -->
-                <p id="noGroupsMessage" class="text-sm text-gray-500 text-center">No hay grupos de estudiantes guardados.</p>
-                <!-- Los divs de grupo se cargarán aquí dinámicamente -->
-            </div>
-        </div>
+                <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                    <i class="fas fa-list mr-2 text-blue-600"></i> Listas Existentes
+                </h3>
+                <div id="student-lists-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <p class="text-gray-500">No hay listas de estudiantes añadidas aún.</p>
+                </div>
+            </section>
 
-        <!-- Sección de Evaluación de Estudiantes (Pantalla 4) -->
-        <div id="evaluationScreen" class="screen bg-[color:var(--color-accent-light)] p-6 rounded-lg border border-[color:var(--color-accent-medium)]">
-            <h2 class="text-2xl font-semibold text-[color:var(--color-primary-dark)] mb-4"><i class="fas fa-marker mr-2"></i>3. Evaluar a <span id="currentStudentName" class="text-[color:var(--color-primary-dark)]"></span> del grupo <span id="currentGroupName" class="text-[color:var(--color-primary-dark)]"></span></h2>
-            <div id="studentSelectContainer" class="mb-4">
-                <label for="studentSelect" class="block text-gray-700 text-lg font-medium mb-2">Seleccionar Estudiante:</label>
-                <select id="studentSelect" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary-light)] text-base"></select>
-                <p id="noStudentsInGroupMessage" class="text-sm text-red-500 mt-2 hidden">No hay estudiantes en este grupo.</p>
-            </div>
+            <!-- Módulo de Evaluación de Alumnos -->
+            <section id="evaluate" class="tab-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                    <i class="fas fa-edit mr-2 text-indigo-600"></i> Evaluar Alumnos
+                </h2>
+                <div class="mb-6 flex flex-col md:flex-row items-center gap-4">
+                    <label for="select-student-list" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-list-alt mr-1 text-purple-500"></i> Seleccionar Lista:
+                    </label>
+                    <select id="select-student-list" class="mt-1 block w-full md:w-auto border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
+                        <option value="">-- Seleccionar Lista --</option>
+                    </select>
+                </div>
 
-            <div class="flex justify-between items-center bg-[color:var(--color-accent-medium)] p-3 rounded-md mb-4 font-semibold text-lg text-gray-800">
-                <span>Puntaje Total: <span id="totalScoreDisplay" class="text-[color:var(--color-primary-dark)]">0</span></span>
-                <span>Promedio: <span id="averageScoreDisplay" class="text-[color:var(--color-primary-dark)]">0.00</span></span>
-            </div>
+                <div id="evaluation-controls" class="mb-6 flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-sm hidden">
+                    <button id="prev-student-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-chevron-left mr-2"></i> Anterior
+                    </button>
+                    <span id="current-student-name" class="text-xl font-semibold text-indigo-700"></span>
+                    <button id="next-student-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        Siguiente <i class="fas fa-chevron-right ml-2"></i>
+                    </button>
+                </div>
 
-            <div id="studentRubricEvaluation" class="overflow-x-auto mb-6">
-                <!-- La rúbrica para evaluación del estudiante actual se renderizará aquí -->
-            </div>
-            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 md:space-x-4">
-                <button id="prevStudentBtn"
-                        class="w-full md:w-auto bg-gray-500 text-white py-3 px-6 rounded-md shadow-md hover:bg-gray-600 transition duration-300 ease-in-out font-semibold disabled:opacity-50">
-                    <i class="fas fa-arrow-left mr-2"></i>Anterior Estudiante
-                </button>
-                <button id="nextStudentBtn"
-                        class="w-full md:w-auto bg-[color:var(--color-primary-dark)] text-white py-3 px-6 rounded-md shadow-md hover:bg-[color:var(--color-primary-dark-hover)] transition duration-300 ease-in-out font-semibold disabled:opacity50">
-                    Siguiente Estudiante<i class="fas fa-arrow-right ml-2"></i>
-                </button>
-            </div>
-        </div>
+                <div id="evaluation-rubric-display" class="overflow-x-auto bg-gray-50 p-4 rounded-lg shadow-inner mt-4 hidden">
+                    <!-- La rúbrica para evaluación se renderizará aquí -->
+                </div>
 
-        <!-- Sección de Exportación de Evaluaciones (Pantalla 5) -->
-        <div id="exportScreen" class="screen bg-[color:var(--color-accent-light)] p-6 rounded-lg border border-[color:var(--color-accent-medium)]">
-            <h2 class="text-2xl font-semibold text-[color:var(--color-primary-dark)] mb-4"><i class="fas fa-file-export mr-2"></i>4. Exportar Evaluaciones</h2>
-            <button id="exportRubricsBtn"
-                    class="w-full bg-[color:var(--color-primary-dark)] text-white py-3 px-6 rounded-md shadow-md hover:bg-[color:var(--color-primary-dark-hover)] transition duration-300 ease-in-out font-semibold disabled:opacity-50">
-                <i class="fas fa-file-pdf mr-2"></i>Exportar Todas las Rúbricas a PDF
-            </button>
-            <p class="text-sm text-gray-600 mt-4 text-center">
-                Se generará un archivo PDF con una rúbrica por estudiante para el grupo actualmente seleccionado.
-            </p>
-        </div>
+                <div id="evaluation-summary" class="mt-6 p-4 bg-indigo-50 text-indigo-800 rounded-lg shadow-md hidden">
+                    <p class="text-lg font-semibold flex items-center">
+                        <i class="fas fa-star mr-2"></i> Puntaje Total: <span id="total-score" class="ml-2 font-bold">0</span>
+                    </p>
+                    <p class="text-lg font-semibold flex items-center">
+                        <i class="fas fa-calculator mr-2"></i> Promedio: <span id="average-score" class="ml-2 font-bold">0.00</span>
+                    </p>
+                </div>
 
-        <!-- Área de Mensajes para el Usuario -->
-        <div id="messageArea" class="mt-6 p-4 rounded-md text-sm text-center hidden"></div>
+                <div class="mt-8 hidden" id="save-evaluation-section">
+                    <!-- El botón de guardar individual se ha hecho menos prominente ya que el guardado es automático -->
+                    <button id="save-evaluation-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center" style="display: none;">
+                        <i class="fas fa-save mr-2"></i> Guardar Evaluación (Automático)
+                    </button>
+                    <button id="finish-evaluation-btn" class="ml-3 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i> Finalizar Evaluación y Exportar Todas
+                    </button>
+                </div>
+            </section>
+
+            <!-- Módulo de Exportación de Rúbricas -->
+            <section id="export" class="tab-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                    <i class="fas fa-file-export mr-2 text-indigo-600"></i> Exportar Rúbricas
+                </h2>
+                <div class="mb-6">
+                    <p class="text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-blue-500"></i> Seleccione una lista de estudiantes para exportar sus rúbricas evaluadas.
+                    </p>
+                    <label for="export-student-list" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-list-alt mr-1 text-purple-500"></i> Seleccionar Lista:
+                    </label>
+                    <select id="export-student-list" class="mt-1 block w-full md:w-auto border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
+                        <option value="">-- Seleccionar Lista --</option>
+                    </select>
+                </div>
+                <div class="mt-8 flex flex-wrap gap-4">
+                    <button id="export-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
+                        <i class="fas fa-file-pdf mr-2"></i> Exportar a PDF (Todas las Rúbricas)
+                    </button>
+                    <button id="export-odf-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center" disabled title="La exportación a ODF no está disponible en esta versión web.">
+                        <i class="fas fa-file-word mr-2"></i> Exportar a ODF (No disponible)
+                    </button>
+                </div>
+                <div class="mt-6 p-4 bg-red-100 text-red-800 rounded-lg shadow-md hidden" id="pdf-export-message">
+                    <p class="flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i> No hay evaluaciones disponibles para exportar para la lista seleccionada.
+                    </p>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <script>
-        // Variables globales para almacenar el estado de la aplicación
-        let rubricTemplate = [];
-        let rubricMetadata = {
-            institution: '',
-            course: '',
-            sessionTitle: '',
-            teacher: '',
-            date: ''
+    <!-- Modal de Mensajes (reemplaza a alert()) -->
+    <div id="message-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-message-modal">&times;</span>
+            <p id="modal-message" class="text-lg text-center font-semibold text-gray-800"></p>
+            <div class="flex justify-center mt-4">
+                <button id="modal-ok-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación (reemplaza a confirm()) -->
+    <div id="confirmation-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-confirmation-modal">&times;</span>
+            <p id="confirmation-message" class="text-lg text-center font-semibold text-gray-800"></p>
+            <div class="flex justify-center mt-4 space-x-4">
+                <button id="confirm-yes-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105">Sí</button>
+                <button id="confirm-no-button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de Firebase SDK y librerías externas -->
+    <script type="module">
+        // Importa los módulos necesarios de Firebase y otras librerías
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // html2canvas sigue siendo importado como módulo
+        import * as html2canvas from "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+
+        // Variables globales para instancias de Firebase y datos de usuario
+        let app;
+        let db;
+        let auth;
+        let currentUserId = null;
+        let isAuthReady = false; // Indica si la autenticación de Firebase está lista
+
+        // Variable global para el editor de rúbricas
+        let rubricEditor; 
+
+        // Estado global de la aplicación para gestionar los datos
+        let appState = {
+            config: {
+                institution: '',
+                course: '',
+                teacher: '',
+                date: '',
+                sessionTitle: '' // Título de la sesión (no persistente globalmente, se guarda con cada evaluación)
+            },
+            currentRubric: null, // Objeto de la rúbrica activa: { aspects: [], levels: [] }
+            studentLists: {}, // Objeto de listas de estudiantes: { listId: { name: '', students: [] } }
+            currentEvaluationListId: null, // ID de la lista de estudiantes actualmente seleccionada para evaluar
+            currentStudentIndex: 0, // Índice del estudiante actual en la lista de evaluación
+            evaluatedRubrics: {}, // Objeto de rúbricas evaluadas por estudiante: { studentId: { rubricData: {}, totalScore: 0, averageScore: 0, listName: '', config: {} } }
+            listEvaluations: {} // Objeto para organizar las evaluaciones por lista: { listId: { studentId: evaluationData } }
         };
-        let allStudentGroups = []; 
-        let currentStudentsInGroup = [];
-        let currentSelectedGroupName = '';
-        let currentStudentIndex = -1;
-        let currentScreenId = 'rubricScreen';
 
-        let persistentInstitutions = [];
-        let persistentCourses = [];
-        let persistentTeachers = [];
-        let evaluations = {};
+        // --- Funciones de Utilidad para Modales (mensajes y confirmaciones) ---
+        const messageModal = document.getElementById('message-modal');
+        const modalMessage = document.getElementById('modal-message');
+        const closeMessageModal = document.getElementById('close-message-modal');
+        const modalOkButton = document.getElementById('modal-ok-button');
 
-        // Obtener referencias a los elementos del DOM (Rubric Screen)
-        let rubricInput, loadRubricBtn, rubricDisplay, institutionSelect, newInstitutionInput, addInstitutionBtn;
-        let courseSelect, newCourseInput, addCourseBtn, teacherSelect, newTeacherInput, addTeacherBtn;
-        let sessionTitleInput, dateInput;
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmationMessage = document.getElementById('confirmation-message');
+        const closeConfirmationModal = document.getElementById('close-confirmation-modal');
+        const confirmYesButton = document.getElementById('confirm-yes-button');
+        const confirmNoButton = document.getElementById('confirm-no-button');
 
-        // Obtener referencias a los elementos del DOM (Students Screen)
-        let groupNameInput, studentsInput, saveStudentGroupBtn;
+        // Muestra un modal con un mensaje
+        function showMessage(message) {
+            modalMessage.textContent = message;
+            messageModal.style.display = 'flex';
+        }
 
-        // Obtener referencias a los elementos del DOM (List Groups Screen)
-        let studentGroupsListContainer; 
-        let noGroupsMessage; 
+        // Muestra un modal de confirmación con opciones Sí/No
+        function showConfirmation(message, onConfirm) {
+            confirmationMessage.textContent = message;
+            confirmationModal.style.display = 'flex';
 
-        // Obtener referencias a los elementos del DOM (Evaluation Screen)
-        let currentStudentNameSpan, currentGroupNameSpan, studentSelectContainer, studentSelect, noStudentsInGroupMessage;
-        let studentRubricEvaluationDiv, prevStudentBtn, nextStudentBtn;
-        let totalScoreDisplay, averageScoreDisplay;
+            const handleYes = () => {
+                onConfirm(true); // Llama a la función de callback con 'true' si se confirma
+                confirmationModal.style.display = 'none';
+                // Elimina los event listeners para evitar múltiples ejecuciones
+                confirmYesButton.removeEventListener('click', handleYes);
+                confirmNoButton.removeEventListener('click', handleNo);
+            };
 
-        // Obtener referencias a los elementos del DOM (Export Screen)
-        let exportRubricsBtn;
-        let messageArea;
+            const handleNo = () => {
+                onConfirm(false); // Llama a la función de callback con 'false' si se cancela
+                confirmationModal.style.display = 'none';
+                // Elimina los event listeners
+                confirmYesButton.removeEventListener('click', handleYes);
+                confirmNoButton.removeEventListener('click', handleNo);
+            };
 
-        // Referencias a los botones de navegación y las pantallas
-        let navButtons;
-        let screens;
+            confirmYesButton.addEventListener('click', handleYes);
+            confirmNoButton.addEventListener('click', handleNo);
+            closeConfirmationModal.addEventListener('click', handleNo); // Cerrar modal equivale a 'No'
+            window.addEventListener('click', (event) => {
+                if (event.target === confirmationModal) {
+                    handleNo(); // Clic fuera del modal equivale a 'No'
+                }
+            });
+        }
 
-        // Inicializar jsPDF
-        const { jsPDF } = window.jspdf;
+        // Event listeners para cerrar los modales de mensajes
+        closeMessageModal.addEventListener('click', () => messageModal.style.display = 'none');
+        modalOkButton.addEventListener('click', () => messageModal.style.display = 'none');
+        window.addEventListener('click', (event) => {
+            if (event.target === messageModal) {
+                messageModal.style.display = 'none';
+            }
+        });
 
-        /**
-         * Funciones para manejar localStorage
-         */
-        function saveToLocalStorage(key, data) {
+        // --- Inicialización de Firebase y Autenticación ---
+        window.onload = async function () {
+            // Se obtienen las variables globales de configuración de Firebase
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+            // Inicializa la aplicación de Firebase
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Inicializa rubricEditor como una variable global aquí
+            rubricEditor = document.getElementById('rubric-editor');
+
+            // Escucha cambios en el estado de autenticación del usuario
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUserId = user.uid; // Establece el ID de usuario si está autenticado
+                    document.getElementById('user-id-display').textContent = currentUserId; // Muestra el ID de usuario
+                    isAuthReady = true; // Marca que la autenticación está lista
+                    console.log("Firebase Auth Ready. User ID:", currentUserId);
+                    // Carga los datos persistentes una vez que el usuario está autenticado
+                    await loadAllPersistentData();
+                } else {
+                    // Si no hay usuario autenticado, intenta iniciar sesión anónimamente o con un token personalizado
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                        console.log("Signed in anonymously or with custom token.");
+                    } catch (error) {
+                        console.error("Error signing in:", error);
+                        showMessage("Error al iniciar sesión. Algunas funciones podrían no estar disponibles.");
+                    }
+                }
+            });
+        };
+
+        // --- Funciones de Persistencia (Firestore) ---
+        // Carga todos los datos persistentes del usuario desde Firestore
+        async function loadAllPersistentData() {
+            if (!currentUserId || !isAuthReady) {
+                console.warn("Firebase no está listo o el usuario no está autenticado. No se pueden cargar los datos.");
+                return;
+            }
+
             try {
-                localStorage.setItem(key, JSON.stringify(data));
-                console.log(`Saved to localStorage for key: ${key}. Data:`, data);
-            } catch (e) {
-                console.error('Error saving to localStorage:', e);
-                showMessage('Error al guardar datos. El almacenamiento local puede estar lleno.', 'error');
+                // Cargar configuración básica
+                const configDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/settings`, 'configDoc');
+                const configSnap = await getDoc(configDocRef);
+                if (configSnap.exists()) {
+                    appState.config = { ...appState.config, ...configSnap.data() }; // Fusiona la config cargada con la inicial
+                    document.getElementById('institution').value = appState.config.institution || '';
+                    document.getElementById('course').value = appState.config.course || '';
+                    document.getElementById('teacher').value = appState.config.teacher || '';
+                    document.getElementById('date').value = appState.config.date || '';
+                    console.log("Configuración cargada:", appState.config);
+                }
+
+                // Cargar rúbrica actual
+                const rubricDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/rubrics`, 'currentRubric');
+                const rubricSnap = await getDoc(rubricDocRef);
+                if (rubricSnap.exists()) {
+                    appState.currentRubric = rubricSnap.data();
+                    renderEditableRubric(); // Renderiza la rúbrica cargada
+                    console.log("Rúbrica cargada:", appState.currentRubric);
+                } else {
+                    appState.currentRubric = null;
+                    document.getElementById('rubric-editor').innerHTML = '<p class="text-gray-500">Cargue una rúbrica desde CSV para empezar a editarla.</p>';
+                }
+
+                // Cargar listas de estudiantes
+                appState.studentLists = {}; // Limpia las listas anteriores
+                const studentListsColRef = collection(db, `artifacts/${__app_id}/users/${currentUserId}/studentLists`);
+                const studentListsSnap = await getDocs(studentListsColRef);
+                studentListsSnap.forEach(docSnap => {
+                    appState.studentLists[docSnap.id] = docSnap.data();
+                });
+                renderStudentLists(); // Renderiza las listas de estudiantes
+                populateStudentListSelects(); // Rellena los selectores de listas de estudiantes
+                console.log("Listas de estudiantes cargadas:", appState.studentLists);
+
+                // Cargar todas las evaluaciones guardadas
+                appState.evaluatedRubrics = {};
+                appState.listEvaluations = {};
+                const evaluationsColRef = collection(db, `artifacts/${__app_id}/users/${currentUserId}/evaluations`);
+                const evaluationsSnap = await getDocs(evaluationsColRef);
+                evaluationsSnap.forEach(docSnap => {
+                    const evalData = docSnap.data();
+                    appState.evaluatedRubrics[docSnap.id] = evalData; // doc.id es studentId
+                    if (!appState.listEvaluations[evalData.listId]) {
+                        appState.listEvaluations[evalData.listId] = {};
+                    }
+                    appState.listEvaluations[evalData.listId][docSnap.id] = evalData;
+                });
+                console.log("Evaluaciones cargadas:", appState.evaluatedRubrics, appState.listEvaluations);
+
+            } catch (error) {
+                console.error("Error al cargar los datos persistentes:", error);
+                showMessage("Error al cargar los datos persistentes. " + error.message);
             }
         }
 
-        function loadFromLocalStorage(key) {
-            console.log(`Loading from localStorage for key: ${key}`);
+        // Guarda la configuración básica en Firestore
+        async function saveConfig() {
+            if (!currentUserId || !isAuthReady) {
+                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
+                return;
+            }
             try {
-                const data = localStorage.getItem(key);
-                console.log(`Loaded raw data for ${key}:`, data);
-                if (data) {
-                    const parsedData = JSON.parse(data);
-                    console.log(`Parsed data for ${key}:`, parsedData);
-                    return parsedData;
-                }
-                return null;
-            } catch (e) {
-                console.error(`Error loading from localStorage for key ${key}:`, e);
-                return null;
+                const configDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/settings`, 'configDoc');
+                // Actualiza el estado de la aplicación con los valores del formulario
+                appState.config.institution = document.getElementById('institution').value;
+                appState.config.course = document.getElementById('course').value;
+                appState.config.teacher = document.getElementById('teacher').value;
+                appState.config.date = document.getElementById('date').value;
+                // sessionTitle es un valor temporal para la sesión actual, no se guarda en Firestore directamente aquí
+                appState.config.sessionTitle = document.getElementById('session-title').value;
+
+                await setDoc(configDocRef, {
+                    institution: appState.config.institution,
+                    course: appState.config.course,
+                    teacher: appState.config.teacher,
+                    date: appState.config.date,
+                }, { merge: true }); // Usa merge para no sobrescribir otros campos si existieran
+                showMessage("Configuración guardada exitosamente!");
+                console.log("Configuración guardada:", appState.config);
+            } catch (error) {
+                console.error("Error al guardar la configuración:", error);
+                showMessage("Error al guardar la configuración: " + error.message);
             }
         }
 
-        /**
-         * Muestra un mensaje al usuario en el área de mensajes.
-         * @param {string} message - El mensaje a mostrar.
-         * @param {string} type - El tipo de mensaje ('success', 'error', 'info'). Determina el color del fondo.
-         */
-        function showMessage(message, type = 'info') {
-            const messageArea = document.getElementById('messageArea');
-            if (!messageArea) return;
-            messageArea.textContent = message;
-            messageArea.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
-            if (type === 'error') {
-                messageArea.classList.add('bg-red-100', 'text-red-700');
-            } else if (type === 'success') {
-                messageArea.classList.add('bg-green-100', 'text-green-700');
-            } else {
-                messageArea.classList.add('bg-blue-100', 'text-blue-700');
+        // Guarda la rúbrica actual en Firestore
+        async function saveRubric() {
+            if (!currentUserId || !isAuthReady) {
+                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
+                return;
             }
-            messageArea.classList.remove('hidden');
+            if (!appState.currentRubric) {
+                showMessage("No hay rúbrica para guardar. Cargue o cree una primero.");
+                return;
+            }
+            try {
+                // Asegura que los datos de la rúbrica estén actualizados desde el editor antes de guardar
+                updateRubricFromEditor();
+                const rubricDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/rubrics`, 'currentRubric');
+                // Se hace una copia profunda para evitar problemas con referencias a objetos mutables
+                await setDoc(rubricDocRef, JSON.parse(JSON.stringify(appState.currentRubric)));
+                showMessage("Rúbrica guardada exitosamente!");
+                console.log("Rúbrica guardada:", appState.currentRubric);
+            } catch (error) {
+                console.error("Error al guardar la rúbrica:", error);
+                showMessage("Error al guardar la rúbrica: " + error.message);
+            }
         }
 
-        /**
-         * Rellena un elemento <select> con opciones de una lista.
-         * @param {HTMLSelectElement} selectElement - El elemento <select> a rellenar.
-         * @param {Array<string>} items - La lista de elementos a añadir como opciones.
-         */
-        function populateSelect(selectElement, items) {
-            if (!selectElement) return;
-            selectElement.innerHTML = '';
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = '-- Seleccionar --';
-            selectElement.appendChild(defaultOption);
-
-            items.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item;
-                option.textContent = item;
-                selectElement.appendChild(option);
-            });
-        }
-
-        /**
-         * Renderiza los elementos de la lista de grupos de estudiantes.
-         * Esta función ahora trabaja con allStudentGroups y renderiza divs.
-         */
-        function renderAllStudentGroups() {
-            const container = document.getElementById('studentGroupsListContainer');
-            const msgNoGroups = document.getElementById('noGroupsMessage');
-            const navEvaluateButton = document.getElementById('navEvaluate');
-            const navExportButton = document.getElementById('navExport');
-
-            console.log("renderAllStudentGroups called. Student groups:", allStudentGroups.length, allStudentGroups);
-
-            if (!container || !msgNoGroups || !navEvaluateButton || !navExportButton) {
-                console.warn("Elementos DOM para la lista de grupos no listos. Saltando renderización.");
+        // Guarda una nueva lista de estudiantes en Firestore
+        async function saveStudentList(listName, students) {
+            if (!currentUserId || !isAuthReady) {
+                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
+                return;
+            }
+            if (!listName || students.length === 0) {
+                showMessage("El nombre de la lista y los estudiantes son obligatorios.");
                 return;
             }
 
-            // Limpiar el contenedor completamente antes de volver a renderizar
-            container.innerHTML = ''; 
-
-            if (allStudentGroups.length === 0) {
-                noGroupsMessage.classList.remove('hidden'); 
-                navEvaluateButton.disabled = true;
-                navEvaluateButton.classList.remove('bg-[color:var(--color-primary-dark)]', 'text-white', 'hover:bg-[color:var(--color-primary-dark-hover)]');
-                navEvaluateButton.classList.add('bg-[color:var(--color-gray-dark)]', 'text-[color:var(--color-gray-text)]', 'cursor-not-allowed');
-                
-                navExportButton.disabled = true;
-                navExportButton.classList.remove('bg-[color:var(--color-primary-dark)]', 'text-white', 'hover:bg-[color:var(--color-primary-dark-hover)]');
-                navExportButton.classList.add('bg-[color:var(--color-gray-dark)]', 'text-[color:var(--color-gray-text)]', 'cursor-not-allowed');
-
-                container.appendChild(msgNoGroups);
-                console.log("renderAllStudentGroups: No groups, noGroupsMessage is VISIBLE.");
-                return;
-            } else {
-                noGroupsMessage.classList.add('hidden');
-                enableNavButton(navEvaluateButton);
-                enableNavButton(navExportButton); // Enable export button here too
-                console.log("renderAllStudentGroups: Groups found, noGroupsMessage is HIDDEN, navEvaluate is ENABLED.");
-            }
-
-            allStudentGroups.forEach(group => {
-                const groupDiv = document.createElement('div');
-                groupDiv.className = 'student-group-item'; // Clase para los estilos de item de grupo
-                groupDiv.dataset.groupId = group.id;
-
-                const nameElement = document.createElement('span');
-                nameElement.className = 'flex-grow text-lg font-medium text-gray-800';
-                nameElement.textContent = group.groupName;
-
-                const studentCountElement = document.createElement('span');
-                studentCountElement.className = 'text-sm text-gray-600 md:ml-4';
-                studentCountElement.textContent = `${group.students.length} estudiantes`;
-
-                const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'flex space-x-2 ml-auto mt-2 md:mt-0';
-
-                const loadBtn = document.createElement('button');
-                loadBtn.className = 'bg-[color:var(--color-primary-light)] text-white py-1 px-3 rounded-md hover:bg-[color:var(--color-primary-light-hover)] transition duration-200 text-sm font-semibold';
-                loadBtn.innerHTML = '<i class="fas fa-folder-open mr-1"></i> Cargar';
-                loadBtn.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    loadStudentGroupForEvaluation(group.id); // Renombrado para claridad
-                    showScreen('evaluationScreen');
-                    console.log("Load button clicked for group:", group.groupName);
-                });
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition duration-200 text-sm font-semibold';
-                deleteBtn.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Eliminar';
-                deleteBtn.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    if (confirm(`¿Estás seguro de que quieres eliminar el grupo "${group.groupName}" y sus evaluaciones asociadas?`)) {
-                        deleteStudentGroup(group.id);
-                        console.log("Delete button clicked for group:", group.groupName);
-                    }
-                });
-
-                actionsDiv.appendChild(loadBtn);
-                actionsDiv.appendChild(deleteBtn);
-
-                groupDiv.appendChild(nameElement);
-                groupDiv.appendChild(studentCountElement);
-                groupDiv.appendChild(actionsDiv);
-
-                container.appendChild(groupDiv); // Añadir el div de grupo al contenedor de lista
-                console.log("Group div appended for group:", group.groupName);
-
-                if (group.groupName === currentSelectedGroupName) {
-                    groupDiv.classList.add('selected-group');
-                }
-            });
-            console.log("renderAllStudentGroups finished.");
-        }
-
-        /**
-         * Carga los datos persistentes (instituciones, cursos, docentes, grupos de estudiantes y evaluaciones) de localStorage.
-         */
-        function loadPersistentData() {
-            console.log("loadPersistentData called.");
-
-            persistentInstitutions = loadFromLocalStorage('persistentInstitutions') || [];
-            populateSelect(document.getElementById('institutionSelect'), persistentInstitutions);
-
-            persistentCourses = loadFromLocalStorage('persistentCourses') || [];
-            populateSelect(document.getElementById('courseSelect'), persistentCourses);
-
-            persistentTeachers = loadFromLocalStorage('persistentTeachers') || [];
-            populateSelect(document.getElementById('teacherSelect'), persistentTeachers);
-
-            // Cargar grupos de estudiantes
-            allStudentGroups = loadFromLocalStorage('allStudentGroups') || []; // Usar el nuevo nombre de la clave
-            renderAllStudentGroups(); // Renderizar los grupos cargados al inicio
-
-            // Cargar evaluaciones
-            evaluations = loadFromLocalStorage('evaluations') || {};
-
-            console.log("Data loaded from localStorage.");
-        }
-
-        /**
-         * Actualiza los metadatos de la rúbrica desde los campos de entrada.
-         */
-        function updateRubricMetadata() {
-            rubricMetadata.institution = institutionSelect ? institutionSelect.value : '';
-            rubricMetadata.course = courseSelect ? courseSelect.value : '';
-            rubricMetadata.sessionTitle = sessionTitleInput ? sessionTitleInput.value : '';
-            rubricMetadata.teacher = teacherSelect ? teacherSelect.value : '';
-            rubricMetadata.date = dateInput ? dateInput.value : '';
-        }
-
-        /**
-         * Carga la rúbrica desde el textarea y la muestra.
-         */
-        function loadRubricBtnHandler() {
-            const csvText = rubricInput.value;
-            rubricTemplate = parseCSV(csvText);
-            if (rubricTemplate.length > 0 && rubricTemplate[0].length > 0) {
-                renderRubricTable(rubricTemplate, rubricDisplay, true, false);
-                showMessage('Rúbrica cargada y editable.', 'success');
-                const navStudentsButton = document.getElementById('navStudents');
-                if(navStudentsButton) enableNavButton(navStudentsButton);
-                const navGroupsListButton = document.getElementById('navGroupsList'); // Habilitar nuevo botón
-                if(navGroupsListButton) enableNavButton(navGroupsListButton);
-                const navEvaluateButton = document.getElementById('navEvaluate');
-                if(navEvaluateButton) enableNavButton(navEvaluateButton);
-                const navExportButton = document.getElementById('navExport');
-                if(navExportButton) enableNavButton(navExportButton);
-
-                updateRubricMetadata();
-            } else {
-                rubricDisplay.innerHTML = '<p class="text-center text-red-500">No se pudo cargar la rúbrica. Asegúrate de que el formato CSV sea correcto y no esté vacío.</p>';
-                showMessage('Error al cargar la rúbrica. Verifica el formato.', 'error');
-                
-                const navStudentsButton = document.getElementById('navStudents');
-                if(navStudentsButton) {
-                    navStudentsButton.disabled = true;
-                    navStudentsButton.classList.remove('bg-[color:var(--color-primary-dark)]', 'text-white', 'hover:bg-[color:var(--color-primary-dark-hover)]');
-                    navStudentsButton.classList.add('bg-[color:var(--color-gray-dark)]', 'text-[color:var(--color-gray-text)]', 'cursor-not-allowed');
-                }
-                const navGroupsListButton = document.getElementById('navGroupsList'); // Deshabilitar nuevo botón
-                if(navGroupsListButton) {
-                    navGroupsListButton.disabled = true;
-                    navGroupsListButton.classList.remove('bg-[color:var(--color-primary-dark)]', 'text-white', 'hover:bg-[color:var(--color-primary-dark-hover)]');
-                    navGroupsListButton.classList.add('bg-[color:var(--color-gray-dark)]', 'text-[color:var(--color-gray-text)]', 'cursor-not-allowed');
-                }
-                const navEvaluateButton = document.getElementById('navEvaluate');
-                if(navEvaluateButton) {
-                    navEvaluateButton.disabled = true;
-                    navEvaluateButton.classList.remove('bg-[color:var(--color-primary-dark)]', 'text-white', 'hover:bg-[color:var(--color-primary-dark-hover)]');
-                    navEvaluateButton.classList.add('bg-[color:var(--color-gray-dark)]', 'text-[color:var(--color-gray-text)]', 'cursor-not-allowed');
-                }
-                const navExportButton = document.getElementById('navExport');
-                if(navExportButton) {
-                    navExportButton.disabled = true;
-                    navExportButton.classList.remove('bg-[color:var(--color-primary-dark)]', 'text-white', 'hover:bg-[color:var(--color-primary-dark-hover)]');
-                    navExportButton.classList.add('bg-[color:var(--color-gray-dark)]', 'text-[color:var(--color-gray-text)]', 'cursor-not-allowed');
-                }
+            // Genera un ID único para la lista de estudiantes
+            const listId = `list_${Date.now()}`;
+            try {
+                const listDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/studentLists`, listId);
+                await setDoc(listDocRef, { name: listName, students: students });
+                appState.studentLists[listId] = { name: listName, students: students };
+                renderStudentLists(); // Actualiza la visualización de listas
+                populateStudentListSelects(); // Actualiza los selectores de listas
+                showMessage(`Lista '${listName}' guardada exitosamente!`);
+                console.log("Lista de estudiantes guardada:", appState.studentLists[listId]);
+            } catch (error) {
+                console.error("Error al guardar la lista de estudiantes:", error);
+                showMessage("Error al guardar la lista de estudiantes: " + error.message);
             }
         }
 
-        /**
-         * Parsea el texto CSV en una matriz 2D.
-         * Detecta automáticamente el delimitador (punto y coma o coma).
-         * @param {string} csvText - El texto en formato CSV.
-         * @returns {Array<Array<string>>} Una matriz 2D que representa los datos CSV.
-         */
-        function parseCSV(csvText) {
-            const lines = csvText.trim().split('\n').filter(line => line.trim() !== '');
-            if (lines.length === 0) return [];
-
-            let delimiter = ';';
-            if (lines[0].indexOf(';') === -1 && lines[0].indexOf(',') !== -1) {
-                delimiter = ',';
-            }
-
-            function splitLine(line, delimiterChar) {
-                const result = [];
-                let inQuote = false;
-                let currentCell = '';
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    if (char === '"') {
-                        inQuote = !inQuote;
-                        if (inQuote && line[i+1] === '"') {
-                           currentCell += '"';
-                           i++;
-                        }
-                    } else if (char === delimiterChar && !inQuote) {
-                        result.push(currentCell.trim());
-                        currentCell = '';
-                    } else {
-                        currentCell += char;
-                    }
-                }
-                result.push(currentCell.trim());
-                return result;
-            }
-            return lines.map(line => splitLine(line, delimiter));
-        }
-
-        /**
-         * Crea una tabla HTML editable a partir de una matriz 2D de datos de rúbrica.
-         * @param {Array<Array<string>>} data - Los datos de la rúbrica (incluyendo encabezados).
-         * @param {HTMLElement} targetDiv - El div donde se renderizará la tabla.
-         * @param {boolean} editable - Si las celdas de la tabla deben ser editables (`contenteditable`).
-         * @param {boolean} selectableScores - Si las celdas de puntuación deben ser clickeables para selección.
-         */
-        function renderRubricTable(data, targetDiv, editable = true, selectableScores = false) {
-            if (!targetDiv) return;
-            targetDiv.innerHTML = '';
-            if (data.length === 0 || data[0].length === 0) {
-                targetDiv.innerHTML = '<p class="text-center text-gray-500">No hay rúbrica para mostrar.</p>';
+        // Elimina una lista de estudiantes de Firestore
+        async function deleteStudentList(listId) {
+            if (!currentUserId || !isAuthReady) {
+                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
                 return;
             }
-
-            const table = document.createElement('table');
-            table.className = 'min-w-full divide-y divide-gray-200 border border-gray-300 rounded-md';
-
-            const thead = document.createElement('thead');
-            thead.className = 'bg-[color:var(--color-accent-medium)]';
-            const headerRow = document.createElement('tr');
-            data[0].forEach(headerText => {
-                const th = document.createElement('th');
-                th.className = 'px-4 py-2 text-left text-sm font-medium text-[color:var(--color-primary-dark)] uppercase tracking-wider border-r border-gray-200 last:border-r-0';
-                th.textContent = headerText;
-                headerRow.appendChild(th);
+            // Solicita confirmación antes de eliminar
+            showConfirmation(`¿Está seguro que desea eliminar la lista de estudiantes '${appState.studentLists[listId].name}'?`, async (confirmed) => {
+                if (confirmed) {
+                    try {
+                        const listDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/studentLists`, listId);
+                        await deleteDoc(listDocRef); // Elimina el documento de Firestore
+                        delete appState.studentLists[listId]; // Elimina del estado de la aplicación
+                        renderStudentLists(); // Actualiza la visualización
+                        populateStudentListSelects(); // Actualiza los selectores
+                        showMessage("Lista eliminada exitosamente!");
+                        console.log("Lista de estudiantes eliminada:", listId);
+                    } catch (error) {
+                        console.error("Error al eliminar la lista de estudiantes:", error);
+                        showMessage("Error al eliminar la lista de estudiantes: " + error.message);
+                    }
+                }
             });
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-
-            const tbody = document.createElement('tbody');
-            tbody.className = 'bg-white divide-y divide-gray-200';
-            for (let i = 1; i < data.length; i++) {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                data[i].forEach((cellText, cellIndex) => {
-                    const td = document.createElement('td');
-                    td.className = 'px-4 py-3 whitespace-pre-wrap text-sm text-gray-800 border-r border-gray-200 last:border-r-0';
-                    if (editable) {
-                        td.contentEditable = 'true';
-                        td.spellcheck = false;
-                        td.setAttribute('data-row', i);
-                        td.setAttribute('data-col', cellIndex);
-                    }
-                    td.textContent = cellText;
-
-                    if (selectableScores && cellIndex > 0) {
-                        td.classList.add('rubric-score-cell');
-                        td.addEventListener('click', (event) => {
-                            const selectedTd = event.currentTarget;
-                            const rowElement = selectedTd.closest('tr');
-                            rowElement.querySelectorAll('.rubric-score-cell').forEach(cell => {
-                                cell.classList.remove('selected');
-                            });
-                            selectedTd.classList.add('selected');
-
-                            const studentName = currentStudentsInGroup[currentStudentIndex];
-                            if (!evaluations[currentSelectedGroupName]) {
-                                evaluations[currentSelectedGroupName] = {};
-                            }
-                            if (!evaluations[currentSelectedGroupName][studentName]) {
-                                evaluations[currentSelectedGroupName][studentName] = {
-                                    rubricMetadata: { ...rubricMetadata },
-                                    scores: {}
-                                };
-                            }
-
-                            const aspect = data[i][0];
-                            const scoreHeader = data[0][cellIndex];
-                            const scoreMatch = scoreHeader.match(/\((\d+)\)/);
-                            const score = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
-                            const description = cellText;
-
-                            evaluations[currentSelectedGroupName][studentName].scores[aspect] = { score: score, description: description };
-                            saveToLocalStorage('evaluations', evaluations);
-                            updateScoreDisplays();
-                        });
-                    }
-                    row.appendChild(td);
-                });
-                tbody.appendChild(row);
-            }
-            table.appendChild(tbody);
-            targetDiv.appendChild(table);
-
-            if (editable) {
-                table.addEventListener('input', (event) => {
-                    const target = event.target;
-                    if (target.contentEditable === 'true') {
-                        const row = parseInt(target.getAttribute('data-row'), 10);
-                        const col = parseInt(target.getAttribute('data-col'), 10);
-                        rubricTemplate[row][col] = target.textContent;
-                        showMessage('Rúbrica actualizada. Cualquier cambio afectará a futuras evaluaciones.', 'info');
-                    }
-                });
-            }
         }
 
-        /**
-         * Maneja la visibilidad de las pantallas y el estilo del botón de navegación activo.
-         * @param {string} screenId - El ID de la pantalla a mostrar.
-         */
-        function showScreen(screenId) {
-            if (!navButtons || !screens) {
-                console.warn("Botones de navegación o pantallas no inicializados.");
+        // Guarda la evaluación de un estudiante en Firestore
+        async function saveStudentEvaluation(studentId, evaluationData) {
+            if (!currentUserId || !isAuthReady) {
+                // No mostrar mensaje, ya que esto se llamará automáticamente
+                console.warn("Intento de guardar evaluación sin usuario autenticado. Skipping.");
                 return;
             }
-
-            screens.forEach(screen => {
-                screen.classList.remove('active');
-                screen.style.display = 'none';
-            });
-            const targetScreen = document.getElementById(screenId);
-            if (targetScreen) {
-                targetScreen.classList.add('active');
-                targetScreen.style.display = 'block';
-            }
-
-            currentScreenId = screenId;
-
-            navButtons.forEach(button => {
-                button.classList.remove('bg-[color:var(--color-primary-dark)]', 'text-white', 'hover:bg-[color:var(--color-primary-dark-hover)]');
-                button.classList.remove('bg-[color:var(--color-accent-medium)]', 'text-gray-800', 'hover:bg-[color:var(--color-accent-medium-hover)]');
-
-                if (!button.disabled) {
-                     button.classList.add('bg-[color:var(--color-accent-medium)]', 'text-gray-800', 'hover:bg-[color:var(--color-accent-medium-hover)]');
-                } else {
-                    button.classList.add('bg-[color:var(--color-gray-dark)]', 'text-[color:var(--color-gray-text)]', 'cursor-not-allowed');
+            try {
+                const evaluationDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/evaluations`, studentId);
+                await setDoc(evaluationDocRef, JSON.parse(JSON.stringify(evaluationData))); // Guarda una copia profunda
+                appState.evaluatedRubrics[studentId] = evaluationData; // Actualiza el estado global
+                // Organiza la evaluación por lista para facilitar el acceso
+                if (!appState.listEvaluations[evaluationData.listId]) {
+                    appState.listEvaluations[evaluationData.listId] = {};
                 }
-
-                if (button.dataset.screen === screenId) {
-                    button.classList.remove('bg-[color:var(--color-accent-medium)]', 'text-gray-800', 'hover:bg-[color:var(--color-accent-medium-hover)]');
-                    button.classList.remove('bg-[color:var(--color-gray-dark)]', 'text-[color:var(--color-gray-text)]', 'cursor-not-allowed');
-                    button.classList.add('bg-[color:var(--color-primary-dark)]', 'text-white', 'hover:bg-[color:var(--color-primary-dark-hover)]');
-                }
-            });
-            if(messageArea) messageArea.classList.add('hidden');
-
-            if (screenId === 'evaluationScreen') {
-                if (currentSelectedGroupName && currentStudentsInGroup.length > 0) {
-                    if (currentStudentIndex === -1) {
-                         currentStudentIndex = 0;
-                    }
-                    if(studentSelect) studentSelect.value = currentStudentIndex;
-                    loadStudentForEvaluation(currentStudentIndex);
-                } else if (allStudentGroups.length > 0) {
-                    showMessage('Selecciona un grupo de estudiantes primero.', 'info');
-                    showScreen('listGroupsScreen');
-                } else {
-                    showMessage('Carga una rúbrica y grupos de estudiantes primero.', 'info');
-                    showScreen('rubricScreen');
-                }
-            } else if (screenId === 'listGroupsScreen') {
-                renderAllStudentGroups();
+                appState.listEvaluations[evaluationData.listId][studentId] = evaluationData;
+                console.log("Evaluación guardada automáticamente para el estudiante:", studentId, evaluationData);
+            } catch (error) {
+                console.error("Error al guardar la evaluación automáticamente:", error);
+                // Mostrar mensaje de error si el guardado automático falla
+                showMessage("Error al guardar la evaluación automáticamente: " + error.message);
             }
         }
 
-        /**
-         * Habilita un botón de navegación.
-         * @param {HTMLElement} buttonElement - El elemento del botón a habilitar.
-         */
-        function enableNavButton(buttonElement) {
-            if (!buttonElement) return;
-            buttonElement.disabled = false;
-            buttonElement.classList.remove('bg-[color:var(--color-gray-dark)]', 'text-[color:var(--color-gray-text)]', 'cursor-not-allowed');
-            // Aplicar el estilo por defecto de botón habilitado, si no es la pantalla activa
-            if (buttonElement.dataset.screen !== currentScreenId) {
-                buttonElement.classList.add('bg-[color:var(--color-accent-medium)]', 'text-gray-800', 'hover:bg-[color:var(--color-accent-medium-hover)]');
-            } else { // Si es la pantalla activa, aplicar el estilo de botón activo
-                buttonElement.classList.add('bg-[color:var(--color-primary-dark)]', 'text-white', 'hover:bg-[color:var(--color-primary-dark-hover)]');
-            }
-        }
+        // --- Navegación entre Pestañas ---
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Elimina la clase 'active' de todos los botones y oculta todos los contenidos
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
 
-        /**
-         * Actualiza los metadatos de la rúbrica desde los campos de entrada.
-         */
-        function updateRubricMetadata() {
-            rubricMetadata.institution = institutionSelect ? institutionSelect.value : '';
-            rubricMetadata.course = courseSelect ? courseSelect.value : '';
-            rubricMetadata.sessionTitle = sessionTitleInput ? sessionTitleInput.value : '';
-            rubricMetadata.teacher = teacherSelect ? teacherSelect.value : '';
-            rubricMetadata.date = dateInput ? dateInput.value : '';
-        }
+                // Agrega la clase 'active' al botón clickeado y muestra su contenido
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.remove('hidden');
 
-        /**
-         * Adds a new persistent item to a list and saves it to localStorage.
-         * @param {string} storageKey - The key for localStorage (e.g., 'persistentInstitutions').
-         * @param {Array<string>} listArray - The array to add the item to (e.g., persistentInstitutions).
-         * @param {HTMLInputElement} inputElement - The input field where the new item name is typed.
-         * @param {HTMLSelectElement} selectElement - The select dropdown to update.
-         */
-        function addPersistentItem(storageKey, listArray, inputElement, selectElement) {
-            const newItem = inputElement.value.trim();
-            if (newItem && !listArray.includes(newItem)) {
-                listArray.push(newItem);
-                listArray.sort();
-                populateSelect(selectElement, listArray);
-                saveToLocalStorage(storageKey, listArray);
-                selectElement.value = newItem;
-                inputElement.value = '';
-                updateRubricMetadata();
-            } else if (newItem) {
-                showMessage(`El elemento "${newItem}" ya existe.`, 'info');
-            }
-        }
-
-        /**
-         * Carga un grupo de estudiantes y los prepara para la evaluación.
-         * Esta función ha sido renombrada para mayor claridad.
-         * @param {string} groupId - El ID del grupo a cargar.
-         */
-        function loadStudentGroupForEvaluation(groupId) {
-            const selectedGroup = allStudentGroups.find(g => g.id === groupId);
-            if (selectedGroup) {
-                currentSelectedGroupName = selectedGroup.groupName;
-                currentStudentsInGroup = selectedGroup.students;
-                currentStudentIndex = 0;
-
-                if(currentGroupNameSpan) currentGroupNameSpan.textContent = currentSelectedGroupName;
-
-                if(studentSelect) studentSelect.innerHTML = '';
-                if (currentStudentsInGroup.length > 0) {
-                    currentStudentsInGroup.forEach((student, index) => {
-                        const option = document.createElement('option');
-                        option.value = index;
-                        option.textContent = student;
-                        if(studentSelect) studentSelect.appendChild(option);
-                    });
-                    if(studentSelectContainer) studentSelectContainer.classList.remove('hidden');
-                    if(noStudentsInGroupMessage) noStudentsInGroupMessage.classList.add('hidden');
-                    loadStudentForEvaluation(currentStudentIndex);
-                } else {
-                    if(studentSelectContainer) studentSelectContainer.classList.add('hidden');
-                    if(noStudentsInGroupMessage) noStudentsInGroupMessage.classList.remove('hidden');
-                    showMessage('El grupo seleccionado no tiene estudiantes.', 'info');
-                    if(studentRubricEvaluationDiv) studentRubricEvaluationDiv.innerHTML = '<p class="text-center text-gray-500">Carga un grupo con estudiantes para comenzar a evaluar.</p>';
-                    if(currentStudentNameSpan) currentStudentNameSpan.textContent = 'N/A';
-                    updateNavigationButtons();
+                // Acciones específicas al cambiar de pestaña
+                if (button.dataset.tab === 'evaluate') {
+                    populateStudentListSelects(); // Actualiza el selector de listas para evaluación
+                } else if (button.dataset.tab === 'export') {
+                    populateStudentListSelects('export'); // Actualiza los selectores de listas para exportación
                 }
-                showMessage(`Grupo "${currentSelectedGroupName}" cargado.`, 'success');
-            } else {
-                showMessage('Grupo no encontrado.', 'error');
-            }
-        }
-
-        /**
-         * Elimina un grupo de estudiantes de localStorage.
-         * Esta función ahora trabaja con allStudentGroups.
-         * @param {string} groupId - El ID del grupo a eliminar.
-         */
-        function deleteStudentGroup(groupId) {
-            const groupToDelete = allStudentGroups.find(g => g.id === groupId);
-            if (!groupToDelete) {
-                showMessage('Grupo no encontrado para eliminar.', 'error');
-                return;
-            }
-
-            allStudentGroups = allStudentGroups.filter(g => g.id !== groupId);
-            saveToLocalStorage('allStudentGroups', allStudentGroups); // Guardar lista actualizada
-
-            if (evaluations[groupToDelete.groupName]) {
-                delete evaluations[groupToDelete.groupName];
-                saveToLocalStorage('evaluations', evaluations);
-            }
-
-            showMessage('Grupo eliminado con éxito.', 'success');
-            renderAllStudentGroups(); // Re-renderizar la lista de grupos
-
-            if (currentSelectedGroupName === groupToDelete.groupName) {
-                currentSelectedGroupName = '';
-                currentStudentsInGroup = [];
-                currentStudentIndex = -1;
-                if(studentSelect) studentSelect.innerHTML = '';
-                if(currentStudentNameSpan) currentStudentNameSpan.textContent = '';
-                if(currentGroupNameSpan) currentGroupNameSpan.textContent = '';
-                if(studentRubricEvaluationDiv) studentRubricEvaluationDiv.innerHTML = '';
-                if(noStudentsInGroupMessage) noStudentsInGroupMessage.classList.remove('hidden');
-                if(studentSelectContainer) studentSelectContainer.classList.add('hidden');
-                updateNavigationButtons();
-                updateScoreDisplays();
-            }
-        }
-
-        /**
-         * Guarda la evaluación de un estudiante en localStorage.
-         * @param {string} studentName - Nombre del estudiante.
-         * @param {string} groupName - Nombre del grupo al que pertenece el estudiante.
-         * @param {object} evaluationData - Los datos completos de la evaluación para el estudiante (metadatos de rúbrica y scores).
-         */
-        function saveEvaluationToLocalStorage(studentName, groupName, evaluationData) {
-            if (!evaluations[groupName]) {
-                evaluations[groupName] = {};
-            }
-            evaluations[groupName][studentName] = evaluationData;
-            saveToLocalStorage('evaluations', evaluations);
-            console.log(`Evaluación de ${studentName} en ${groupName} guardada en localStorage.`);
-        }
-
-        /**
-         * Carga la evaluación de un estudiante desde localStorage (si existe).
-         * @param {string} studentName - Nombre del estudiante.
-         * @param {string} groupName - Nombre del grupo.
-         * @returns {object|null} La evaluación del estudiante o null si no existe.
-         */
-        function loadEvaluationFromLocalStorage(studentName, groupName) {
-            const allEvaluations = loadFromLocalStorage('evaluations') || {};
-            return allEvaluations[groupName]?.[studentName] || null;
-        }
-
-        /**
-         * Actualiza el estado de los botones de navegación (anterior/siguiente estudiante).
-         */
-        function updateNavigationButtons() {
-            if(prevStudentBtn) prevStudentBtn.disabled = currentStudentIndex <= 0;
-            if(nextStudentBtn) nextStudentBtn.disabled = currentStudentIndex >= currentStudentsInGroup.length - 1;
-        }
-
-        /**
-         * Calcula y actualiza los displays de puntaje total y promedio.
-         * @param {string} studentName - El nombre del estudiante actual.
-         * @param {string} groupName - El nombre del grupo actual.
-         */
-        function updateScoreDisplays() {
-            const studentName = currentStudentsInGroup[currentStudentIndex];
-            // Asegurarse de cargar la evaluación más reciente para el estudiante y grupo actuales
-            const currentStudentEvaluation = loadEvaluationFromLocalStorage(studentName, currentSelectedGroupName);
-
-            let totalScore = 0;
-            if (currentStudentEvaluation && currentStudentEvaluation.scores) {
-                Object.values(currentStudentEvaluation.scores).forEach(scoreItem => {
-                    if (typeof scoreItem.score === 'number') {
-                        totalScore += scoreItem.score;
-                    }
-                });
-            }
-
-            const numberOfAspects = rubricTemplate.length > 1 ? rubricTemplate.length - 1 : 0;
-            const averageScore = numberOfAspects > 0 ? (totalScore / numberOfAspects).toFixed(2) : '0.00';
-
-            if(totalScoreDisplay) totalScoreDisplay.textContent = totalScore;
-            if(averageScoreDisplay) averageScoreDisplay.textContent = averageScore;
-        }
-
-        /**
-         * Carga la rúbrica para que el estudiante seleccionado sea evaluado.
-         * @param {number} index - El índice del estudiante en el array `currentStudentsInGroup`.
-         */
-        async function loadStudentForEvaluation(index) {
-            if (index < 0 || index >= currentStudentsInGroup.length) {
-                updateScoreDisplays();
-                return;
-            }
-
-            currentStudentIndex = index;
-            const studentName = currentStudentsInGroup[currentStudentIndex];
-            if(currentStudentNameSpan) currentStudentNameSpan.textContent = studentName;
-
-            renderRubricTable(rubricTemplate, studentRubricEvaluationDiv, false, true);
-
-            const loadedEvaluation = loadEvaluationFromLocalStorage(studentName, currentSelectedGroupName);
-
-            if (loadedEvaluation) {
-                if (!evaluations[currentSelectedGroupName]) {
-                    evaluations[currentSelectedGroupName] = {};
-                }
-                evaluations[currentSelectedGroupName][studentName] = loadedEvaluation;
-
-                const studentEvaluationScores = loadedEvaluation.scores;
-                if(studentRubricEvaluationDiv){
-                    const tableRows = studentRubricEvaluationDiv.querySelectorAll('tbody tr');
-                    tableRows.forEach((row, rowIndex) => {
-                        const aspect = rubricTemplate[rowIndex + 1]?.[0];
-
-                        if (aspect && studentEvaluationScores[aspect]) {
-                            const selectedScore = studentEvaluationScores[aspect].score;
-                            const scoreCells = row.querySelectorAll('.rubric-score-cell');
-                            scoreCells.forEach((cell, cellIndex) => {
-                                const scoreHeader = rubricTemplate[0]?.[cellIndex + 1];
-                                if (scoreHeader) {
-                                    const scoreMatch = scoreHeader.match(/\((\d+)\)/);
-                                    const score = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
-                                    if (score === selectedScore) {
-                                        cell.classList.add('selected');
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-
-            } else {
-                 if(studentRubricEvaluationDiv){
-                    studentRubricEvaluationDiv.querySelectorAll('.rubric-score-cell').forEach(cell => {
-                        cell.classList.remove('selected');
-                    });
-                 }
-
-                if (!evaluations[currentSelectedGroupName]) {
-                    evaluations[currentSelectedGroupName] = {};
-                }
-                if (!evaluations[currentSelectedGroupName][studentName]) {
-                    evaluations[currentSelectedGroupName][studentName] = {
-                        rubricMetadata: { ...rubricMetadata },
-                        scores: {}
-                    };
-                }
-            }
-            updateNavigationButtons();
-            updateScoreDisplays();
-            if(studentSelect) studentSelect.value = currentStudentIndex;
-        }
-
-        // DOMContentLoaded para asegurar que todos los elementos HTML estén cargados
-        document.addEventListener('DOMContentLoaded', () => {
-            // Asignar referencias a los elementos del DOM
-            rubricInput = document.getElementById('rubricInput');
-            loadRubricBtn = document.getElementById('loadRubricBtn');
-            rubricDisplay = document.getElementById('rubricDisplay');
-            institutionSelect = document.getElementById('institutionSelect');
-            newInstitutionInput = document.getElementById('newInstitutionInput');
-            addInstitutionBtn = document.getElementById('addInstitutionBtn');
-            courseSelect = document.getElementById('courseSelect');
-            newCourseInput = document.getElementById('newCourseInput');
-            addCourseBtn = document.getElementById('addCourseBtn');
-            teacherSelect = document.getElementById('teacherSelect');
-            newTeacherInput = document.getElementById('newTeacherInput');
-            addTeacherBtn = document.getElementById('addTeacherBtn');
-            sessionTitleInput = document.getElementById('sessionTitleInput');
-            dateInput = document.getElementById('dateInput');
-
-            groupNameInput = document.getElementById('groupNameInput');
-            studentsInput = document.getElementById('studentsInput');
-            saveStudentGroupBtn = document.getElementById('saveStudentGroupBtn');
-            studentGroupsListContainer = document.getElementById('studentGroupsListContainer'); // Nuevo ID
-            noGroupsMessage = document.getElementById('noGroupsMessage'); // Mensaje dentro del nuevo contenedor
-
-            currentStudentNameSpan = document.getElementById('currentStudentName');
-            currentGroupNameSpan = document.getElementById('currentGroupName');
-            studentSelectContainer = document.getElementById('studentSelectContainer');
-            studentSelect = document.getElementById('studentSelect');
-            noStudentsInGroupMessage = document.getElementById('noStudentsInGroupMessage');
-            studentRubricEvaluationDiv = document.getElementById('studentRubricEvaluation');
-            prevStudentBtn = document.getElementById('prevStudentBtn');
-            nextStudentBtn = document.getElementById('nextStudentBtn');
-            totalScoreDisplay = document.getElementById('totalScoreDisplay');
-            averageScoreDisplay = document.getElementById('averageScoreDisplay');
-
-            exportRubricsBtn = document.getElementById('exportRubricsBtn');
-            messageArea = document.getElementById('messageArea');
-
-            navButtons = document.querySelectorAll('.nav-button');
-            screens = document.querySelectorAll('.screen');
-
-            // Cargar todos los datos persistentes desde localStorage al iniciar
-            loadPersistentData();
-
-            // Inicializar la aplicación: mostrar la primera pantalla por defecto
-            showScreen('rubricScreen');
-
-            // Configurar los listeners para los botones de navegación
-            navButtons.forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const screenId = event.target.dataset.screen;
-                    showScreen(screenId);
-                });
-            });
-
-            // Event listeners para los metadatos de la rúbrica
-            if(institutionSelect) institutionSelect.addEventListener('change', updateRubricMetadata);
-            if(courseSelect) courseSelect.addEventListener('change', updateRubricMetadata);
-            if(teacherSelect) teacherSelect.addEventListener('change', updateRubricMetadata);
-            if(sessionTitleInput) sessionTitleInput.addEventListener('input', updateRubricMetadata);
-            if(dateInput) dateInput.addEventListener('change', updateRubricMetadata);
-
-            // Add Persistent List Event Listeners
-            if(addInstitutionBtn) addInstitutionBtn.addEventListener('click', () => addPersistentItem('persistentInstitutions', persistentInstitutions, newInstitutionInput, institutionSelect));
-            if(addCourseBtn) addCourseBtn.addEventListener('click', () => addPersistentItem('persistentCourses', persistentCourses, newCourseInput, courseSelect));
-            if(addTeacherBtn) addTeacherBtn.addEventListener('click', () => addPersistentItem('persistentTeachers', persistentTeachers, newTeacherInput, teacherSelect));
-
-            // Cargar rúbrica
-            if(loadRubricBtn) loadRubricBtn.addEventListener('click', loadRubricBtnHandler);
-
-            // Guardar grupo de estudiantes
-            if(saveStudentGroupBtn) saveStudentGroupBtn.addEventListener('click', () => {
-                const groupName = groupNameInput.value.trim();
-                const studentsText = studentsInput.value.trim();
-                const studentsArray = studentsText.split('\n').map(s => s.trim()).filter(s => s !== '');
-
-                if (!groupName) {
-                    showMessage('Por favor, ingresa un nombre para el grupo.', 'error');
-                    return;
-                }
-                if (studentsArray.length === 0) {
-                    showMessage('Por favor, ingresa al menos un estudiante.', 'error');
-                    return;
-                }
-
-                const groupId = Date.now().toString(); 
-
-                const existingGroupIndex = allStudentGroups.findIndex(g => g.groupName === groupName);
-
-                if (existingGroupIndex !== -1) {
-                    allStudentGroups[existingGroupIndex].students = studentsArray;
-                    showMessage(`Grupo "${groupName}" actualizado.`, 'success');
-                } else {
-                    allStudentGroups.push({ id: groupId, groupName: groupName, students: studentsArray });
-                    showMessage(`Grupo "${groupName}" guardado.`, 'success');
-                }
-                
-                saveToLocalStorage('allStudentGroups', allStudentGroups);
-                groupNameInput.value = '';
-                studentsInput.value = '';
-                renderAllStudentGroups(); 
-                showScreen('listGroupsScreen'); 
-            });
-
-            // Selector de estudiantes en pantalla de evaluación
-            if(studentSelect) studentSelect.addEventListener('change', (event) => {
-                const selectedIndex = parseInt(event.target.value, 10);
-                loadStudentForEvaluation(selectedIndex);
-            });
-
-            // Botones de navegación de estudiante (Anterior/Siguiente)
-            if(prevStudentBtn) prevStudentBtn.addEventListener('click', () => {
-                if (currentStudentIndex > 0) {
-                    loadStudentForEvaluation(currentStudentIndex - 1);
-                }
-            });
-
-            if(nextStudentBtn) nextStudentBtn.addEventListener('click', () => {
-                if (currentStudentIndex < currentStudentsInGroup.length - 1) {
-                    loadStudentForEvaluation(currentStudentIndex + 1);
-                }
-            });
-
-            // Botón de exportar
-            if(exportRubricsBtn) exportRubricsBtn.addEventListener('click', async () => {
-                if (!currentSelectedGroupName || currentStudentsInGroup.length === 0) {
-                    showMessage('Por favor, selecciona un grupo de estudiantes primero.', 'error');
-                    return;
-                }
-                
-                const doc = new jsPDF();
-                const headers = rubricTemplate[0];
-
-                let firstPage = true;
-                for (const studentName of currentStudentsInGroup) {
-                    const studentEvaluationData = loadEvaluationFromLocalStorage(studentName, currentSelectedGroupName);
-
-                    if (!studentEvaluationData || Object.keys(studentEvaluationData.scores || {}).length === 0) {
-                        continue;
-                    }
-
-                    if (!firstPage) {
-                        doc.addPage();
-                    }
-                    firstPage = false;
-
-                    const meta = rubricMetadata; 
-                    let totalScore = 0;
-                    Object.values(studentEvaluationData.scores).forEach(scoreItem => {
-                        if (typeof scoreItem.score === 'number') {
-                            totalScore += scoreItem.score;
-                        }
-                    });
-
-                    const numberOfAspects = rubricTemplate.length > 1 ? rubricTemplate.length - 1 : 0;
-                    const averageScore = numberOfAspects > 0 ? (totalScore / numberOfAspects).toFixed(2) : '0.00';
-
-
-                    doc.setFontSize(18);
-                    doc.text(`Rúbrica para: ${studentName}`, 14, 20);
-                    doc.setFontSize(10);
-                    doc.text(`Grupo: ${currentSelectedGroupName}`, 14, 28);
-                    doc.text(`Institución: ${meta.institution || 'N/A'}`, 14, 34);
-                    doc.text(`Curso/Módulo: ${meta.course || 'N/A'}`, 14, 40);
-                    doc.text(`Docente: ${meta.teacher || 'N/A'}`, 14, 46);
-                    doc.text(`Título de Sesión: ${meta.sessionTitle || 'N/A'}`, 14, 52);
-                    doc.text(`Fecha: ${meta.date || 'N/A'}`, 14, 58);
-                    doc.text(`Puntaje Total: ${totalScore}`, 14, 64);
-                    doc.text(`Promedio: ${averageScore}`, 14, 70);
-
-
-                    const tableData = [];
-                    const rubricContent = rubricTemplate.slice(1);
-
-                    rubricContent.forEach(row => {
-                        const aspect = row[0];
-                        const studentScores = studentEvaluationData.scores[aspect];
-
-                        const pdfRow = [aspect];
-                        for (let i = 1; i < row.length; i++) {
-                            const scoreHeader = headers[i];
-                            const cellDescription = row[i];
-                            const scoreMatch = scoreHeader.match(/\((\d+)\)/);
-                            const scoreValue = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
-
-                            let cellText = cellDescription;
-                            let cellStyle = {};
-
-                            if (studentScores && studentScores.score === scoreValue) {
-                                cellText = `[X] ${cellDescription}`;
-                                cellStyle = { fillColor: [144, 205, 244] };
-                            }
-                            pdfRow.push({ content: cellText, styles: cellStyle });
-                        }
-                        tableData.push(pdfRow);
-                    });
-
-                    doc.autoTable({
-                        startY: 75,
-                        head: [headers.map(h => ({ content: h, styles: { fillColor: [59, 130, 246], textColor: [255, 255, 255] } }))],
-                        body: tableData,
-                        theme: 'grid',
-                        styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-                        columnStyles: {
-                            0: { cellWidth: 35 },
-                        },
-                        margin: { top: 10, left: 14, right: 14 }
-                    });
-
-                    doc.setFontSize(10);
-                    doc.text('Generado por la Herramienta de Evaluación de Rúbricas.', 14, doc.autoTable.previous.finalY + 10);
-                }
-
-                doc.save(`evaluaciones_grupo_${currentSelectedGroupName.replace(/\s+/g, '_')}.pdf`);
-                showMessage(`Evaluaciones del grupo "${currentSelectedGroupName}" exportadas a PDF.`, 'success');
             });
         });
+
+        // --- Módulo: Configuración Básica ---
+        document.getElementById('save-config-btn').addEventListener('click', saveConfig);
+
+        // --- Módulo: CSV a Rúbrica Editable ---
+        document.getElementById('load-csv-btn').addEventListener('click', () => { // Se corrige el event listener para que incluya 'click'
+            const csvText = document.getElementById('csv-input').value;
+            if (!csvText) {
+                showMessage("Por favor, pegue el texto CSV en el campo.");
+                return;
+            }
+            parseCsvToRubric(csvText); // Parsea el texto CSV a un objeto de rúbrica
+            renderEditableRubric(); // Renderiza la rúbrica en la tabla editable
+        });
+
+        document.getElementById('save-rubric-btn').addEventListener('click', saveRubric);
+
+        /**
+         * Parsea una línea CSV robustamente, manejando comas dentro de campos entre comillas.
+         * @param {string} line La línea CSV a parsear.
+         * @param {string} delimiter El carácter delimitador (por defecto: ',').
+         * @returns {string[]} Un array de campos parseados.
+         */
+        function parseCsvLineRobust(line, delimiter = ',') {
+            const result = [];
+            let inQuote = false;
+            let currentField = '';
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    // Handle escaped double quotes: "" inside a quoted field
+                    if (inQuote && i < line.length - 1 && line[i + 1] === '"') {
+                        currentField += '"'; // Add a single quote
+                        i++; // Skip the next character as it's part of the escaped quote
+                    } else {
+                        inQuote = !inQuote; // Toggle quote state
+                    }
+                } else if (char === delimiter && !inQuote) {
+                    result.push(currentField.trim()); // Add field and trim whitespace
+                    currentField = ''; // Reset for next field
+                } else {
+                    currentField += char; // Append character to current field
+                }
+            }
+            result.push(currentField.trim()); // Add the last field
+            return result;
+        }
+
+        // Parsea el texto CSV (delimitado por ',') a la estructura de la rúbrica
+        function parseCsvToRubric(csvText) {
+            try {
+                // Filtra líneas completamente vacías para evitar problemas de parseo
+                const lines = csvText.trim().split('\n').filter(line => line.trim() !== '');
+                if (lines.length < 2) {
+                    showMessage("El CSV debe tener al menos una fila de encabezado y una fila de datos. Asegúrese de que el formato sea correcto.");
+                    appState.currentRubric = null; // Reinicia la rúbrica si el parseo falla
+                    return;
+                }
+
+                // Parsea la primera línea (encabezado) usando la función robusta
+                const headerLine = parseCsvLineRobust(lines[0]);
+                if (headerLine.length < 2 || headerLine[0].trim().toLowerCase() !== 'aspectos') {
+                    showMessage("El encabezado del CSV debe comenzar con 'Aspectos' y tener al menos un nivel, delimitado por ','.");
+                    appState.currentRubric = null;
+                    return;
+                }
+
+                // Parsea los niveles y sus puntuaciones desde el encabezado
+                const levels = [];
+                for (let i = 1; i < headerLine.length; i++) {
+                    const levelText = headerLine[i].trim();
+                    const match = levelText.match(/(.+)\((\d+)\)/); // Busca el formato "Nombre (Puntuación)"
+                    if (match) {
+                        levels.push({ name: match[1].trim(), score: parseInt(match[2], 10) });
+                    } else {
+                        // Si el formato no coincide, asigna una puntuación por defecto y advierte al usuario
+                        showMessage(`Advertencia: El nivel '${levelText}' no tiene el formato 'Nombre (Puntuación)'. Se le asignará una puntuación de 0. Por favor, corrija el formato en el CSV.`);
+                        levels.push({ name: levelText, score: 0 });
+                    }
+                }
+
+                // Parsea los aspectos y sus descriptores
+                const aspects = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const parts = parseCsvLineRobust(lines[i]); // Usa la función robusta para cada línea
+                    if (parts.length > 0 && parts[0].trim()) { // Asegura que el nombre del aspecto no esté vacío
+                        const aspectName = parts[0].trim();
+                        // Asegura que haya suficientes descriptores para todos los niveles
+                        let descriptors = parts.slice(1).map(d => d.trim());
+                        // Rellena con cadenas vacías si no se proporcionan suficientes descriptores
+                        while (descriptors.length < levels.length) {
+                            descriptors.push('');
+                        }
+                        aspects.push({ name: aspectName, descriptors: descriptors });
+                    }
+                }
+
+                // Validación final: asegura que se hayan parseado aspectos y niveles válidos
+                if (aspects.length === 0 || levels.length === 0) {
+                    showMessage("No se pudieron extraer aspectos o niveles válidos del CSV. Verifique el formato.");
+                    appState.currentRubric = null;
+                    return;
+                }
+
+                appState.currentRubric = { aspects, levels };
+                console.log("Rúbrica parseada exitosamente:", appState.currentRubric);
+                // El mensaje de éxito se muestra en el listener del botón, no aquí.
+            } catch (error) {
+                console.error("Error al parsear el CSV de la rúbrica:", error);
+                showMessage("Error al cargar la rúbrica desde CSV. Verifique el formato. Detalles: " + error.message);
+                appState.currentRubric = null;
+            }
+        }
+
+        // Renderiza la rúbrica en una tabla HTML editable
+        function renderEditableRubric() {
+            if (!rubricEditor) { // Añadir una comprobación para asegurar que rubricEditor está definido
+                console.error("Error: rubricEditor no está inicializado.");
+                return;
+            }
+
+            if (!appState.currentRubric || appState.currentRubric.aspects.length === 0 || appState.currentRubric.levels.length === 0) {
+                rubricEditor.innerHTML = '<p class="text-gray-500">Cargue una rúbrica desde CSV para empezar a editarla.</p>';
+                return;
+            }
+
+            let html = `
+                <table class="w-full border-collapse table-auto">
+                    <thead>
+                        <tr class="bg-indigo-100 text-indigo-800">
+                            <th class="border border-indigo-200 p-3 text-left font-semibold w-1/5">
+                                <span contenteditable="true" data-type="header" data-index="0">Aspectos</span>
+                            </th>
+                            ${appState.currentRubric.levels.map((level, index) => `
+                                <th class="border border-indigo-200 p-3 text-left font-semibold">
+                                    <span contenteditable="true" data-type="level-name" data-index="${index}">${level.name}</span>
+                                    (<span contenteditable="true" data-type="level-score" data-index="${index}">${level.score}</span>)
+                                </th>
+                            `).join('')}
+                        </tr>
+                    </thead>
+                    <tbody id="rubric-body">
+                        ${appState.currentRubric.aspects.map((aspect, aspectIndex) => `
+                            <tr class="${aspectIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
+                                <td class="border border-gray-200 p-3 font-medium">
+                                    <span contenteditable="true" data-type="aspect-name" data-aspect-index="${aspectIndex}">${aspect.name}</span>
+                                </td>
+                                ${aspect.descriptors.map((descriptor, levelIndex) => `
+                                    <td class="border border-gray-200 p-3">
+                                        <span contenteditable="true" data-type="descriptor" data-aspect-index="${aspectIndex}" data-level-index="${levelIndex}">${descriptor}</span>
+                                    </td>
+                                `).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            rubricEditor.innerHTML = html;
+
+            // Agrega event listeners para actualizar el estado cuando se edita el contenido
+            rubricEditor.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                element.addEventListener('input', () => {
+                    // El estado se actualizará completamente al guardar la rúbrica
+                    // o cuando se navegue en la evaluación.
+                });
+            });
+        }
+
+        // Actualiza el objeto de la rúbrica en appState con los valores de la tabla HTML editable
+        function updateRubricFromEditor() {
+            if (!appState.currentRubric) return;
+
+            const updatedAspects = [];
+            const rubricBody = rubricEditor.querySelector('#rubric-body'); // Acceder a rubricBody a través de rubricEditor
+            if (!rubricBody) return; // Si el editor no está renderizado, sale
+
+            // Actualiza los nombres y puntuaciones de los niveles desde el encabezado de la tabla
+            const levelNames = Array.from(rubricEditor.querySelectorAll('[data-type="level-name"]')).map(el => el.textContent.trim());
+            const levelScores = Array.from(rubricEditor.querySelectorAll('[data-type="level-score"]')).map(el => parseInt(el.textContent.trim(), 10) || 0);
+
+            appState.currentRubric.levels = levelNames.map((name, i) => ({
+                name: name,
+                score: levelScores[i]
+            }));
+
+            // Itera sobre las filas de la tabla para obtener los aspectos y descriptores
+            rubricBody.querySelectorAll('tr').forEach(row => {
+                const aspectNameElement = row.querySelector('[data-type="aspect-name"]');
+                if (!aspectNameElement) return; // Salta si no es una fila de aspecto válida
+
+                const aspectName = aspectNameElement.textContent.trim();
+                const descriptors = Array.from(row.querySelectorAll('[data-type="descriptor"]')).map(el => el.textContent.trim());
+                updatedAspects.push({ name: aspectName, descriptors: descriptors });
+            });
+            appState.currentRubric.aspects = updatedAspects;
+        }
+
+        // Botón para añadir un nuevo aspecto a la rúbrica
+        document.getElementById('add-aspect-btn').addEventListener('click', () => {
+            if (!appState.currentRubric) {
+                showMessage("Cargue una rúbrica primero.");
+                return;
+            }
+            const newAspectName = `Nuevo Aspecto ${appState.currentRubric.aspects.length + 1}`;
+            // Crea descriptores vacíos para todos los niveles existentes
+            const newDescriptors = Array(appState.currentRubric.levels.length).fill('');
+            appState.currentRubric.aspects.push({ name: newAspectName, descriptors: newDescriptors });
+            renderEditableRubric(); // Vuelve a renderizar la rúbrica con el nuevo aspecto
+            showMessage("Nuevo aspecto añadido. Guarde la rúbrica para persistir los cambios.");
+        });
+
+        // Botón para añadir un nuevo nivel a la rúbrica
+        document.getElementById('add-level-btn').addEventListener('click', () => {
+            if (!appState.currentRubric) {
+                showMessage("Cargue una rúbrica primero.");
+                return;
+            }
+            const newLevelName = `Nuevo Nivel ${appState.currentRubric.levels.length + 1}`;
+            const newLevelScore = 0; // Puntuación por defecto
+            appState.currentRubric.levels.push({ name: newLevelName, score: newLevelScore });
+            // Añade un descriptor vacío para el nuevo nivel en cada aspecto existente
+            appState.currentRubric.aspects.forEach(aspect => {
+                aspect.descriptors.push('');
+            });
+            renderEditableRubric(); // Vuelve a renderizar la rúbrica con el nuevo nivel
+            showMessage("Nuevo nivel añadido. Guarde la rúbrica para persistir los cambios.");
+        });
+
+        // Botón para eliminar el último aspecto
+        document.getElementById('remove-last-aspect-btn').addEventListener('click', () => {
+            if (!appState.currentRubric || appState.currentRubric.aspects.length === 0) {
+                showMessage("No hay aspectos para eliminar.");
+                return;
+            }
+            showConfirmation("¿Está seguro que desea eliminar el último aspecto?", (confirmed) => {
+                if (confirmed) {
+                    appState.currentRubric.aspects.pop(); // Elimina el último aspecto
+                    renderEditableRubric(); // Vuelve a renderizar
+                    showMessage("Último aspecto eliminado. Guarde la rúbrica para persistir los cambios.");
+                }
+            });
+        });
+
+        // Botón para eliminar el último nivel
+        document.getElementById('remove-last-level-btn').addEventListener('click', () => {
+            if (!appState.currentRubric || appState.currentRubric.levels.length === 0) {
+                showMessage("No hay niveles para eliminar.");
+                return;
+            }
+            showConfirmation("¿Está seguro que desea eliminar el último nivel?", (confirmed) => {
+                if (confirmed) {
+                    appState.currentRubric.levels.pop(); // Elimina el último nivel
+                    appState.currentRubric.aspects.forEach(aspect => {
+                        aspect.descriptors.pop(); // Elimina el descriptor asociado al nivel eliminado en cada aspecto
+                    });
+                    renderEditableRubric(); // Vuelve a renderizar
+                    showMessage("Último nivel eliminado. Guarde la rúbrica para persistir los cambios.");
+                }
+            });
+        });
+
+        // --- Módulo: Gestión de Listas de Estudiantes ---
+        document.getElementById('add-students-list-btn').addEventListener('click', () => {
+            const listName = document.getElementById('list-name').value.trim();
+            const studentsInput = document.getElementById('students-input').value.trim();
+
+            if (!listName) {
+                showMessage("Por favor, ingrese un nombre para la lista de estudiantes.");
+                return;
+            }
+            if (!studentsInput) {
+                showMessage("Por favor, pegue los nombres de los estudiantes.");
+                return;
+            }
+
+            // Divide los nombres de estudiantes por saltos de línea o comas, y los limpia
+            const students = studentsInput.split(/[\n,;]+/).map(name => name.trim()).filter(name => name !== '');
+            if (students.length === 0) {
+                showMessage("No se encontraron nombres de estudiantes válidos.");
+                return;
+            }
+
+            // Verifica si ya existe una lista con el mismo nombre
+            const existingListNames = Object.values(appState.studentLists).map(list => list.name.toLowerCase());
+            if (existingListNames.includes(listName.toLowerCase())) {
+                showMessage(`Ya existe una lista con el nombre '${listName}'. Por favor, elija otro nombre.`);
+                return;
+            }
+
+            saveStudentList(listName, students); // Guarda la nueva lista
+            // Limpia los campos del formulario
+            document.getElementById('list-name').value = '';
+            document.getElementById('students-input').value = '';
+        });
+
+        // Renderiza las listas de estudiantes en la interfaz
+        function renderStudentLists() {
+            const container = document.getElementById('student-lists-container');
+            container.innerHTML = ''; // Limpia el contenido anterior
+
+            if (Object.keys(appState.studentLists).length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No hay listas de estudiantes añadidas aún.</p>';
+                return;
+            }
+
+            // Itera sobre las listas de estudiantes y crea una tarjeta para cada una
+            for (const listId in appState.studentLists) {
+                const list = appState.studentLists[listId];
+                const card = document.createElement('div');
+                card.className = 'bg-gray-100 p-4 rounded-lg shadow-md flex flex-col justify-between border border-gray-200';
+                card.innerHTML = `
+                    <h4 class="text-lg font-semibold text-gray-800 flex items-center mb-2">
+                        <i class="fas fa-clipboard-list mr-2 text-blue-500"></i> ${list.name}
+                    </h4>
+                    <p class="text-gray-600 mb-3 text-sm">
+                        Total de estudiantes: <span class="font-bold">${list.students.length}</span>
+                    </p>
+                    <button class="delete-list-btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center justify-center mt-auto" data-list-id="${listId}">
+                        <i class="fas fa-trash-alt mr-2"></i> Eliminar
+                    </button>
+                `;
+                container.appendChild(card);
+            }
+
+            // Agrega event listeners a los botones de eliminar
+            document.querySelectorAll('.delete-list-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const listIdToDelete = event.target.dataset.listId;
+                    if (listIdToDelete) {
+                        deleteStudentList(listIdToDelete);
+                    }
+                });
+            });
+        }
+
+        // Rellena los selectores de listas de estudiantes (para evaluación y exportación)
+        function populateStudentListSelects(target = 'evaluate') {
+            const selectElement = target === 'evaluate' ? document.getElementById('select-student-list') : document.getElementById('export-student-list');
+            selectElement.innerHTML = '<option value="">-- Seleccionar Lista --</option>'; // Restablece las opciones
+
+            for (const listId in appState.studentLists) {
+                const option = document.createElement('option');
+                option.value = listId;
+                option.textContent = appState.studentLists[listId].name;
+                selectElement.appendChild(option);
+            }
+        }
+
+        // --- Módulo: Evaluación ---
+        const evaluationControls = document.getElementById('evaluation-controls');
+        const currentStudentNameDisplay = document.getElementById('current-student-name');
+        const prevStudentBtn = document.getElementById('prev-student-btn');
+        const nextStudentBtn = document.getElementById('next-student-btn');
+        const evaluationRubricDisplay = document.getElementById('evaluation-rubric-display');
+        const totalScoreDisplay = document.getElementById('total-score');
+        const averageScoreDisplay = document.getElementById('average-score');
+        const saveEvaluationBtn = document.getElementById('save-evaluation-btn');
+        const finishEvaluationBtn = document.getElementById('finish-evaluation-btn');
+        const saveEvaluationSection = document.getElementById('save-evaluation-section');
+
+        // Maneja la selección de una lista de estudiantes para evaluación
+        document.getElementById('select-student-list').addEventListener('change', (event) => {
+            const listId = event.target.value;
+            appState.currentEvaluationListId = listId; // Establece la lista de evaluación actual
+            appState.currentStudentIndex = 0; // Reinicia el índice del estudiante
+
+            if (listId && appState.currentRubric) {
+                // Muestra los controles de evaluación si hay una lista y rúbrica seleccionadas
+                evaluationControls.classList.remove('hidden');
+                evaluationRubricDisplay.classList.remove('hidden');
+                document.getElementById('evaluation-summary').classList.remove('hidden');
+                saveEvaluationSection.classList.remove('hidden');
+                loadStudentForEvaluation(); // Carga el primer estudiante para evaluar
+            } else {
+                // Oculta los controles si no hay una lista o rúbrica
+                evaluationControls.classList.add('hidden');
+                evaluationRubricDisplay.classList.add('hidden');
+                document.getElementById('evaluation-summary').classList.add('hidden');
+                saveEvaluationSection.classList.add('hidden');
+                showMessage("Por favor, seleccione una lista y asegúrese de que haya una rúbrica cargada.");
+            }
+        });
+
+        // Botón para navegar al estudiante anterior
+        prevStudentBtn.addEventListener('click', () => {
+            if (appState.currentStudentIndex > 0) {
+                appState.currentStudentIndex--;
+                loadStudentForEvaluation();
+            }
+        });
+
+        // Botón para navegar al siguiente estudiante
+        nextStudentBtn.addEventListener('click', () => {
+            const selectedList = appState.studentLists[appState.currentEvaluationListId];
+            if (selectedList && appState.currentStudentIndex < selectedList.students.length - 1) {
+                appState.currentStudentIndex++;
+                loadStudentForEvaluation();
+            }
+        });
+
+        // Carga y muestra el estudiante actual para evaluación
+        function loadStudentForEvaluation() {
+            const listId = appState.currentEvaluationListId;
+            const selectedList = appState.studentLists[listId];
+
+            if (!selectedList || selectedList.students.length === 0) {
+                currentStudentNameDisplay.textContent = "No hay estudiantes en esta lista.";
+                evaluationRubricDisplay.innerHTML = '';
+                return;
+            }
+
+            const currentStudentName = selectedList.students[appState.currentStudentIndex];
+            currentStudentNameDisplay.textContent = `${currentStudentName} (${appState.currentStudentIndex + 1}/${selectedList.students.length})`;
+
+            // Genera un ID único para el estudiante para el almacenamiento de la evaluación
+            const studentId = `${listId}_${btoa(currentStudentName).replace(/=/g, '')}`; // Codifica Base64 para un ID seguro
+
+            // Verifica si el estudiante tiene una evaluación existente para esta lista
+            let studentEvaluationData = appState.listEvaluations[listId]?.[studentId];
+
+            renderEvaluationRubric(studentEvaluationData); // Renderiza la rúbrica para este estudiante
+            calculateAndDisplayScores(); // Calcula y muestra las puntuaciones
+        }
+
+        // Renderiza la rúbrica para el módulo de evaluación
+        function renderEvaluationRubric(evaluationData = null) {
+            if (!appState.currentRubric) {
+                evaluationRubricDisplay.innerHTML = '<p class="text-gray-500">Cargue una rúbrica en la sección "Gestionar Rúbrica" antes de evaluar.</p>';
+                return;
+            }
+
+            let html = `
+                <table class="w-full border-collapse table-auto">
+                    <thead>
+                        <tr class="bg-indigo-100 text-indigo-800">
+                            <th class="border border-indigo-200 p-3 text-left font-semibold w-1/5">Aspectos</th>
+                            ${appState.currentRubric.levels.map(level => `
+                                <th class="border border-indigo-200 p-3 text-left font-semibold">
+                                    ${level.name} (${level.score})
+                                </th>
+                            `).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${appState.currentRubric.aspects.map((aspect, aspectIndex) => `
+                            <tr class="${aspectIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
+                                <td class="border border-gray-200 p-3 font-medium">${aspect.name}</td>
+                                ${aspect.descriptors.map((descriptor, levelIndex) => {
+                                    // Determina si esta celda está seleccionada en la evaluación actual del estudiante
+                                    const isSelected = evaluationData && evaluationData.rubricData &&
+                                                       evaluationData.rubricData[aspectIndex] === levelIndex;
+                                    return `
+                                        <td class="rubric-cell border border-gray-200 p-3 cursor-pointer hover:bg-violet-100 ${isSelected ? 'selected' : ''}"
+                                            data-aspect-index="${aspectIndex}" data-level-index="${levelIndex}">
+                                            ${descriptor}
+                                        </td>
+                                    `;
+                                }).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            evaluationRubricDisplay.innerHTML = html;
+
+            // Agrega el event listener para clics en las celdas de la rúbrica
+            evaluationRubricDisplay.querySelectorAll('.rubric-cell').forEach(cell => {
+                cell.addEventListener('click', async (event) => { // Marcado como async
+                    const clickedAspectIndex = parseInt(event.target.dataset.aspectIndex, 10);
+                    const clickedLevelIndex = parseInt(event.target.dataset.levelIndex, 10);
+
+                    // Deselecciona cualquier otra celda en la misma fila (solo una selección por aspecto)
+                    event.target.closest('tr').querySelectorAll('.rubric-cell').forEach(otherCell => {
+                        otherCell.classList.remove('selected');
+                    });
+
+                    // Selecciona la celda clickeada
+                    event.target.classList.add('selected');
+
+                    // Almacena la selección para el estudiante actual
+                    const listId = appState.currentEvaluationListId;
+                    const selectedList = appState.studentLists[listId];
+                    const currentStudentName = selectedList.students[appState.currentStudentIndex];
+                    const studentId = `${listId}_${btoa(currentStudentName).replace(/=/g, '')}`;
+
+                    // Inicializa el objeto de evaluación del estudiante si no existe
+                    if (!appState.evaluatedRubrics[studentId]) { 
+                        appState.evaluatedRubrics[studentId] = {
+                            studentName: currentStudentName,
+                            listId: listId,
+                            listName: selectedList.name,
+                            rubricData: {}, // Formato: { indiceAspecto: indiceNivelSeleccionado }
+                            totalScore: 0,
+                            averageScore: 0,
+                            config: { ...appState.config } // Captura la configuración actual en el momento de la evaluación
+                        };
+                    }
+                    appState.evaluatedRubrics[studentId].rubricData[clickedAspectIndex] = clickedLevelIndex;
+
+                    calculateAndDisplayScores(); // Recalcula y muestra las puntuaciones
+                    
+                    // Guarda automáticamente la evaluación después de cada clic
+                    await saveStudentEvaluation(studentId, appState.evaluatedRubrics[studentId]);
+                });
+            });
+            calculateAndDisplayScores(); // Asegura que las puntuaciones se muestren correctamente al cargar
+        }
+
+        // Calcula y muestra el puntaje total y promedio de la evaluación actual
+        function calculateAndDisplayScores() {
+            const listId = appState.currentEvaluationListId;
+            const selectedList = appState.studentLists[listId];
+            const currentStudentName = selectedList.students[appState.currentStudentIndex];
+            const studentId = `${listId}_${btoa(currentStudentName).replace(/=/g, '')}`;
+            const studentEvaluation = appState.evaluatedRubrics[studentId];
+
+            if (!studentEvaluation || !appState.currentRubric) {
+                totalScoreDisplay.textContent = '0';
+                averageScoreDisplay.textContent = '0.00';
+                return;
+            }
+
+            let totalScore = 0;
+            let aspectsEvaluated = 0;
+
+            // Itera sobre los aspectos evaluados y suma las puntuaciones
+            for (const aspectIndex in studentEvaluation.rubricData) {
+                const levelIndex = studentEvaluation.rubricData[aspectIndex];
+                if (appState.currentRubric.levels[levelIndex]) {
+                    totalScore += appState.currentRubric.levels[levelIndex].score;
+                    aspectsEvaluated++;
+                }
+            }
+
+            const averageScore = aspectsEvaluated > 0 ? (totalScore / aspectsEvaluated).toFixed(2) : '0.00';
+
+            totalScoreDisplay.textContent = totalScore;
+            averageScoreDisplay.textContent = averageScore;
+
+            // Actualiza el objeto de evaluación del estudiante en el estado global
+            studentEvaluation.totalScore = totalScore;
+            studentEvaluation.averageScore = parseFloat(averageScore);
+        }
+
+        // El botón de guardar individual ya no es necesario para el guardado automático
+        // saveEvaluationBtn.addEventListener('click', async () => { ... });
+
+        // --- Módulo: Exportación ---
+        document.getElementById('export-pdf-btn').addEventListener('click', async () => {
+            const listId = document.getElementById('export-student-list').value;
+            if (!listId) {
+                showMessage("Por favor, seleccione una lista para exportar.");
+                return;
+            }
+
+            const studentsInList = appState.studentLists[listId]?.students;
+            if (!studentsInList || studentsInList.length === 0) {
+                showMessage("La lista seleccionada no tiene estudiantes.");
+                return;
+            }
+
+            // Filtra las evaluaciones relevantes para la lista seleccionada
+            const evaluationsToExport = studentsInList
+                .map(studentName => {
+                    const studentId = `${listId}_${btoa(studentName).replace(/=/g, '')}`;
+                    return appState.evaluatedRubrics[studentId];
+                })
+                .filter(evalData => evalData); // Elimina entradas nulas/indefinidas
+
+            if (evaluationsToExport.length === 0) {
+                document.getElementById('pdf-export-message').classList.remove('hidden');
+                showMessage("No hay evaluaciones disponibles para exportar para la lista seleccionada.");
+                return;
+            } else {
+                document.getElementById('pdf-export-message').classList.add('hidden');
+            }
+
+            // Importa jsPDF dinámicamente justo antes de usarlo
+            const { jsPDF } = await import("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+
+            const doc = new jsPDF({ 
+                orientation: 'landscape', // Página horizontal
+                unit: 'pt', // Unidades en puntos
+                format: 'a4' // Formato A4
+            });
+            
+            const margin = 40; // Margen en puntos
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+
+            let firstPage = true; // Bandera para añadir página solo a partir de la segunda
+
+            for (const evaluation of evaluationsToExport) {
+                if (!firstPage) {
+                    doc.addPage(); // Añade una nueva página para cada rúbrica
+                } else {
+                    firstPage = false;
+                }
+
+                // Crea un div temporal para renderizar la rúbrica para el PDF
+                const tempDiv = document.createElement('div');
+                tempDiv.style.width = `${pageWidth - 2 * margin}pt`; // Ancho con márgenes
+                tempDiv.style.padding = '20pt';
+                tempDiv.style.boxSizing = 'border-box';
+                tempDiv.style.fontFamily = 'Inter, sans-serif';
+                tempDiv.style.fontSize = '10pt';
+
+                // Información básica en el PDF
+                tempDiv.innerHTML += `
+                    <h1 style="font-size: 18pt; font-weight: bold; text-align: center; margin-bottom: 15pt;">
+                        Rúbrica de Evaluación
+                    </h1>
+                    <div style="margin-bottom: 10pt; line-height: 1.5;">
+                        <p><strong>Institución Educativa:</strong> ${evaluation.config.institution}</p>
+                        <p><strong>Curso/Módulo:</strong> ${evaluation.config.course}</p>
+                        <p><strong>Docente:</strong> ${evaluation.config.teacher}</p>
+                        <p><strong>Fecha:</strong> ${evaluation.config.date}</p>
+                        <p><strong>Título de la Sesión:</strong> ${evaluation.config.sessionTitle}</p>
+                        <p style="font-size: 14pt; font-weight: bold; margin-top: 10pt;">Estudiante: ${evaluation.studentName}</p>
+                        <p style="font-size: 12pt;">Lista: ${evaluation.listName}</p>
+                    </div>
+                `;
+
+                // Tabla de la rúbrica para el PDF (sin editabilidad)
+                let rubricHtml = `
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 15pt;">
+                        <thead>
+                            <tr style="background-color: #e0e7ff; color: #4338ca;">
+                                <th style="border: 1px solid #c7d2fe; padding: 8pt; text-align: left; font-weight: bold; width: 20%;">Aspectos</th>
+                                ${appState.currentRubric.levels.map(level => `
+                                    <th style="border: 1px solid #c7d2fe; padding: 8pt; text-align: left; font-weight: bold;">
+                                        ${level.name} (${level.score})
+                                    </th>
+                                `).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${appState.currentRubric.aspects.map((aspect, aspectIndex) => `
+                                <tr style="background-color: ${aspectIndex % 2 === 0 ? '#ffffff' : '#f9fafb'};">
+                                    <td style="border: 1px solid #e5e7eb; padding: 8pt; font-weight: 500;">${aspect.name}</td>
+                                    ${aspect.descriptors.map((descriptor, levelIndex) => {
+                                        const isSelected = evaluation.rubricData[aspectIndex] === levelIndex;
+                                        return `
+                                            <td style="border: 1px solid #e5e7eb; padding: 8pt; ${isSelected ? 'background-color: #c7d2fe; font-weight: bold;' : ''}">
+                                                ${descriptor} ${isSelected ? '&#10003;' : ''} <!-- Marca de verificación para celdas seleccionadas -->
+                                            </td>
+                                        `;
+                                    }).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                tempDiv.innerHTML += rubricHtml;
+
+                // Sección de puntaje de resumen
+                tempDiv.innerHTML += `
+                    <div style="margin-top: 20pt; padding: 10pt; background-color: #eef2ff; border: 1px solid #c7d2fe; border-radius: 5pt;">
+                        <p style="font-size: 12pt; font-weight: bold; color: #4338ca;">
+                            Puntaje Total: ${evaluation.totalScore}
+                        </p>
+                        <p style="font-size: 12pt; font-weight: bold; color: #4338ca;">
+                            Promedio: ${evaluation.averageScore}
+                        </p>
+                    </div>
+                `;
+
+                // Añade el div temporal al cuerpo del documento (necesario para html2canvas)
+                document.body.appendChild(tempDiv);
+
+                // Convierte el HTML a un canvas y luego a una imagen para añadir al PDF
+                await html2canvas(tempDiv, { scale: 2 }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = pageWidth - 2 * margin; // El ancho de la imagen se ajusta a la página
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    const x = margin;
+                    const y = margin; // Margen superior
+
+                    doc.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+                });
+
+                // Elimina el div temporal del DOM
+                document.body.removeChild(tempDiv);
+            }
+
+            doc.save(`Rubricas_Evaluacion_${appState.config.course}_${appState.config.date}.pdf`); // Guarda el PDF
+            showMessage("¡Rúbricas exportadas a PDF exitosamente!");
+        });
+
+        // Botón para finalizar la evaluación y exportar (guarda la actual y luego exporta)
+        finishEvaluationBtn.addEventListener('click', async () => {
+            // Primero, guarda la evaluación del estudiante actual (por si no se hizo un último clic antes de exportar)
+            const listId = appState.currentEvaluationListId;
+            const selectedList = appState.studentLists[listId];
+            const currentStudentName = selectedList.students[appState.currentStudentIndex];
+            const studentId = `${listId}_${btoa(currentStudentName).replace(/=/g, '')}`;
+
+            if (appState.evaluatedRubrics[studentId]) {
+                await saveStudentEvaluation(studentId, appState.evaluatedRubrics[studentId]);
+            }
+
+            // Luego, simula un clic en el botón de exportar PDF para la lista actual
+            document.getElementById('export-student-list').value = appState.currentEvaluationListId;
+            document.getElementById('export-pdf-btn').click();
+        });
+
+
     </script>
 </body>
 </html>
