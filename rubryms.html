@@ -369,12 +369,12 @@ Carlos López"></textarea>
         // DEBES REEMPLAZAR ESTE OBJETO CON LA CONFIGURACIÓN REAL DE TU PROYECTO FIREBASE.
         // Puedes encontrar esta configuración en la Consola de Firebase -> Configuración del proyecto.
         const firebaseConfigForDeployment = {
-            apiKey: "TU_API_KEY", // Reemplaza con tu clave de API
-            authDomain: "TU_AUTH_DOMAIN", // Reemplaza con tu dominio de autenticación
-            projectId: "TU_PROJECT_ID", // Reemplaza con tu ID de proyecto
-            storageBucket: "TU_STORAGE_BUCKET", // Reemplaza con tu bucket de almacenamiento
-            messagingSenderId: "TU_MESSAGING_SENDER_ID", // Reemplaza con tu ID de remitente de mensajes
-            appId: "TU_APP_ID" // Reemplaza con tu ID de aplicación
+            apiKey: "AIzaSyD89thlGO8HntMzC8xs0EwMDp5E42KyaaE", // Reemplaza con tu clave de API
+            authDomain: "rubryms.firebaseapp.com", // Reemplaza con tu dominio de autenticación
+            projectId: "rubryms", // Reemplaza con tu ID de proyecto
+            storageBucket: "rubryms.firebasestorage.app", // Reemplaza con tu bucket de almacenamiento
+            messagingSenderId: "232158276973", // Reemplaza con tu ID de remitente de mensajes
+            appId: "1:232158276973:web:7706101d8b8ac9b0283e64" // Reemplaza con tu ID de aplicación
         };
 
         // Estado global de la aplicación para gestionar los datos
@@ -532,7 +532,8 @@ Carlos López"></textarea>
                 // Se verifica que la API Key no sea el placeholder inicial para asegurar que el usuario la ha configurado
                 if (firebaseConfigForDeployment.apiKey && firebaseConfigForDeployment.apiKey !== "TU_API_KEY") {
                     usedFirebaseConfig = firebaseConfigForDeployment;
-                    usedAppId = firebaseConfigForDeployment.projectId; // Usar el project ID como app ID para Firestore
+                    // Asegúrate de que usedAppId sea el projectId para consistencia con Canvas
+                    usedAppId = firebaseConfigForDeployment.projectId; 
                     console.log("Detectado entorno externo. Usando configuración de despliegue manual.");
                 } else {
                     // Fallback si la configuración manual no está completa o es la placeholder
