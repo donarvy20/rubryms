@@ -80,6 +80,13 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* Clase para deshabilitar elementos visualmente y funcionalmente */
+        .disabled-ui {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none; /* Evita eventos de clic */
+        }
     </style>
 </head>
 <body>
@@ -432,6 +439,69 @@ Carlos López"></textarea>
             }
         });
 
+        /**
+         * Habilita o deshabilita los elementos interactivos de la UI.
+         * @param {boolean} enabled Si es true, habilita; si es false, deshabilita.
+         */
+        function setUIState(enabled) {
+            const interactiveElements = [
+                document.getElementById('save-config-btn'),
+                document.getElementById('csv-input'),
+                document.getElementById('load-csv-btn'),
+                document.getElementById('save-rubric-btn'),
+                document.getElementById('add-aspect-btn'),
+                document.getElementById('add-level-btn'),
+                document.getElementById('remove-last-aspect-btn'),
+                document.getElementById('remove-last-level-btn'),
+                document.getElementById('list-name'),
+                document.getElementById('students-input'),
+                document.getElementById('add-students-list-btn'),
+                document.getElementById('select-student-list'),
+                document.getElementById('prev-student-btn'),
+                document.getElementById('next-student-btn'),
+                document.getElementById('finish-evaluation-btn'),
+                document.getElementById('export-student-list'),
+                document.getElementById('export-pdf-btn'),
+                document.getElementById('export-odf-btn') // Este botón ya está disabled en HTML por ahora
+            ];
+
+            interactiveElements.forEach(el => {
+                if (el) { // Asegura que el elemento exista
+                    el.disabled = !enabled;
+                    if (enabled) {
+                        el.classList.remove('disabled-ui');
+                    } else {
+                        el.classList.add('disabled-ui');
+                    }
+                }
+            });
+
+            // Manejar botones de eliminar en listas de estudiantes (renderizados dinámicamente)
+            document.querySelectorAll('.delete-list-btn').forEach(btn => {
+                if (btn) {
+                    btn.disabled = !enabled;
+                    if (enabled) {
+                        btn.classList.remove('disabled-ui');
+                    } else {
+                        btn.classList.add('disabled-ui');
+                    }
+                }
+            });
+
+            // Deshabilitar/habilitar el contenido editable en la tabla de rúbricas
+            if (rubricEditor) {
+                rubricEditor.querySelectorAll('[contenteditable="true"]').forEach(span => {
+                    span.contentEditable = enabled ? "true" : "false";
+                    if (enabled) {
+                        span.classList.remove('disabled-ui');
+                    } else {
+                        span.classList.add('disabled-ui');
+                    }
+                });
+            }
+        }
+
+
         // --- Inicialización de Firebase y Autenticación ---
         window.onload = async function () {
             // Se obtienen las variables globales de configuración de Firebase
@@ -449,6 +519,11 @@ Carlos López"></textarea>
             // Inicializa rubricEditor como una variable global aquí
             rubricEditor = document.getElementById('rubric-editor');
 
+            // Deshabilita la UI al inicio
+            setUIState(false);
+            document.getElementById('user-id-display').textContent = "Cargando...";
+
+
             // Escucha cambios en el estado de autenticación del usuario
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
@@ -458,6 +533,7 @@ Carlos López"></textarea>
                     console.log("Firebase Auth Ready. User ID:", currentUserId);
                     // Carga los datos persistentes una vez que el usuario está autenticado
                     await loadAllPersistentData();
+                    setUIState(true); // Habilita la UI una vez que la autenticación y carga de datos han terminado
                 } else {
                     // Si no hay usuario autenticado, intenta iniciar sesión anónimamente o con un token personalizado
                     try {
@@ -466,10 +542,13 @@ Carlos López"></textarea>
                         } else {
                             await signInAnonymously(auth); // Inicia sesión anónimamente si no hay token
                         }
-                        console.log("Signed in anonymously or with custom token.");
+                        // La reautenticación activará onAuthStateChanged nuevamente
+                        // y el bloque 'if (user)' se ejecutará
                     } catch (error) {
                         console.error("Error signing in:", error);
                         showMessage("Error al iniciar sesión. Algunas funciones podrían no estar disponibles. Detalles: " + error.message);
+                        isAuthReady = true; // Establecer a true para que la UI no se quede deshabilitada indefinidamente, aunque haya fallado la autenticación.
+                        document.getElementById('user-id-display').textContent = "Falló la autenticación";
                     }
                 }
             });
@@ -1014,6 +1093,7 @@ Carlos López"></textarea>
             }
 
             // Agrega event listeners a los botones de eliminar
+            // Estos botones deben ser deshabilitados/habilitados también por setUIState
             document.querySelectorAll('.delete-list-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const listIdToDelete = event.target.dataset.listId;
@@ -1022,6 +1102,8 @@ Carlos López"></textarea>
                     }
                 });
             });
+            // Asegúrate de que el estado de los botones de eliminación se actualice correctamente
+            setUIState(isAuthReady);
         }
 
         // Rellena los selectores de listas de estudiantes (para evaluación y exportación)
@@ -1035,6 +1117,8 @@ Carlos López"></textarea>
                 option.textContent = appState.studentLists[listId].name;
                 selectElement.appendChild(option);
             }
+            // Asegúrate de que el estado de los selectores se actualice
+            setUIState(isAuthReady);
         }
 
         // --- Módulo: Evaluación ---
