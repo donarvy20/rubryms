@@ -3,1607 +3,1489 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluador de Rúbricas</title>
-    <!-- Carga de Tailwind CSS para estilos modernos y responsivos -->
+    <title>Sistema de Evaluación con Rúbricas</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carga de Font Awesome para iconos llamativos -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Carga de jspdf de forma tradicional (no como módulo) para que esté disponible globalmente -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Estilo general para la fuente Inter y el fondo de la página */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Fondo gris claro */
+            background-color: #f0f4f8;
+            color: #334155;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        /* Estilo para el botón de pestaña activo en la navegación */
-        .tab-button.active {
-            background-color: #4f46e5; /* Indigo-600 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            width: 100%;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+            padding: 2rem;
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #cbd5e1; /* border-gray-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            color: #334155;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+        }
+        .input-field:focus {
+            border-color: #3b82f6; /* ring-blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* ring-blue-500/50 */
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+        .btn-primary {
+            background-color: #3b82f6; /* bg-blue-500 */
+            color: white;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25); /* shadow-blue-500/25 */
+        }
+        .btn-primary:hover {
+            background-color: #2563eb; /* bg-blue-600 */
+            box-shadow: 0 6px 8px rgba(59, 130, 246, 0.35);
+        }
+        .btn-secondary {
+            background-color: #64748b; /* bg-gray-500 */
             color: white;
         }
-        /* Estilo para la celda de la rúbrica seleccionada durante la evaluación */
-        .rubric-cell.selected {
-            background-color: #a78bfa; /* Violet-400 */
-            transition: background-color 0.2s ease-in-out; /* Transición suave al seleccionar */
+        .btn-secondary:hover {
+            background-color: #4b5563; /* bg-gray-600 */
         }
-        /* Estilos personalizados para la barra de desplazamiento (webkit) */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .btn-red {
+            background-color: #ef4444; /* bg-red-500 */
+            color: white;
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
+        .btn-red:hover {
+            background-color: #dc2626; /* bg-red-600 */
         }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-weight: 600;
+            background-color: #e2e8f0; /* bg-gray-200 */
+            color: #475569; /* text-gray-600 */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        .tab-btn.active {
+            background-color: white;
+            color: #3b82f6; /* text-blue-500 */
+            box-shadow: 0 -2px 0 0 #3b82f6 inset;
+            z-index: 10;
+        }
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .icon {
+            margin-right: 0.5rem;
+            width: 1.25rem;
+            height: 1.25rem;
         }
 
-        /* Estilos para el modal de mensajes */
+        /* Rubric Table Styling */
+        #rubricTableEdit, #rubricEvaluationTable { /* Apply to both tables */
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        #rubricTableEdit th, #rubricTableEdit td,
+        #rubricEvaluationTable th, #rubricEvaluationTable td {
+            border: 1px solid #e2e8f0; /* border-gray-200 */
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        #rubricTableEdit th, #rubricEvaluationTable th {
+            background-color: #f8fafc; /* bg-gray-50 */
+            font-weight: 600;
+            color: #475569;
+        }
+        #rubricTableEdit td, #rubricEvaluationTable td {
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+        }
+        #rubricTableEdit td.selected,
+        #rubricEvaluationTable td.selected { /* Apply 'selected' style to both tables */
+            background-color: #bfdbfe; /* bg-blue-200 */
+            font-weight: 600;
+        }
+        #rubricTableEdit td:hover,
+        #rubricEvaluationTable td:hover {
+            background-color: #eff6ff; /* bg-blue-50 */
+        }
+
+        /* Modal Styling */
         .modal {
-            display: none; /* Oculto por defecto */
-            position: fixed; /* Posición fija para cubrir toda la pantalla */
-            z-index: 1000; /* Se superpone a otros elementos */
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
             left: 0;
             top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto; /* Habilita el scroll si el contenido es grande */
-            background-color: rgba(0,0,0,0.4); /* Fondo semi-transparente */
-            align-items: center; /* Centrar verticalmente */
-            justify-content: center; /* Centrar horizontalmente */
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            align-items: center;
+            justify-content: center;
         }
-
         .modal-content {
             background-color: #fefefe;
             margin: auto;
-            padding: 20px;
-            border-radius: 0.5rem; /* Bordes redondeados */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Sombra */
-            width: 80%;
-            max-width: 500px; /* Ancho máximo */
-            position: relative;
+            padding: 2rem;
+            border: 1px solid #888;
+            width: 90%; /* Could be more responsive */
+            max-width: 500px;
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
-
-        .close-button {
+        .close-btn {
             color: #aaa;
-            float: right;
-            font-size: 28px;
+            align-self: flex-end;
+            font-size: 1.75rem;
             font-weight: bold;
+            cursor: pointer;
         }
-
-        .close-button:hover,
-        .close-button:focus {
+        .close-btn:hover,
+        .close-btn:focus {
             color: black;
             text-decoration: none;
             cursor: pointer;
         }
-
-        /* Clase para deshabilitar elementos visualmente y funcionalmente */
-        .disabled-ui {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none; /* Evita eventos de clic */
+        .message-box {
+            background-color: #f0f9ff;
+            border: 1px solid #a7d3f2;
+            color: #0c4a6e;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+        .message-box.show {
+            display: block;
         }
     </style>
-</head>
-<body>
-    <!-- Encabezado de la aplicación -->
-    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 shadow-md rounded-b-lg">
-        <h1 class="text-3xl font-bold text-center flex items-center justify-center">
-            <i class="fas fa-clipboard-check mr-3"></i> Sistema de Evaluación de Rúbricas
-        </h1>
-    </header>
-
-    <div class="flex flex-col md:flex-row flex-1">
-        <!-- Barra lateral de navegación (pestañas de módulos) -->
-        <nav class="bg-gray-800 text-white p-4 md:w-64 flex flex-col space-y-2 rounded-r-lg shadow-lg">
-            <button class="tab-button w-full text-left py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-200 ease-in-out flex items-center active" data-tab="config">
-                <i class="fas fa-cogs mr-3"></i> Configuración Básica
-            </button>
-            <button class="tab-button w-full text-left py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-200 ease-in-out flex items-center" data-tab="rubric">
-                <i class="fas fa-table mr-3"></i> Gestionar Rúbrica
-            </button>
-            <button class="tab-button w-full text-left py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-200 ease-in-out flex items-center" data-tab="students">
-                <i class="fas fa-users mr-3"></i> Gestionar Estudiantes
-            </button>
-            <button class="tab-button w-full text-left py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 ease-in-out flex items-center" data-tab="evaluate">
-                <i class="fas fa-edit mr-3"></i> Evaluar Alumnos
-            </button>
-            <button class="tab-button w-full text-left py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 ease-in-out flex items-center" data-tab="export">
-                <i class="fas fa-file-export mr-3"></i> Exportar Rúbricas
-            </button>
-            <!-- Muestra el ID de usuario actual para fines de depuración y referencia -->
-            <div class="mt-auto pt-4 text-xs text-gray-400">
-                <p>ID de Usuario: <span id="user-id-display">Cargando...</span></p>
-            </div>
-        </nav>
-
-        <!-- Área principal de contenido (módulos) -->
-        <main class="flex-1 p-6 bg-white rounded-l-lg shadow-inner overflow-auto">
-            <!-- Módulo de Configuración Básica -->
-            <section id="config" class="tab-content active">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-                    <i class="fas fa-cogs mr-2 text-indigo-600"></i> Configuración Básica
-                </h2>
-                <!-- Input fields for current session config -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="institution" class="block text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-school mr-1 text-blue-500"></i> Institución Educativa
-                        </label>
-                        <input type="text" id="institution" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
-                    </div>
-                    <div>
-                        <label for="course" class="block text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-book mr-1 text-green-500"></i> Curso/Módulo
-                        </label>
-                        <input type="text" id="course" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
-                    </div>
-                    <div>
-                        <label for="teacher" class="block text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-chalkboard-teacher mr-1 text-purple-500"></i> Docente
-                        </label>
-                        <input type="text" id="teacher" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
-                    </div>
-                    <div>
-                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-calendar-alt mr-1 text-red-500"></i> Fecha
-                        </label>
-                        <input type="date" id="date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="session-title" class="block text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-heading mr-1 text-orange-500"></i> Título de la Sesión (No persistente)
-                        </label>
-                        <input type="text" id="session-title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
-                    </div>
-                </div>
-                <div class="mt-8">
-                    <button id="save-config-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-save mr-2"></i> Guardar Configuración Actual
-                    </button>
-                </div>
-
-                <hr class="my-8 border-gray-300">
-
-                <!-- Section for managing saved configurations/presets -->
-                <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
-                    <i class="fas fa-bookmark mr-2 text-green-600"></i> Configuraciones Guardadas (Presets)
-                </h3>
-                <div class="mb-4">
-                    <label for="saved-configs-select" class="block text-sm font-medium text-gray-700 mb-1">
-                        <i class="fas fa-list-alt mr-1 text-teal-500"></i> Seleccionar Preset:
-                    </label>
-                    <select id="saved-configs-select" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
-                        <option value="">-- No hay presets guardados --</option>
-                    </select>
-                </div>
-                <div class="flex flex-wrap gap-4 mt-4">
-                    <button id="load-preset-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-download mr-2"></i> Cargar Preset
-                    </button>
-                    <button id="save-as-new-preset-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-plus mr-2"></i> Guardar como Nuevo Preset
-                    </button>
-                    <button id="delete-preset-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-trash-alt mr-2"></i> Eliminar Preset
-                    </button>
-                </div>
-            </section>
-
-            <!-- Módulo de Gestión de Rúbricas -->
-            <section id="rubric" class="tab-content hidden">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-                    <i class="fas fa-table mr-2 text-indigo-600"></i> Gestionar Rúbrica
-                </h2>
-                <div class="mb-6">
-                    <label for="csv-input" class="block text-sm font-medium text-gray-700 mb-1">
-                        <i class="fas fa-paste mr-1 text-teal-500"></i> Pegar texto CSV (delimitado por ',') aquí:
-                    </label>
-                    <textarea id="csv-input" rows="8" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg" placeholder="Ejemplo:
-Aspectos,Destacado (5),Logrado (4),Proceso (3),Inicio (2),Previo al Inicio (1)
-Contenido,&quot;La información es completa, precisa, actualizada y altamente relevante para el tema tratado.&quot;,La información es clara...,Diseño funcional...,El mensaje es claro...,No contiene errores ortográficos...,Las fuentes están presentes...">
-</textarea>
-                    <button id="load-csv-btn" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-upload mr-2"></i> Cargar Rúbrica desde CSV
-                    </button>
-                    <button id="save-rubric-btn" class="mt-4 ml-3 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-save mr-2"></i> Guardar Rúbrica Actual
-                    </button>
-                </div>
-
-                <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
-                    <i class="fas fa-pencil-alt mr-2 text-blue-600"></i> Rúbrica Editable
-                </h3>
-                <div id="rubric-editor" class="overflow-x-auto bg-gray-50 p-4 rounded-lg shadow-inner">
-                    <!-- La tabla de la rúbrica se cargará aquí mediante JavaScript -->
-                    <p class="text-gray-500">Cargue una rúbrica desde CSV para empezar a editarla.</p>
-                </div>
-                <div class="mt-6 flex flex-wrap gap-4">
-                    <button id="add-aspect-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-plus-circle mr-2"></i> Añadir Aspecto
-                    </button>
-                    <button id="add-level-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-plus-circle mr-2"></i> Añadir Nivel
-                    </button>
-                    <button id="remove-last-aspect-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-minus-circle mr-2"></i> Eliminar Último Aspecto
-                    </button>
-                    <button id="remove-last-level-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-minus-circle mr-2"></i> Eliminar Último Nivel
-                    </button>
-                </div>
-            </section>
-
-            <!-- Módulo de Gestión de Estudiantes -->
-            <section id="students" class="tab-content hidden">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-                    <i class="fas fa-users mr-2 text-indigo-600"></i> Gestionar Listas de Estudiantes
-                </h2>
-                <div class="mb-6 p-4 border border-gray-200 rounded-lg shadow-sm">
-                    <label for="list-name" class="block text-sm font-medium text-gray-700 mb-1">
-                        <i class="fas fa-tag mr-1 text-purple-500"></i> Nombre de la Lista
-                    </label>
-                    <input type="text" id="list-name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg mb-4" placeholder="Ej: AULA 01">
-
-                    <label for="students-input" class="block text-sm font-medium text-gray-700 mb-1">
-                        <i class="fas fa-user-plus mr-1 text-green-500"></i> Pegar nombres de estudiantes (uno por línea o separados por coma):
-                    </label>
-                    <textarea id="students-input" rows="6" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg" placeholder="Juan Pérez
-María García
-Carlos López"></textarea>
-                    <button id="add-students-list-btn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-plus mr-2"></i> Añadir Lista de Estudiantes
-                    </button>
-                </div>
-
-                <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
-                    <i class="fas fa-list mr-2 text-blue-600"></i> Listas Existentes
-                </h3>
-                <div id="student-lists-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <p class="text-gray-500">No hay listas de estudiantes añadidas aún.</p>
-                </div>
-            </section>
-
-            <!-- Módulo de Evaluación de Alumnos -->
-            <section id="evaluate" class="tab-content hidden">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-                    <i class="fas fa-edit mr-2 text-indigo-600"></i> Evaluar Alumnos
-                </h2>
-                <div class="mb-6 flex flex-col md:flex-row items-center gap-4">
-                    <label for="select-student-list" class="block text-sm font-medium text-gray-700">
-                        <i class="fas fa-list-alt mr-1 text-purple-500"></i> Seleccionar Lista:
-                    </label>
-                    <select id="select-student-list" class="mt-1 block w-full md:w-auto border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
-                        <option value="">-- Seleccionar Lista --</option>
-                    </select>
-                </div>
-
-                <div id="evaluation-controls" class="mb-6 flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-sm hidden">
-                    <button id="prev-student-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-chevron-left mr-2"></i> Anterior
-                    </button>
-                    <span id="current-student-name" class="text-xl font-semibold text-indigo-700"></span>
-                    <button id="next-student-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        Siguiente <i class="fas fa-chevron-right ml-2"></i>
-                    </button>
-                </div>
-
-                <div id="evaluation-rubric-display" class="overflow-x-auto bg-gray-50 p-4 rounded-lg shadow-inner mt-4 hidden">
-                    <!-- La rúbrica para evaluación se renderizará aquí -->
-                </div>
-
-                <div id="evaluation-summary" class="mt-6 p-4 bg-indigo-50 text-indigo-800 rounded-lg shadow-md hidden">
-                    <p class="text-lg font-semibold flex items-center">
-                        <i class="fas fa-star mr-2"></i> Puntaje Total: <span id="total-score" class="ml-2 font-bold">0</span>
-                    </p>
-                    <p class="text-lg font-semibold flex items-center">
-                        <i class="fas fa-calculator mr-2"></i> Promedio: <span id="average-score" class="ml-2 font-bold">0.00</span>
-                    </p>
-                </div>
-
-                <div class="mt-8 hidden" id="save-evaluation-section">
-                    <!-- El botón de guardar individual se ha hecho menos prominente ya que el guardado es automático -->
-                    <button id="save-evaluation-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center" style="display: none;">
-                        <i class="fas fa-save mr-2"></i> Guardar Evaluación (Automático)
-                    </button>
-                    <button id="finish-evaluation-btn" class="ml-3 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-check-circle mr-2"></i> Finalizar Evaluación y Exportar Todas
-                    </button>
-                </div>
-            </section>
-
-            <!-- Módulo de Exportación de Rúbricas -->
-            <section id="export" class="tab-content hidden">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-                    <i class="fas fa-file-export mr-2 text-indigo-600"></i> Exportar Rúbricas
-                </h2>
-                <div class="mb-6">
-                    <p class="text-gray-700 mb-4 flex items-center">
-                        <i class="fas fa-info-circle mr-2 text-blue-500"></i> Seleccione una lista de estudiantes para exportar sus rúbricas evaluadas.
-                    </p>
-                    <label for="export-student-list" class="block text-sm font-medium text-gray-700">
-                        <i class="fas fa-list-alt mr-1 text-purple-500"></i> Seleccionar Lista:
-                    </label>
-                    <select id="export-student-list" class="mt-1 block w-full md:w-auto border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg">
-                        <option value="">-- Seleccionar Lista --</option>
-                    </select>
-                </div>
-                <div class="mt-8 flex flex-wrap gap-4">
-                    <button id="export-pdf-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center">
-                        <i class="fas fa-file-pdf mr-2"></i> Exportar a PDF (Todas las Rúbricas)
-                    </button>
-                    <button id="export-odf-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 flex items-center" disabled title="La exportación a ODF no está disponible en esta versión web.">
-                        <i class="fas fa-file-word mr-2"></i> Exportar a ODF (No disponible)
-                    </button>
-                </div>
-                <div class="mt-6 p-4 bg-red-100 text-red-800 rounded-lg shadow-md hidden" id="pdf-export-message">
-                    <p class="flex items-center">
-                        <i class="fas fa-exclamation-triangle mr-2"></i> No hay evaluaciones disponibles para exportar para la lista seleccionada.
-                    </p>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Modal de Mensajes (reemplaza a alert()) -->
-    <div id="message-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="close-message-modal">&times;</span>
-            <p id="modal-message" class="text-lg text-center font-semibold text-gray-800"></p>
-            <div class="flex justify-center mt-4">
-                <button id="modal-ok-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105">OK</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Confirmación (reemplaza a confirm()) -->
-    <div id="confirmation-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="close-confirmation-modal">&times;</span>
-            <p id="confirmation-message" class="text-lg text-center font-semibold text-gray-800"></p>
-            <div class="flex justify-center mt-4 space-x-4">
-                <button id="confirm-yes-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105">Sí</button>
-                <button id="confirm-no-button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105">No</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts de Firebase SDK y librerías externas -->
+    <!-- Firebase SDKs -->
     <script type="module">
-        // Importa los módulos necesarios de Firebase y otras librerías
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // html2canvas sigue siendo importado como módulo
-        import * as html2canvas from "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Variables globales para instancias de Firebase y datos de usuario
-        let app;
-        let db;
-        let auth;
-        let currentUserId = null;
-        let isAuthReady = false; // Indica si la autenticación de Firebase está lista
+        // Global variables for Firebase
+        let firebaseApp, db, auth;
+        let userId = null;
+        let currentRubric = null;
+        let currentStudents = [];
+        let currentEvaluationData = {}; // Stores evaluation for current student {aspectId: score}
+        let allEvaluations = {}; // Stores all evaluations by studentId: {rubricId: evaluationData}
+        let currentStudentListId = null;
+        let currentStudentIndex = 0; // For tracking student being evaluated
+        let jspdfConstructor = null; // Global variable to hold jsPDF constructor
 
-        // Variable global para el editor de rúbricas
-        let rubricEditor; 
-
-        // ESTA ES TU CONFIGURACIÓN DE FIREBASE.
-        // SI ESTÁS DESPLEGANDO EN GITHUB PAGES (O FUERA DEL ENTORNO DE DESARROLLO DE GOOGLE),
-        // DEBES REEMPLAZAR ESTE OBJETO CON LA CONFIGURACIÓN REAL DE TU PROYECTO FIREBASE.
-        // Puedes encontrar esta configuración en la Consola de Firebase -> Configuración del proyecto.
-        const firebaseConfigForDeployment = {
-            apiKey: "AIzaSyD89thlGO8HntMzC8xs0EwMDp5E42KyaaE", // Reemplaza con tu clave de API
-            authDomain: "rubryms.firebaseapp.com", // Reemplaza con tu dominio de autenticación
-            projectId: "rubryms", // Reemplaza con tu ID de proyecto
-            storageBucket: "rubryms.firebasestorage.app", // Reemplaza con tu bucket de almacenamiento
-            messagingSenderId: "232158276973", // Reemplaza con tu ID de remitente de mensajes
-            appId: "1:232158276973:web:7706101d8b8ac9b0283e64" // Reemplaza con tu ID de aplicación
+        // Access __app_id and __firebase_config provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyD89thlGO8HntMzC8xs0EwMDp5E42KyaaE",
+            authDomain: "rubryms.firebaseapp.com",
+            projectId: "rubryms",
+            storageBucket: "rubryms.firebasestorage.app",
+            messagingSenderId: "232158276973",
+            appId: "1:232158276973:web:7706101d8b8ac9b0283e64",
+            measurementId: "G-5BZP55CP46"
         };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // Estado global de la aplicación para gestionar los datos
-        let appState = {
-            config: {
-                institution: '',
-                course: '',
-                teacher: '',
-                date: '',
-                sessionTitle: '' // Título de la sesión (no persistente globalmente, se guarda con cada evaluación)
-            },
-            currentRubric: null, // Objeto de la rúbrica activa: { aspects: [], levels: [] }
-            studentLists: {}, // Objeto de listas de estudiantes: { listId: { name: '', students: [] } }
-            currentEvaluationListId: null, // ID de la lista de estudiantes actualmente seleccionada para evaluar
-            currentStudentIndex: 0, // Índice del estudiante actual en la lista de evaluación
-            evaluatedRubrics: {}, // Objeto de rúbricas evaluadas por estudiante: { studentId: { rubricData: {}, totalScore: 0, averageScore: 0, listName: '', config: {} } }
-            listEvaluations: {}, // Objeto para organizar las evaluaciones por lista: { listId: { studentId: evaluationData } }
-            savedConfigPresets: {} // Nuevo: Objeto para almacenar configuraciones preestablecidas de Institución/Curso/Docente
-        };
+        // --- Firebase Initialization and Authentication ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                firebaseApp = initializeApp(firebaseConfig);
+                db = getFirestore(firebaseApp);
+                auth = getAuth(firebaseApp);
 
-        // --- Funciones de Utilidad para Modales (mensajes y confirmaciones) ---
-        const messageModal = document.getElementById('message-modal');
-        const modalMessage = document.getElementById('modal-message');
-        const closeMessageModal = document.getElementById('close-message-modal');
-        const modalOkButton = document.getElementById('modal-ok-button');
-
-        const confirmationModal = document.getElementById('confirmation-modal');
-        const confirmationMessage = document.getElementById('confirmation-message');
-        const closeConfirmationModal = document.getElementById('close-confirmation-modal');
-        const confirmYesButton = document.getElementById('confirm-yes-button');
-        const confirmNoButton = document.getElementById('confirm-no-button');
-
-        // Muestra un modal con un mensaje
-        function showMessage(message) {
-            modalMessage.textContent = message;
-            messageModal.style.display = 'flex';
-        }
-
-        // Muestra un modal de confirmación con opciones Sí/No
-        function showConfirmation(message, onConfirm) {
-            confirmationMessage.textContent = message;
-            confirmationModal.style.display = 'flex';
-
-            const handleYes = () => {
-                onConfirm(true); // Llama a la función de callback con 'true' si se confirma
-                confirmationModal.style.display = 'none';
-                // Elimina los event listeners para evitar múltiples ejecuciones
-                confirmYesButton.removeEventListener('click', handleYes);
-                confirmNoButton.removeEventListener('click', handleNo);
-            };
-
-            const handleNo = () => {
-                onConfirm(false); // Llama a la función de callback con 'false' si se cancela
-                confirmationModal.style.display = 'none';
-                // Elimina los event listeners
-                confirmYesButton.removeEventListener('click', handleYes);
-                confirmNoButton.removeEventListener('click', handleNo);
-            };
-
-            confirmYesButton.addEventListener('click', handleYes);
-            confirmNoButton.addEventListener('click', handleNo);
-            closeConfirmationModal.addEventListener('click', handleNo); // Cerrar modal equivale a 'No'
-            window.addEventListener('click', (event) => {
-                if (event.target === confirmationModal) {
-                    handleNo(); // Clic fuera del modal equivale a 'No'
-                }
-            });
-        }
-
-        // Event listeners para cerrar los modales de mensajes
-        closeMessageModal.addEventListener('click', () => messageModal.style.display = 'none');
-        modalOkButton.addEventListener('click', () => messageModal.style.display = 'none');
-        window.addEventListener('click', (event) => {
-            if (event.target === messageModal) {
-                messageModal.style.display = 'none';
-            }
-        });
-
-        /**
-         * Habilita o deshabilita los elementos interactivos de la UI.
-         * @param {boolean} enabled Si es true, habilita; si es false, deshabilita.
-         */
-        function setUIState(enabled) {
-            const interactiveElements = [
-                document.getElementById('save-config-btn'),
-                document.getElementById('csv-input'),
-                document.getElementById('load-csv-btn'),
-                document.getElementById('save-rubric-btn'),
-                document.getElementById('add-aspect-btn'),
-                document.getElementById('add-level-btn'),
-                document.getElementById('remove-last-aspect-btn'),
-                document.getElementById('remove-last-level-btn'),
-                document.getElementById('list-name'),
-                document.getElementById('students-input'),
-                document.getElementById('add-students-list-btn'),
-                document.getElementById('select-student-list'),
-                document.getElementById('prev-student-btn'),
-                document.getElementById('next-student-btn'),
-                document.getElementById('finish-evaluation-btn'),
-                document.getElementById('export-student-list'),
-                document.getElementById('export-pdf-btn'),
-                document.getElementById('export-odf-btn'), // Este botón ya está disabled en HTML por ahora
-                // Nuevos elementos para presets de configuración
-                document.getElementById('saved-configs-select'),
-                document.getElementById('load-preset-btn'),
-                document.getElementById('save-as-new-preset-btn'),
-                document.getElementById('delete-preset-btn')
-            ];
-
-            interactiveElements.forEach(el => {
-                if (el) { // Asegura que el elemento exista
-                    el.disabled = !enabled;
-                    if (enabled) {
-                        el.classList.remove('disabled-ui');
-                    } else {
-                        el.classList.add('disabled-ui');
-                    }
-                }
-            });
-
-            // Manejar botones de eliminar en listas de estudiantes (renderizados dinámicamente)
-            document.querySelectorAll('.delete-list-btn').forEach(btn => {
-                if (btn) {
-                    btn.disabled = !enabled;
-                    if (enabled) {
-                        btn.classList.remove('disabled-ui');
-                    } else {
-                        btn.classList.add('disabled-ui');
-                    }
-                }
-            });
-
-            // Deshabilitar/habilitar el contenido editable en la tabla de rúbricas
-            if (rubricEditor) {
-                rubricEditor.querySelectorAll('[contenteditable="true"]').forEach(span => {
-                    span.contentEditable = enabled ? "true" : "false";
-                    if (enabled) {
-                        span.classList.remove('disabled-ui');
-                    } else {
-                        span.classList.add('disabled-ui');
-                    }
-                });
-            }
-        }
-
-
-        // --- Inicialización de Firebase y Autenticación ---
-        window.onload = async function () {
-            let usedFirebaseConfig;
-            let usedAppId;
-
-            // Detectar si estamos en el entorno Canvas o en un despliegue externo (como GitHub Pages)
-            // Se usa el typeof para verificar si las variables globales existen
-            if (typeof __firebase_config !== 'undefined' && typeof __app_id !== 'undefined') {
-                // Entorno Canvas: usar las variables globales proporcionadas
-                usedFirebaseConfig = JSON.parse(__firebase_config);
-                usedAppId = __app_id;
-                console.log("Detectado entorno Canvas. Usando configuración proporcionada.");
-            } else {
-                // Entorno externo: usar la configuración definida manualmente para despliegue
-                // Se verifica que la API Key no sea el placeholder inicial para asegurar que el usuario la ha configurado
-                if (firebaseConfigForDeployment.apiKey && firebaseConfigForDeployment.apiKey !== "TU_API_KEY") {
-                    usedFirebaseConfig = firebaseConfigForDeployment;
-                    // Asegúrate de que usedAppId sea el projectId para consistencia con Canvas
-                    usedAppId = firebaseConfigForDeployment.projectId; 
-                    console.log("Detectado entorno externo. Usando configuración de despliegue manual.");
+                // Sign in with custom token if available, otherwise anonymously
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Signed in with custom token.");
                 } else {
-                    // Fallback si la configuración manual no está completa o es la placeholder
-                    // La aplicación intentará inicializar Firebase, pero las operaciones de DB fallarán
-                    usedFirebaseConfig = {}; // Configuración vacía para inicializar Firebase sin un proyecto real
-                    usedAppId = 'fallback-app-id'; // ID de app de respaldo para Firestore
-                    showMessage("Advertencia: No se detectó configuración de Firebase o está incompleta. La persistencia de datos NO funcionará. Por favor, asegúrate de configurar 'firebaseConfigForDeployment' en el código.");
-                    console.warn("Firebase configuration is missing or incomplete for external deployment. Data persistence will not work.");
+                    await signInAnonymously(auth);
+                    console.log("Signed in anonymously.");
                 }
-            }
-            
-            // Inicializa la aplicación de Firebase
-            app = initializeApp(usedFirebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
 
-            // Importante: redefinir __app_id aquí para que Firestore lo use correctamente
-            // Esto es crucial para la ruta de la colección en Firestore (`artifacts/${__app_id}/...`)
-            // Si el user no ha puesto su ID de proyecto, esto seguirá siendo 'fallback-app-id'
-            // Object.defineProperty es solo para hacerla de solo lectura como en Canvas
-            Object.defineProperty(window, '__app_id', {
-                value: usedAppId,
-                writable: false,
-                configurable: false
-            });
-
-            // Inicializa rubricEditor como una variable global aquí
-            rubricEditor = document.getElementById('rubric-editor');
-
-            // Deshabilita la UI al inicio
-            setUIState(false);
-            document.getElementById('user-id-display').textContent = "Cargando...";
-
-
-            // Escucha cambios en el estado de autenticación del usuario
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    currentUserId = user.uid; // Establece el ID de usuario si está autenticado
-                    document.getElementById('user-id-display').textContent = currentUserId; // Muestra el ID de usuario
-                    isAuthReady = true; // Marca que la autenticación está lista
-                    console.log("Firebase Auth Ready. User ID:", currentUserId);
-                    // Carga los datos persistentes una vez que el usuario está autenticado
-                    await loadAllPersistentData();
-                    setUIState(true); // Habilita la UI una vez que la autenticación y carga de datos han terminado
-                } else {
-                    // Si no hay usuario autenticado, intenta iniciar sesión anónimamente o con un token personalizado
-                    try {
-                        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            // Intenta iniciar sesión anónimamente solo si hay una configuración de Firebase válida
-                            // y no es la configuración de placeholder.
-                            if (usedFirebaseConfig.projectId && usedFirebaseConfig.projectId !== "TU_PROJECT_ID") {
-                                await signInAnonymously(auth);
-                            } else {
-                                // Si no hay configuración de Firebase para despliegue, lanzamos un error para la UI
-                                throw new Error("Firebase no está configurado correctamente para la autenticación anónima. La persistencia de datos no funcionará.");
-                            }
-                        }
-                        // La reautenticación activará onAuthStateChanged nuevamente
-                        // y el bloque 'if (user)' se ejecutará
-                    } catch (error) {
-                        console.error("Error signing in:", error);
-                        showMessage("Error al iniciar sesión. Algunas funciones podrían no estar disponibles. Para la persistencia de datos, asegúrate de configurar Firebase. Detalles: " + error.message);
-                        isAuthReady = false; // Mantener como false si la autenticación falla, para mantener UI deshabilitada si no hay acceso a DB.
-                        document.getElementById('user-id-display').textContent = "Autenticación Fallida";
-                        setUIState(false); // Mantener UI deshabilitada si la autenticación falla por completo
+                // Listen for auth state changes
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("User ID:", userId);
+                        document.getElementById('auth-section').style.display = 'none';
+                        document.getElementById('app-section').style.display = 'block';
+                        document.getElementById('user-id-display').innerText = `ID de Usuario: ${userId}`;
+                        loadConfiguration(); // Load user specific data
+                        loadRubrics();
+                        loadStudentLists();
+                        // Ensure a default tab is active after login
+                        showPage('config-module');
+                    } else {
+                        userId = null;
+                        document.getElementById('auth-section').style.display = 'block';
+                        document.getElementById('app-section').style.display = 'none';
+                        document.getElementById('user-id-display').innerText = '';
+                        // Always show auth section if not logged in
+                        showPage('auth-section');
                     }
-                }
-            });
-        };
-
-        // --- Funciones de Persistencia (Firestore) ---
-        // Carga todos los datos persistentes del usuario desde Firestore
-        async function loadAllPersistentData() {
-            if (!currentUserId || !isAuthReady) {
-                console.warn("Firebase no está listo o el usuario no está autenticado. No se pueden cargar los datos.");
-                return;
-            }
-
-            try {
-                // Cargar configuración básica
-                const configDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/settings`, 'configDoc');
-                const configSnap = await getDoc(configDocRef);
-                if (configSnap.exists()) {
-                    appState.config = { ...appState.config, ...configSnap.data() }; // Fusiona la config cargada con la inicial
-                    document.getElementById('institution').value = appState.config.institution || '';
-                    document.getElementById('course').value = appState.config.course || '';
-                    document.getElementById('teacher').value = appState.config.teacher || '';
-                    document.getElementById('date').value = appState.config.date || '';
-                    console.log("Configuración cargada:", appState.config);
-                }
-
-                // Cargar rúbrica actual
-                const rubricDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/rubrics`, 'currentRubric');
-                const rubricSnap = await getDoc(rubricDocRef);
-                if (rubricSnap.exists()) {
-                    appState.currentRubric = rubricSnap.data();
-                    renderEditableRubric(); // Renderiza la rúbrica cargada
-                    console.log("Rúbrica cargada:", appState.currentRubric);
-                } else {
-                    appState.currentRubric = null;
-                    document.getElementById('rubric-editor').innerHTML = '<p class="text-gray-500">Cargue una rúbrica desde CSV para empezar a editarla.</p>';
-                }
-
-                // Cargar listas de estudiantes
-                appState.studentLists = {}; // Limpia las listas anteriores
-                const studentListsColRef = collection(db, `artifacts/${__app_id}/users/${currentUserId}/studentLists`);
-                const studentListsSnap = await getDocs(studentListsColRef);
-                studentListsSnap.forEach(docSnap => {
-                    appState.studentLists[docSnap.id] = docSnap.data();
                 });
-                renderStudentLists(); // Renderiza las listas de estudiantes
-                populateStudentListSelects(); // Rellena los selectores de listas de estudiantes
-                console.log("Listas de estudiantes cargadas:", appState.studentLists);
-
-                // Cargar configuraciones preestablecidas (presets)
-                appState.savedConfigPresets = {};
-                const configPresetsColRef = collection(db, `artifacts/${__app_id}/users/${currentUserId}/configPresets`);
-                const configPresetsSnap = await getDocs(configPresetsColRef);
-                configPresetsSnap.forEach(docSnap => {
-                    appState.savedConfigPresets[docSnap.id] = docSnap.data();
-                });
-                renderConfigPresetsSelect(); // Actualiza el selector de presets
-                console.log("Configuraciones preestablecidas cargadas:", appState.savedConfigPresets);
-
-
-                // Cargar todas las evaluaciones guardadas
-                appState.evaluatedRubrics = {};
-                appState.listEvaluations = {};
-                const evaluationsColRef = collection(db, `artifacts/${__app_id}/users/${currentUserId}/evaluations`);
-                const evaluationsSnap = await getDocs(evaluationsColRef);
-                evaluationsSnap.forEach(docSnap => {
-                    const evalData = docSnap.data();
-                    appState.evaluatedRubrics[docSnap.id] = evalData; // doc.id es studentId
-                    if (!appState.listEvaluations[evalData.listId]) {
-                        appState.listEvaluations[evalData.listId] = {};
-                    }
-                    appState.listEvaluations[evalData.listId][docSnap.id] = evalData;
-                });
-                console.log("Evaluaciones cargadas:", appState.evaluatedRubrics, appState.listEvaluations);
 
             } catch (error) {
-                console.error("Error al cargar los datos persistentes:", error);
-                showMessage("Error al cargar los datos persistentes. " + error.message);
-            }
-        }
-
-        // Guarda la configuración básica en Firestore
-        async function saveConfig() {
-            if (!currentUserId || !isAuthReady) {
-                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
-                return;
-            }
-            try {
-                const configDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/settings`, 'configDoc');
-                // Actualiza el estado de la aplicación con los valores del formulario
-                appState.config.institution = document.getElementById('institution').value;
-                appState.config.course = document.getElementById('course').value;
-                appState.config.teacher = document.getElementById('teacher').value;
-                appState.config.date = document.getElementById('date').value;
-                // sessionTitle es un valor temporal para la sesión actual, no se guarda en Firestore directamente aquí
-                appState.config.sessionTitle = document.getElementById('session-title').value;
-
-                await setDoc(configDocRef, {
-                    institution: appState.config.institution,
-                    course: appState.config.course,
-                    teacher: appState.config.teacher,
-                    date: appState.config.date,
-                }, { merge: true }); // Usa merge para no sobrescribir otros campos si existieran
-                showMessage("Configuración guardada exitosamente!");
-                console.log("Configuración guardada:", appState.config);
-            } catch (error) {
-                console.error("Error al guardar la configuración:", error);
-                showMessage("Error al guardar la configuración: " + error.message);
-            }
-        }
-
-        // --- Funciones para gestionar configuraciones preestablecidas (Presets) ---
-        // Renderiza el selector de presets de configuración
-        function renderConfigPresetsSelect() {
-            const selectElement = document.getElementById('saved-configs-select');
-            selectElement.innerHTML = '<option value="">-- No hay presets guardados --</option>';
-
-            const presetIds = Object.keys(appState.savedConfigPresets).sort((a, b) => {
-                const nameA = appState.savedConfigPresets[a].name.toLowerCase();
-                const nameB = appState.savedConfigPresets[b].name.toLowerCase();
-                if (nameA < nameB) return -1;
-                if (nameA > nameB) return 1;
-                return 0;
-            });
-
-            if (presetIds.length > 0) {
-                selectElement.innerHTML = '<option value="">-- Seleccionar Preset --</option>';
-            }
-
-            presetIds.forEach(presetId => {
-                const preset = appState.savedConfigPresets[presetId];
-                const option = document.createElement('option');
-                option.value = presetId;
-                option.textContent = preset.name;
-                selectElement.appendChild(option);
-            });
-        }
-
-        // Carga un preset seleccionado en los campos de configuración
-        document.getElementById('load-preset-btn').addEventListener('click', () => {
-            const selectedPresetId = document.getElementById('saved-configs-select').value;
-            if (!selectedPresetId) {
-                showMessage("Por favor, seleccione un preset para cargar.");
-                return;
-            }
-
-            const preset = appState.savedConfigPresets[selectedPresetId];
-            if (preset) {
-                document.getElementById('institution').value = preset.institution || '';
-                document.getElementById('course').value = preset.course || '';
-                document.getElementById('teacher').value = preset.teacher || '';
-                // No se cargan fecha y título de sesión, ya que son temporales.
-                showMessage(`Preset '${preset.name}' cargado exitosamente.`);
-            } else {
-                showMessage("No se encontró el preset seleccionado.");
+                console.error("Error initializing Firebase or during authentication:", error);
+                showMessageBox(`Error de inicialización: ${error.message}`, 'error');
             }
         });
 
-        // Guarda la configuración actual como un nuevo preset
-        document.getElementById('save-as-new-preset-btn').addEventListener('click', () => {
-            const presetName = prompt("Ingrese un nombre para el nuevo preset:");
-            if (!presetName || presetName.trim() === "") {
-                showMessage("El nombre del preset no puede estar vacío.");
-                return;
+        // --- Utility Functions ---
+
+        // Function to generate a unique ID
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Function to show/hide app pages
+        function showPage(pageId) {
+            document.querySelectorAll('.app-page').forEach(page => {
+                page.style.display = 'none';
+            });
+            const currentPage = document.getElementById(pageId);
+            if (currentPage) {
+                currentPage.style.display = 'block';
             }
 
-            // Verificar si el nombre del preset ya existe
-            const existingNames = Object.values(appState.savedConfigPresets).map(p => p.name.toLowerCase());
-            if (existingNames.includes(presetName.trim().toLowerCase())) {
-                showMessage(`Ya existe un preset con el nombre '${presetName}'. Por favor, elija otro nombre.`);
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeTabButton = document.querySelector(`.tab-btn[data-page="${pageId}"]`);
+            if (activeTabButton) {
+                activeTabButton.classList.add('active');
+            }
+        }
+
+        // Function to show message box
+        function showMessageBox(message, type = 'info') {
+            const msgBox = document.getElementById('messageBox');
+            msgBox.innerText = message;
+            msgBox.classList.remove('bg-green-100', 'bg-red-100', 'bg-blue-100', 'border-green-400', 'border-red-400', 'border-blue-400', 'text-green-700', 'text-red-700', 'text-blue-700');
+
+            switch (type) {
+                case 'success':
+                    msgBox.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
+                    break;
+                case 'error':
+                    msgBox.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
+                    break;
+                case 'info':
+                default:
+                    msgBox.classList.add('bg-blue-100', 'border-blue-400', 'text-blue-700');
+                    break;
+            }
+            msgBox.classList.add('show');
+            setTimeout(() => {
+                msgBox.classList.remove('show');
+            }, 5000);
+        }
+
+        // --- Custom Modal for Confirmations ---
+        const confirmationModal = document.getElementById('confirmationModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const confirmModalBtn = document.getElementById('confirmModalBtn');
+
+        let confirmCallback = null;
+
+        function openConfirmModal(message, onConfirm) {
+            modalMessage.innerText = message;
+            confirmationModal.style.display = 'flex'; // Use flex to center
+            confirmCallback = onConfirm;
+        }
+
+        function closeConfirmModal() {
+            confirmationModal.style.display = 'none';
+            confirmCallback = null;
+        }
+
+        closeModalBtn.addEventListener('click', closeConfirmModal);
+        cancelModalBtn.addEventListener('click', closeConfirmModal);
+        confirmModalBtn.addEventListener('click', () => {
+            if (confirmCallback) {
+                confirmCallback(true);
+            }
+            closeConfirmModal();
+        });
+
+
+        // --- Authentication Module ---
+
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showMessageBox('Registro exitoso. ¡Bienvenido!', 'success');
+            } catch (error) {
+                console.error("Error al registrar:", error);
+                if (error.code === 'auth/operation-not-allowed') {
+                    showMessageBox('El registro con correo/contraseña no está habilitado. Por favor, habilítalo en la configuración de Firebase Authentication (métodos de inicio de sesión).', 'error');
+                } else {
+                    showMessageBox(`Error de registro: ${error.message}`, 'error');
+                }
+            }
+        });
+
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessageBox('Inicio de sesión exitoso. ¡Bienvenido de nuevo!', 'success');
+            } catch (error) {
+                console.error("Error al iniciar sesión:", error);
+                showMessageBox(`Error al iniciar sesión: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('resetPasswordBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value; // Use the login email field for reset
+            if (!email) {
+                showMessageBox('Por favor, ingresa tu correo electrónico para restablecer la contraseña.', 'info');
                 return;
             }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showMessageBox('Se ha enviado un correo de recuperación a tu dirección. Revisa tu bandeja de entrada.', 'success');
+            } catch (error) {
+                console.error("Error al restablecer contraseña:", error);
+                showMessageBox(`Error al restablecer contraseña: ${error.message}`, 'error');
+            }
+        });
 
-            const newPreset = {
-                name: presetName.trim(),
-                institution: document.getElementById('institution').value,
-                course: document.getElementById('course').value,
-                teacher: document.getElementById('teacher').value
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                showMessageBox('Sesión cerrada correctamente.', 'info');
+            } catch (error) {
+                console.error("Error al cerrar sesión:", error);
+                showMessageBox(`Error al cerrar sesión: ${error.message}`, 'error');
+            }
+        });
+
+        // --- Configuration Module ---
+
+        async function saveConfiguration() {
+            if (!userId) {
+                showMessageBox('Debes iniciar sesión para guardar la configuración.', 'error');
+                return;
+            }
+            const configData = {
+                institucion: document.getElementById('institucion').value,
+                curso: document.getElementById('curso').value,
+                tituloSesion: document.getElementById('tituloSesion').value,
+                docente: document.getElementById('docente').value,
+                fecha: document.getElementById('fecha').value,
             };
-            saveConfigPreset(newPreset);
-        });
-
-        // Elimina un preset de configuración
-        document.getElementById('delete-preset-btn').addEventListener('click', () => {
-            const selectedPresetId = document.getElementById('saved-configs-select').value;
-            if (!selectedPresetId) {
-                showMessage("Por favor, seleccione un preset para eliminar.");
-                return;
+            try {
+                await setDoc(doc(db, `artifacts/${appId}/users/${userId}/configs`, 'main_config'), configData);
+                showMessageBox('Configuración guardada exitosamente.', 'success');
             }
+            catch (error) {
+                console.error("Error al guardar configuración:", error);
+                showMessageBox(`Error al guardar configuración: ${error.message}`, 'error');
+            }
+        }
 
-            const presetName = appState.savedConfigPresets[selectedPresetId]?.name;
-            showConfirmation(`¿Está seguro que desea eliminar el preset '${presetName}'?`, (confirmed) => {
-                if (confirmed) {
-                    deleteConfigPreset(selectedPresetId);
+        async function loadConfiguration() {
+            if (!userId) return;
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/configs`, 'main_config');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('institucion').value = data.institucion || '';
+                    document.getElementById('curso').value = data.curso || '';
+                    document.getElementById('tituloSesion').value = data.tituloSesion || '';
+                    document.getElementById('docente').value = data.docente || '';
+                    document.getElementById('fecha').value = data.fecha || '';
                 }
-            });
-        });
-
-        // Guarda un preset de configuración en Firestore
-        async function saveConfigPreset(presetData) {
-            if (!currentUserId || !isAuthReady) {
-                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
-                return;
-            }
-            try {
-                const presetId = `preset_${Date.now()}`; // Genera un ID único para el preset
-                const presetDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/configPresets`, presetId);
-                await setDoc(presetDocRef, presetData);
-                appState.savedConfigPresets[presetId] = presetData; // Agrega al estado local
-                renderConfigPresetsSelect(); // Actualiza el selector
-                showMessage(`Preset '${presetData.name}' guardado exitosamente!`);
             } catch (error) {
-                console.error("Error al guardar el preset de configuración:", error);
-                showMessage("Error al guardar el preset de configuración: " + error.message);
+                console.error("Error al cargar configuración:", error);
+                showMessageBox(`Error al cargar configuración: ${error.message}`, 'error');
             }
         }
 
-        // Elimina un preset de configuración de Firestore
-        async function deleteConfigPreset(presetId) {
-            if (!currentUserId || !isAuthReady) {
-                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
-                return;
-            }
-            try {
-                const presetDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/configPresets`, presetId);
-                await deleteDoc(presetDocRef);
-                delete appState.savedConfigPresets[presetId]; // Elimina del estado local
-                renderConfigPresetsSelect(); // Actualiza el selector
-                showMessage("Preset eliminado exitosamente!");
-            } catch (error) {
-                console.error("Error al eliminar el preset de configuración:", error);
-                showMessage("Error al eliminar el preset de configuración: " + error.message);
-            }
-        }
+        document.getElementById('saveConfigBtn').addEventListener('click', saveConfiguration);
 
-        // Guarda la rúbrica actual en Firestore
-        async function saveRubric() {
-            if (!currentUserId || !isAuthReady) {
-                showMessage("Error: Usuario no autenticado. Por favor, espere o intente recargar.");
-                return;
-            }
-            if (!appState.currentRubric) {
-                showMessage("No hay rúbrica para guardar. Cargue o cree una primero.");
-                return;
-            }
-            try {
-                // Asegura que los datos de la rúbrica estén actualizados desde el editor antes de guardar
-                updateRubricFromEditor();
-                const rubricDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/rubrics`, 'currentRubric');
-                // Se hace una copia profunda para evitar problemas con referencias a objetos mutables
-                await setDoc(rubricDocRef, JSON.parse(JSON.stringify(appState.currentRubric)));
-                showMessage("Rúbrica guardada exitosamente!");
-                console.log("Rúbrica guardada:", appState.currentRubric);
-            } catch (error) {
-                console.error("Error al guardar la rúbrica:", error);
-                showMessage("Error al guardar la rúbrica: " + error.message);
-            }
-        }
+        // --- Rubric Module ---
 
-        // --- Módulo: CSV a Rúbrica Editable ---
-        document.getElementById('load-csv-btn').addEventListener('click', () => {
-            const csvText = document.getElementById('csv-input').value;
-            if (!csvText) {
-                showMessage("Por favor, pegue el texto CSV en el campo.");
-                return;
-            }
-            parseCsvToRubric(csvText); // Parsea el texto CSV a un objeto de rúbrica
-            renderEditableRubric(); // Renderiza la rúbrica en la tabla editable
-        });
-
-        document.getElementById('save-rubric-btn').addEventListener('click', saveRubric);
-
-        /**
-         * Parsea una línea CSV robustamente, manejando comas dentro de campos entre comillas.
-         * @param {string} line La línea CSV a parsear.
-         * @param {string} delimiter El carácter delimitador (por defecto: ',').
-         * @returns {string[]} Un array de campos parseados.
-         */
-        function parseCsvLineRobust(line, delimiter = ',') {
-            const result = [];
+        // Helper function to parse a single CSV line respecting quotes
+        function parseLine(line, delimiter) {
+            const fields = [];
             let inQuote = false;
             let currentField = '';
+
             for (let i = 0; i < line.length; i++) {
                 const char = line[i];
+
                 if (char === '"') {
-                    // Handle escaped double quotes: "" inside a quoted field
-                    if (inQuote && i < line.length - 1 && line[i + 1] === '"') {
-                        currentField += '"'; // Add a single quote
-                        i++; // Skip the next character as it's part of the escaped quote
+                    if (inQuote && line[i + 1] === '"') { // Handle escaped quote ("")
+                        currentField += '"';
+                        i++; // Skip the next quote character as it's part of the escape sequence
                     } else {
-                        inQuote = !inQuote; // Toggle quote state
+                        inQuote = !inQuote;
                     }
                 } else if (char === delimiter && !inQuote) {
-                    result.push(currentField.trim()); // Add field and trim whitespace
-                    currentField = ''; // Reset for next field
+                    fields.push(currentField.trim());
+                    currentField = '';
                 } else {
-                    currentField += char; // Append character to current field
+                    currentField += char;
                 }
             }
-            result.push(currentField.trim()); // Add the last field
-            return result;
+            fields.push(currentField.trim()); // Add the last field
+            return fields;
         }
 
-        // Parsea el texto CSV (delimitado por ',') a la estructura de la rúbrica
-        function parseCsvToRubric(csvText) {
-            try {
-                // Filtra líneas completamente vacías para evitar problemas de parseo
-                const lines = csvText.trim().split('\n').filter(line => line.trim() !== '');
-                if (lines.length < 2) {
-                    showMessage("El CSV debe tener al menos una fila de encabezado y una fila de datos. Asegúrese de que el formato sea correcto.");
-                    appState.currentRubric = null; // Reinicia la rúbrica si el parseo falla
-                    return;
-                }
 
-                // Parsea la primera línea (encabezado) usando la función robusta
-                const headerLine = parseCsvLineRobust(lines[0]);
-                if (headerLine.length < 2 || headerLine[0].trim().toLowerCase() !== 'aspectos') {
-                    showMessage("El encabezado del CSV debe comenzar con 'Aspectos' y tener al menos un nivel, delimitado por ','.");
-                    appState.currentRubric = null;
-                    return;
-                }
-
-                // Parsea los niveles y sus puntuaciones desde el encabezado
-                const levels = [];
-                for (let i = 1; i < headerLine.length; i++) {
-                    const levelText = headerLine[i].trim();
-                    const match = levelText.match(/(.+)\((\d+)\)/); // Busca el formato "Nombre (Puntuación)"
-                    if (match) {
-                        levels.push({ name: match[1].trim(), score: parseInt(match[2], 10) });
-                    } else {
-                        // Si el formato no coincide, asigna una puntuación por defecto y advierte al usuario
-                        showMessage(`Advertencia: El nivel '${levelText}' no tiene el formato 'Nombre (Puntuación)'. Se le asignará una puntuación de 0. Por favor, corrija el formato en el CSV.`);
-                        levels.push({ name: levelText, score: 0 });
-                    }
-                }
-
-                // Parsea los aspectos y sus descriptores
-                const aspects = [];
-                for (let i = 1; i < lines.length; i++) {
-                    const parts = parseCsvLineRobust(lines[i]); // Usa la función robusta para cada línea
-                    if (parts.length > 0 && parts[0].trim()) { // Asegura que el nombre del aspecto no esté vacío
-                        const aspectName = parts[0].trim();
-                        // Asegura que haya suficientes descriptores para todos los niveles
-                        let descriptors = parts.slice(1).map(d => d.trim());
-                        // Rellena con cadenas vacías si no se proporcionan suficientes descriptores
-                        while (descriptors.length < levels.length) {
-                            descriptors.push('');
-                        }
-                        aspects.push({ name: aspectName, descriptors: descriptors });
-                    }
-                }
-
-                // Validación final: asegura que se hayan parseado aspectos y niveles válidos
-                if (aspects.length === 0 || levels.length === 0) {
-                    showMessage("No se pudieron extraer aspectos o niveles válidos del CSV. Verifique el formato.");
-                    appState.currentRubric = null;
-                    return;
-                }
-
-                appState.currentRubric = { aspects, levels };
-                console.log("Rúbrica parseada exitosamente:", appState.currentRubric);
-                // El mensaje de éxito se muestra en el listener del botón, no aquí.
-            } catch (error) {
-                console.error("Error al parsear el CSV de la rúbrica:", error);
-                showMessage("Error al cargar la rúbrica desde CSV. Verifique el formato. Detalles: " + error.message);
-                appState.currentRubric = null;
-            }
-        }
-
-        // Renderiza la rúbrica en una tabla HTML editable
-        function renderEditableRubric() {
-            if (!rubricEditor) { // Añadir una comprobación para asegurar que rubricEditor está definido
-                console.error("Error: rubricEditor no está inicializado.");
-                return;
+        // Function to parse CSV into a structured object
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) {
+                showMessageBox("El CSV está vacío. Por favor, introduce datos.", 'error');
+                return null;
             }
 
-            if (!appState.currentRubric || appState.currentRubric.aspects.length === 0 || appState.currentRubric.levels.length === 0) {
-                rubricEditor.innerHTML = '<p class="text-gray-500">Cargue una rúbrica desde CSV para empezar a editarla.</p>';
-                return;
-            }
+            let headers;
+            let delimiter = ';'; // Assume semicolon first
 
-            let html = `
-                <table class="w-full border-collapse table-auto">
-                    <thead>
-                        <tr class="bg-indigo-100 text-indigo-800">
-                            <th class="border border-indigo-200 p-3 text-left font-semibold w-1/5">
-                                <span contenteditable="true" data-type="header" data-index="0">Aspectos</span>
-                            </th>
-                            ${appState.currentRubric.levels.map((level, index) => `
-                                <th class="border border-indigo-200 p-3 text-left font-semibold">
-                                    <span contenteditable="true" data-type="level-name" data-index="${index}">${level.name}</span>
-                                    (<span contenteditable="true" data-type="level-score" data-index="${index}">${level.score}</span>)
-                                </th>
-                            `).join('')}
-                        </tr>
-                    </thead>
-                    <tbody id="rubric-body">
-                        ${appState.currentRubric.aspects.map((aspect, aspectIndex) => `
-                            <tr class="${aspectIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
-                                <td class="border border-gray-200 p-3 font-medium">
-                                    <span contenteditable="true" data-type="aspect-name" data-aspect-index="${aspectIndex}">${aspect.name}</span>
-                                </td>
-                                ${aspect.descriptors.map((descriptor, levelIndex) => `
-                                    <td class="border border-gray-200 p-3">
-                                        <span contenteditable="true" data-type="descriptor" data-aspect-index="${aspectIndex}" data-level-index="${levelIndex}">${descriptor}</span>
-                                    </td>
-                                `).join('')}
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            rubricEditor.innerHTML = html;
-
-            // Agrega event listeners para actualizar el estado cuando se edita el contenido
-            rubricEditor.querySelectorAll('[contenteditable="true"]').forEach(element => {
-                element.addEventListener('input', () => {
-                    // El estado se actualizará completamente al guardar la rúbrica
-                    // o cuando se navegue en la evaluación.
-                });
-            });
-        }
-
-        // Actualiza el objeto de la rúbrica en appState con los valores de la tabla HTML editable
-        function updateRubricFromEditor() {
-            if (!appState.currentRubric) return;
-
-            const updatedAspects = [];
-            const rubricBody = rubricEditor.querySelector('#rubric-body'); // Acceder a rubricBody a través de rubricEditor
-            if (!rubricBody) return; // Si el editor no está renderizado, sale
-
-            // Actualiza los nombres y puntuaciones de los niveles desde el encabezado de la tabla
-            const levelNames = Array.from(rubricEditor.querySelectorAll('[data-type="level-name"]')).map(el => el.textContent.trim());
-            const levelScores = Array.from(rubricEditor.querySelectorAll('[data-type="level-score"]')).map(el => parseInt(el.textContent.trim(), 10) || 0);
-
-            appState.currentRubric.levels = levelNames.map((name, i) => ({
-                name: name,
-                score: levelScores[i]
-            }));
-
-            // Itera sobre las filas de la tabla para obtener los aspectos y descriptores
-            rubricBody.querySelectorAll('tr').forEach(row => {
-                const aspectNameElement = row.querySelector('[data-type="aspect-name"]');
-                if (!aspectNameElement) return; // Salta si no es una fila de aspecto válida
-
-                const aspectName = aspectNameElement.textContent.trim();
-                const descriptors = Array.from(row.querySelectorAll('[data-type="descriptor"]')).map(el => el.textContent.trim());
-                updatedAspects.push({ name: aspectName, descriptors: descriptors });
-            });
-            appState.currentRubric.aspects = updatedAspects;
-        }
-
-        // Botón para añadir un nuevo aspecto a la rúbrica
-        document.getElementById('add-aspect-btn').addEventListener('click', () => {
-            if (!appState.currentRubric) {
-                showMessage("Cargue una rúbrica primero.");
-                return;
-            }
-            const newAspectName = `Nuevo Aspecto ${appState.currentRubric.aspects.length + 1}`;
-            // Crea descriptores vacíos para todos los niveles existentes
-            const newDescriptors = Array(appState.currentRubric.levels.length).fill('');
-            appState.currentRubric.aspects.push({ name: newAspectName, descriptors: newDescriptors });
-            renderEditableRubric(); // Vuelve a renderizar la rúbrica con el nuevo aspecto
-            showMessage("Nuevo aspecto añadido. Guarde la rúbrica para persistir los cambios.");
-        });
-
-        // Botón para añadir un nuevo nivel a la rúbrica
-        document.getElementById('add-level-btn').addEventListener('click', () => {
-            if (!appState.currentRubric) {
-                showMessage("Cargue una rúbrica primero.");
-                return;
-            }
-            const newLevelName = `Nuevo Nivel ${appState.currentRubric.levels.length + 1}`;
-            const newLevelScore = 0; // Puntuación por defecto
-            appState.currentRubric.levels.push({ name: newLevelName, score: newLevelScore });
-            // Añade un descriptor vacío para el nuevo nivel en cada aspecto existente
-            appState.currentRubric.aspects.forEach(aspect => {
-                aspect.descriptors.push('');
-            });
-            renderEditableRubric(); // Vuelve a renderizar la rúbrica con el nuevo nivel
-            showMessage("Nuevo nivel añadido. Guarde la rúbrica para persistir los cambios.");
-        });
-
-        // Botón para eliminar el último aspecto
-        document.getElementById('remove-last-aspect-btn').addEventListener('click', () => {
-            if (!appState.currentRubric || appState.currentRubric.aspects.length === 0) {
-                showMessage("No hay aspectos para eliminar.");
-                return;
-            }
-            showConfirmation("¿Está seguro que desea eliminar el último aspecto?", (confirmed) => {
-                if (confirmed) {
-                    appState.currentRubric.aspects.pop(); // Elimina el último aspecto
-                    renderEditableRubric(); // Vuelve a renderizar
-                    showMessage("Último aspecto eliminado. Guarde la rúbrica para persistir los cambios.");
-                }
-            });
-        });
-
-        // Botón para eliminar el último nivel
-        document.getElementById('remove-last-level-btn').addEventListener('click', () => {
-            if (!appState.currentRubric || appState.currentRubric.levels.length === 0) {
-                showMessage("No hay niveles para eliminar.");
-                return;
-            }
-            showConfirmation("¿Está seguro que desea eliminar el último nivel?", (confirmed) => {
-                if (confirmed) {
-                    appState.currentRubric.levels.pop(); // Elimina el último nivel
-                    appState.currentRubric.aspects.forEach(aspect => {
-                        aspect.descriptors.pop(); // Elimina el descriptor asociado al nivel eliminado en cada aspecto
-                    });
-                    renderEditableRubric(); // Vuelve a renderizar
-                    showMessage("Último nivel eliminado. Guarde la rúbrica para persistir los cambios.");
-                }
-            });
-        });
-
-        // --- Módulo: Gestión de Listas de Estudiantes ---
-        document.getElementById('add-students-list-btn').addEventListener('click', () => {
-            const listName = document.getElementById('list-name').value.trim();
-            const studentsInput = document.getElementById('students-input').value.trim();
-
-            if (!listName) {
-                showMessage("Por favor, ingrese un nombre para la lista de estudiantes.");
-                return;
-            }
-            if (!studentsInput) {
-                showMessage("Por favor, pegue los nombres de los estudiantes.");
-                return;
-            }
-
-            // Divide los nombres de estudiantes por saltos de línea o comas, y los limpia
-            const students = studentsInput.split(/[\n,;]+/).map(name => name.trim()).filter(name => name !== '');
-            if (students.length === 0) {
-                showMessage("No se encontraron nombres de estudiantes válidos.");
-                return;
-            }
-
-            // Verifica si ya existe una lista con el mismo nombre
-            const existingListNames = Object.values(appState.studentLists).map(list => list.name.toLowerCase());
-            if (existingListNames.includes(listName.toLowerCase())) {
-                showMessage(`Ya existe una lista con el nombre '${listName}'. Por favor, elija otro nombre.`);
-                return;
-            }
-
-            saveStudentList(listName, students); // Guarda la nueva lista
-            // Limpia los campos del formulario
-            document.getElementById('list-name').value = '';
-            document.getElementById('students-input').value = '';
-        });
-
-        // Renderiza las listas de estudiantes en la interfaz
-        function renderStudentLists() {
-            const container = document.getElementById('student-lists-container');
-            container.innerHTML = ''; // Limpia el contenido anterior
-
-            if (Object.keys(appState.studentLists).length === 0) {
-                container.innerHTML = '<p class="text-gray-500">No hay listas de estudiantes añadidas aún.</p>';
-                return;
-            }
-
-            // Itera sobre las listas de estudiantes y crea una tarjeta para cada una
-            for (const listId in appState.studentLists) {
-                const list = appState.studentLists[listId];
-                const card = document.createElement('div');
-                card.className = 'bg-gray-100 p-4 rounded-lg shadow-md flex flex-col justify-between border border-gray-200';
-                card.innerHTML = `
-                    <h4 class="text-lg font-semibold text-gray-800 flex items-center mb-2">
-                        <i class="fas fa-clipboard-list mr-2 text-blue-500"></i> ${list.name}
-                    </h4>
-                    <p class="text-gray-600 mb-3 text-sm">
-                        Total de estudiantes: <span class="font-bold">${list.students.length}</span>
-                    </p>
-                    <button class="delete-list-btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-105 flex items-center justify-center mt-auto" data-list-id="${listId}">
-                        <i class="fas fa-trash-alt mr-2"></i> Eliminar
-                    </button>
-                `;
-                container.appendChild(card);
-            }
-
-            // Agrega event listeners a los botones de eliminar
-            // Estos botones deben ser deshabilitados/habilitados también por setUIState
-            document.querySelectorAll('.delete-list-btn').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const listIdToDelete = event.target.dataset.listId;
-                    if (listIdToDelete) {
-                        deleteStudentList(listIdToDelete);
-                    }
-                });
-            });
-            // Asegúrate de que el estado de los botones de eliminación se actualice correctamente
-            setUIState(isAuthReady);
-        }
-
-        // Rellena los selectores de listas de estudiantes (para evaluación y exportación)
-        function populateStudentListSelects(target = 'evaluate') {
-            const selectElement = target === 'evaluate' ? document.getElementById('select-student-list') : document.getElementById('export-student-list');
-            selectElement.innerHTML = '<option value="">-- Seleccionar Lista --</option>'; // Restablece las opciones
-
-            for (const listId in appState.studentLists) {
-                const option = document.createElement('option');
-                option.value = listId;
-                option.textContent = appState.studentLists[listId].name;
-                selectElement.appendChild(option);
-            }
-            // Asegúrate de que el estado de los selectores se actualice
-            setUIState(isAuthReady);
-        }
-
-        // --- Módulo: Evaluación ---
-        const evaluationControls = document.getElementById('evaluation-controls');
-        const currentStudentNameDisplay = document.getElementById('current-student-name');
-        const prevStudentBtn = document.getElementById('prev-student-btn');
-        const nextStudentBtn = document.getElementById('next-student-btn');
-        const evaluationRubricDisplay = document.getElementById('evaluation-rubric-display');
-        const totalScoreDisplay = document.getElementById('total-score');
-        const averageScoreDisplay = document.getElementById('average-score');
-        const saveEvaluationBtn = document.getElementById('save-evaluation-btn');
-        const finishEvaluationBtn = document.getElementById('finish-evaluation-btn');
-        const saveEvaluationSection = document.getElementById('save-evaluation-section');
-
-        // Maneja la selección de una lista de estudiantes para evaluación
-        document.getElementById('select-student-list').addEventListener('change', (event) => {
-            const listId = event.target.value;
-            appState.currentEvaluationListId = listId; // Establece la lista de evaluación actual
-            appState.currentStudentIndex = 0; // Reinicia el índice del estudiante
-
-            if (listId && appState.currentRubric) {
-                // Muestra los controles de evaluación si hay una lista y rúbrica seleccionadas
-                evaluationControls.classList.remove('hidden');
-                evaluationRubricDisplay.classList.remove('hidden');
-                document.getElementById('evaluation-summary').classList.remove('hidden');
-                saveEvaluationSection.classList.remove('hidden');
-                loadStudentForEvaluation(); // Carga el primer estudiante para evaluar
-            } else {
-                // Oculta los controles si no hay una lista o rúbrica
-                evaluationControls.classList.add('hidden');
-                evaluationRubricDisplay.classList.add('hidden');
-                document.getElementById('evaluation-summary').classList.add('hidden');
-                saveEvaluationSection.classList.add('hidden');
-                showMessage("Por favor, seleccione una lista y asegúrese de que haya una rúbrica cargada.");
-            }
-        });
-
-        // Botón para navegar al estudiante anterior
-        prevStudentBtn.addEventListener('click', () => {
-            if (appState.currentStudentIndex > 0) {
-                appState.currentStudentIndex--;
-                loadStudentForEvaluation();
-            }
-        });
-
-        // Botón para navegar al siguiente estudiante
-        nextStudentBtn.addEventListener('click', () => {
-            const selectedList = appState.studentLists[appState.currentEvaluationListId];
-            if (selectedList && appState.currentStudentIndex < selectedList.students.length - 1) {
-                appState.currentStudentIndex++;
-                loadStudentForEvaluation();
-            }
-        });
-
-        // Carga y muestra el estudiante actual para evaluación
-        function loadStudentForEvaluation() {
-            const listId = appState.currentEvaluationListId;
-            const selectedList = appState.studentLists[listId];
-
-            if (!selectedList || selectedList.students.length === 0) {
-                currentStudentNameDisplay.textContent = "No hay estudiantes en esta lista.";
-                evaluationRubricDisplay.innerHTML = '';
-                return;
-            }
-
-            const currentStudentName = selectedList.students[appState.currentStudentIndex];
-            currentStudentNameDisplay.textContent = `${currentStudentName} (${appState.currentStudentIndex + 1}/${selectedList.students.length})`;
-
-            // Genera un ID único para el estudiante para el almacenamiento de la evaluación
-            const studentId = `${listId}_${btoa(currentStudentName).replace(/=/g, '')}`; // Codifica Base64 para un ID seguro
-
-            // Verifica si el estudiante tiene una evaluación existente para esta lista
-            let studentEvaluationData = appState.listEvaluations[listId]?.[studentId];
-
-            renderEvaluationRubric(studentEvaluationData); // Renderiza la rúbrica para este estudiante
-            calculateAndDisplayScores(); // Calcula y muestra las puntuaciones
-        }
-
-        // Renderiza la rúbrica para el módulo de evaluación
-        function renderEvaluationRubric(evaluationData = null) {
-            if (!appState.currentRubric) {
-                evaluationRubricDisplay.innerHTML = '<p class="text-gray-500">Cargue una rúbrica en la sección "Gestionar Rúbrica" antes de evaluar.</p>';
-                return;
-            }
-
-            let html = `
-                <table class="w-full border-collapse table-auto">
-                    <thead>
-                        <tr class="bg-indigo-100 text-indigo-800">
-                            <th class="border border-indigo-200 p-3 text-left font-semibold w-1/5">Aspectos</th>
-                            ${appState.currentRubric.levels.map(level => `
-                                <th class="border border-indigo-200 p-3 text-left font-semibold">
-                                    ${level.name} (${level.score})
-                                </th>
-                            `).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${appState.currentRubric.aspects.map((aspect, aspectIndex) => `
-                            <tr class="${aspectIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
-                                <td class="border border-gray-200 p-3 font-medium">${aspect.name}</td>
-                                ${aspect.descriptors.map((descriptor, levelIndex) => {
-                                    // Determina si esta celda está seleccionada en la evaluación actual del estudiante
-                                    const isSelected = evaluationData && evaluationData.rubricData &&
-                                                       evaluationData.rubricData[aspectIndex] === levelIndex;
-                                    return `
-                                        <td class="rubric-cell border border-gray-200 p-3 cursor-pointer hover:bg-violet-100 ${isSelected ? 'selected' : ''}"
-                                            data-aspect-index="${aspectIndex}" data-level-index="${levelIndex}">
-                                            ${descriptor}
-                                        </td>
-                                    `;
-                                }).join('')}
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            evaluationRubricDisplay.innerHTML = html;
-
-            // Agrega el event listener para clics en las celdas de la rúbrica
-            evaluationRubricDisplay.querySelectorAll('.rubric-cell').forEach(cell => {
-                cell.addEventListener('click', async (event) => { // Marcado como async
-                    const clickedAspectIndex = parseInt(event.target.dataset.aspectIndex, 10);
-                    const clickedLevelIndex = parseInt(event.target.dataset.levelIndex, 10);
-
-                    // Deselecciona cualquier otra celda en la misma fila (solo una selección por aspecto)
-                    event.target.closest('tr').querySelectorAll('.rubric-cell').forEach(otherCell => {
-                        otherCell.classList.remove('selected');
-                    });
-
-                    // Selecciona la celda clickeada
-                    event.target.classList.add('selected');
-
-                    // Almacena la selección para el estudiante actual
-                    const listId = appState.currentEvaluationListId;
-                    const selectedList = appState.studentLists[listId];
-                    const currentStudentName = selectedList.students[appState.currentStudentIndex];
-                    const studentId = `${listId}_${btoa(currentStudentName).replace(/=/g, '')}`;
-
-                    // Inicializa el objeto de evaluación del estudiante si no existe
-                    if (!appState.evaluatedRubrics[studentId]) { 
-                        appState.evaluatedRubrics[studentId] = {
-                            studentName: currentStudentName,
-                            listId: listId,
-                            listName: selectedList.name,
-                            rubricData: {}, // Formato: { indiceAspecto: indiceNivelSeleccionado }
-                            totalScore: 0,
-                            averageScore: 0,
-                            config: { ...appState.config } // Captura la configuración actual en el momento de la evaluación
-                        };
-                    }
-                    appState.evaluatedRubrics[studentId].rubricData[clickedAspectIndex] = clickedLevelIndex;
-
-                    calculateAndDisplayScores(); // Recalcula y muestra las puntuaciones
-                    
-                    // Guarda automáticamente la evaluación después de cada clic
-                    await saveStudentEvaluation(studentId, appState.evaluatedRubrics[studentId]);
-                });
-            });
-            calculateAndDisplayScores(); // Asegura que las puntuaciones se muestren correctamente al cargar
-        }
-
-        // Calcula y muestra el puntaje total y promedio de la evaluación actual
-        function calculateAndDisplayScores() {
-            const listId = appState.currentEvaluationListId;
-            const selectedList = appState.studentLists[listId];
-            const currentStudentName = selectedList.students[appState.currentStudentIndex];
-            const studentId = `${listId}_${btoa(currentStudentName).replace(/=/g, '')}`;
-            const studentEvaluation = appState.evaluatedRubrics[studentId];
-
-            if (!studentEvaluation || !appState.currentRubric) {
-                totalScoreDisplay.textContent = '0';
-                averageScoreDisplay.textContent = '0.00';
-                return;
-            }
-
-            let totalScore = 0;
-            let aspectsEvaluated = 0;
-
-            // Itera sobre los aspectos evaluados y suma las puntuaciones
-            for (const aspectIndex in studentEvaluation.rubricData) {
-                const levelIndex = studentEvaluation.rubricData[aspectIndex];
-                if (appState.currentRubric.levels[levelIndex]) {
-                    totalScore += appState.currentRubric.levels[levelIndex].score;
-                    aspectsEvaluated++;
-                }
-            }
-
-            const averageScore = aspectsEvaluated > 0 ? (totalScore / aspectsEvaluated).toFixed(2) : '0.00';
-
-            totalScoreDisplay.textContent = totalScore;
-            averageScoreDisplay.textContent = averageScore;
-
-            // Actualiza el objeto de evaluación del estudiante en el estado global
-            studentEvaluation.totalScore = totalScore;
-            studentEvaluation.averageScore = parseFloat(averageScore);
-        }
-
-        // El botón de guardar individual ya no es necesario para el guardado automático
-        // saveEvaluationBtn.addEventListener('click', async () => { ... });
-
-        // --- Módulo: Exportación ---
-        document.getElementById('export-pdf-btn').addEventListener('click', async () => {
-            const listId = document.getElementById('export-student-list').value;
-            if (!listId) {
-                showMessage("Por favor, seleccione una lista para exportar.");
-                return;
-            }
-
-            const studentsInList = appState.studentLists[listId]?.students;
-            if (!studentsInList || studentsInList.length === 0) {
-                showMessage("La lista seleccionada no tiene estudiantes.");
-                return;
-            }
-
-            // Filtra las evaluaciones relevantes para la lista seleccionada
-            const evaluationsToExport = studentsInList
-                .map(studentName => {
-                    const studentId = `${listId}_${btoa(studentName).replace(/=/g, '')}`;
-                    return appState.evaluatedRubrics[studentId];
-                })
-                .filter(evalData => evalData); // Elimina entradas nulas/indefinidas
-
-            if (evaluationsToExport.length === 0) {
-                document.getElementById('pdf-export-message').classList.remove('hidden');
-                showMessage("No hay evaluaciones disponibles para exportar para la lista seleccionada.");
-                return;
-            } else {
-                document.getElementById('pdf-export-message').classList.add('hidden');
-            }
-
-            // Importa jsPDF dinámicamente justo antes de usarlo
-            // Usamos un import asincrónico para jsPDF
-            const { jsPDF } = await import("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
-
-            const doc = new jsPDF({ 
-                orientation: 'landscape', // Página horizontal
-                unit: 'pt', // Unidades en puntos
-                format: 'a4' // Formato A4
-            });
+            // Try semicolon first
+            headers = parseLine(lines[0], delimiter);
             
-            const margin = 40; // Margen en puntos
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
+            // Check if semicolon worked (at least 2 columns and no empty headers)
+            const semicolonWorks = headers.length >= 2 && !headers.some(h => h === '');
 
-            let firstPage = true; // Bandera para añadir página solo a partir de la segunda
+            if (!semicolonWorks) {
+                // If semicolon split failed, try comma
+                delimiter = ',';
+                headers = parseLine(lines[0], delimiter);
+            }
 
-            for (const evaluation of evaluationsToExport) {
-                if (!firstPage) {
-                    doc.addPage(); // Añade una nueva página para cada rúbrica
-                } else {
-                    firstPage = false;
+            // Final check for valid headers after attempting both delimiters
+            if (headers.length < 2 || headers.some(h => h === '')) {
+                showMessageBox("Error: El CSV debe tener al menos dos columnas válidas: 'Aspectos' y al menos un nivel de criterio (ej. 'Destacado (5)'). Asegúrate de que los encabezados no estén vacíos y que estén delimitados por comas o punto y coma, y que las comas internas estén entre comillas dobles.", 'error');
+                return null;
+            }
+
+            const aspects = [];
+            for (let i = 1; i < lines.length; i++) {
+                const parts = parseLine(lines[i], delimiter); // Use the determined delimiter
+                if (parts.length === 0 || parts[0] === '') continue; // Skip empty rows or rows with empty aspect name
+
+                const aspect = {
+                    id: generateUUID(),
+                    name: parts[0], // Already trimmed by parseLine
+                    criteria: []
+                };
+
+                // Iterate through the parts of the current line, considering both parts.length and headers.length
+                for (let j = 1; j < Math.min(parts.length, headers.length); j++) {
+                    const criterionValue = parts[j]; // Already trimmed by parseLine
+                    if (criterionValue !== '') {
+                        // Original score calculation logic (assuming decreasing order of scores in headers)
+                        const score = (headers.length - 1) - (j - 1);
+                        aspect.criteria.push({
+                            level: headers[j], // Already trimmed
+                            score: score,
+                            description: criterionValue
+                        });
+                    }
                 }
+                aspects.push(aspect);
+            }
 
-                // Crea un div temporal para renderizar la rúbrica para el PDF
-                const tempDiv = document.createElement('div');
-                tempDiv.style.width = `${pageWidth - 2 * margin}pt`; // Ancho con márgenes
-                tempDiv.style.padding = '20pt';
-                tempDiv.style.boxSizing = 'border-box';
-                tempDiv.style.fontFamily = 'Inter, sans-serif';
-                tempDiv.style.fontSize = '10pt';
+            if (aspects.length === 0) {
+                showMessageBox("Error: El CSV no contiene aspectos de rúbrica válidos después del encabezado. Asegúrate de que haya contenido en las filas siguientes.", 'error');
+                return null;
+            }
+            return aspects;
+        }
 
-                // Información básica en el PDF
-                tempDiv.innerHTML += `
-                    <h1 style="font-size: 18pt; font-weight: bold; text-align: center; margin-bottom: 15pt;">
-                        Rúbrica de Evaluación
-                    </h1>
-                    <div style="margin-bottom: 10pt; line-height: 1.5;">
-                        <p><strong>Institución Educativa:</strong> ${evaluation.config.institution}</p>
-                        <p><strong>Curso/Módulo:</strong> ${evaluation.config.course}</p>
-                        <p><strong>Docente:</strong> ${evaluation.config.teacher}</p>
-                        <p><strong>Fecha:</strong> ${evaluation.config.date}</p>
-                        <p><strong>Título de la Sesión:</strong> ${evaluation.config.sessionTitle}</p>
-                        <p style="font-size: 14pt; font-weight: bold; margin-top: 10pt;">Estudiante: ${evaluation.studentName}</p>
-                        <p style="font-size: 12pt;">Lista: ${evaluation.listName}</p>
-                    </div>
+        // Function to render the rubric table for editing/display
+        function renderRubricForEditing(rubricData) {
+            const tableContainer = document.getElementById('rubricPreview');
+            tableContainer.innerHTML = ''; // Clear previous content
+
+            if (!rubricData || rubricData.length === 0) {
+                tableContainer.innerHTML = '<p class="text-gray-600">No hay rúbrica cargada. Pega el CSV en el área de texto.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.id = 'rubricTableEdit';
+            table.classList.add('min-w-full', 'bg-white', 'border-collapse', 'rounded-lg', 'overflow-hidden');
+
+            // Create table header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            headerRow.classList.add('bg-blue-100'); // Light blue for header
+            // Ensure rubricData[0] and rubricData[0].criteria exist before mapping
+            const criteriaHeaders = rubricData[0].criteria && rubricData[0].criteria.length > 0
+                ? rubricData[0].criteria.map(c => `<th class="py-3 px-4 border border-blue-200 text-left text-sm font-semibold text-blue-800">${c.level}</th>`).join('')
+                : ''; // Fallback if no criteria are present in the first aspect
+
+            headerRow.innerHTML = `
+                <th class="py-3 px-4 border border-blue-200 text-left text-sm font-semibold text-blue-800">Aspectos</th>
+                ${criteriaHeaders}
+            `;
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Create table body
+            const tbody = document.createElement('tbody');
+            rubricData.forEach(aspect => {
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50');
+                // Ensure aspect.criteria exists and is iterable
+                const aspectCriteriaCells = aspect.criteria && aspect.criteria.length > 0
+                    ? aspect.criteria.map(c => `<td class="py-3 px-4 border border-gray-200 text-gray-800">${c.description}</td>`).join('')
+                    : `<td colspan="${(rubricData[0].criteria ? rubricData[0].criteria.length : 1)}" class="py-3 px-4 border border-gray-200 text-gray-800 text-center">Sin criterios definidos para este aspecto.</td>`;
+
+
+                row.innerHTML = `
+                    <td class="py-3 px-4 border border-gray-200 font-medium text-gray-700">${aspect.name}</td>
+                    ${aspectCriteriaCells}
                 `;
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            tableContainer.appendChild(table);
+        }
 
-                // Tabla de la rúbrica para el PDF (sin editabilidad)
-                let rubricHtml = `
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 15pt;">
-                        <thead>
-                            <tr style="background-color: #e0e7ff; color: #4338ca;">
-                                <th style="border: 1px solid #c7d2fe; padding: 8pt; text-align: left; font-weight: bold; width: 20%;">Aspectos</th>
-                                ${appState.currentRubric.levels.map(level => `
-                                    <th style="border: 1px solid #c7d2fe; padding: 8pt; text-align: left; font-weight: bold;">
-                                        ${level.name} (${level.score})
-                                    </th>
-                                `).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${appState.currentRubric.aspects.map((aspect, aspectIndex) => `
-                                <tr style="background-color: ${aspectIndex % 2 === 0 ? '#ffffff' : '#f9fafb'};">
-                                    <td style="border: 1px solid #e5e7eb; padding: 8pt; font-weight: 500;">${aspect.name}</td>
-                                    ${aspect.descriptors.map((descriptor, levelIndex) => {
-                                        const isSelected = evaluation.rubricData[aspectIndex] === levelIndex;
-                                        return `
-                                            <td style="border: 1px solid #e5e7eb; padding: 8pt; ${isSelected ? 'background-color: #c7d2fe; font-weight: bold;' : ''}">
-                                                ${descriptor} ${isSelected ? '&#10003;' : ''} <!-- Marca de verificación para celdas seleccionadas -->
-                                            </td>
-                                        `;
-                                    }).join('')}
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-                tempDiv.innerHTML += rubricHtml;
+        document.getElementById('parseRubricBtn').addEventListener('click', () => {
+            const csvText = document.getElementById('rubricCsvInput').value;
+            try {
+                const parsedRubric = parseCSV(csvText);
+                if (parsedRubric && parsedRubric.length > 0) {
+                    currentRubric = parsedRubric;
+                    renderRubricForEditing(currentRubric);
+                    showMessageBox('Rúbrica cargada y previsualizada.', 'success');
+                } else {
+                    // Message box already handled by parseCSV if null is returned
+                    currentRubric = null;
+                    document.getElementById('rubricPreview').innerHTML = '';
+                }
+            } catch (e) {
+                console.error("Error parsing CSV:", e);
+                showMessageBox(`Error inesperado al parsear CSV: ${e.message}. Revisa el formato.`, 'error');
+                currentRubric = null;
+                document.getElementById('rubricPreview').innerHTML = '';
+            }
+        });
 
-                // Sección de puntaje de resumen
-                tempDiv.innerHTML += `
-                    <div style="margin-top: 20pt; padding: 10pt; background-color: #eef2ff; border: 1px solid #c7d2fe; border-radius: 5pt;">
-                        <p style="font-size: 12pt; font-weight: bold; color: #4338ca;">
-                            Puntaje Total: ${evaluation.totalScore}
-                        </p>
-                        <p style="font-size: 12pt; font-weight: bold; color: #4338ca;">
-                            Promedio: ${evaluation.averageScore}
-                        </p>
-                    </div>
-                `;
+        document.getElementById('saveRubricBtn').addEventListener('click', async () => {
+            if (!userId) {
+                showMessageBox('Debes iniciar sesión para guardar la rúbrica.', 'error');
+                return;
+            }
+            if (!currentRubric) {
+                showMessageBox('No hay una rúbrica cargada para guardar. Por favor, previsualiza una rúbrica primero.', 'info');
+                return;
+            }
 
-                // Añade el div temporal al cuerpo del documento (necesario para html2canvas)
-                document.body.appendChild(tempDiv);
+            // Get rubric name from the new input field
+            const rubricName = document.getElementById('rubricNameInput').value.trim();
 
-                // Convierte el HTML a un canvas y luego a una imagen para añadir al PDF
-                await html2canvas(tempDiv, { scale: 2 }).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const imgWidth = pageWidth - 2 * margin; // El ancho de la imagen se ajusta a la página
-                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                    const x = margin;
-                    const y = margin; // Margen superior
+            if (!rubricName) { // Check if the input field is empty
+                showMessageBox('¡Atención! Debes ingresar un nombre válido para la rúbrica en la caja de texto. El nombre no puede estar vacío.', 'error');
+                return;
+            }
 
-                    doc.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+            try {
+                // Save the rubric by name
+                await setDoc(doc(db, `artifacts/${appId}/users/${userId}/rubrics`, rubricName), {
+                    name: rubricName,
+                    data: JSON.stringify(currentRubric) // Store as string
+                });
+                showMessageBox(`Rúbrica "${rubricName}" guardada exitosamente.`, 'success');
+                document.getElementById('rubricNameInput').value = ''; // Clear the input field after saving
+                loadRubrics(); // Reload dropdown for evaluation
+            } catch (error) {
+                console.error("Error al guardar rúbrica:", error);
+                showMessageBox(`Error al guardar rúbrica: ${error.message}`, 'error');
+            }
+        });
+
+        async function loadRubrics() {
+            if (!userId) return;
+            const rubricSelect = document.getElementById('rubricSelect');
+            const rubricSelectExport = document.getElementById('rubricSelectExport'); // Added for export module
+            rubricSelect.innerHTML = '<option value="">Selecciona una rúbrica</option>';
+            rubricSelectExport.innerHTML = '<option value="">Selecciona una rúbrica</option>'; // Clear both
+            try {
+                const q = query(collection(db, `artifacts/${appId}/users/${userId}/rubrics`));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const option1 = document.createElement('option');
+                    option1.value = doc.id;
+                    option1.innerText = data.name;
+                    rubricSelect.appendChild(option1);
+
+                    const option2 = document.createElement('option'); // For export
+                    option2.value = doc.id;
+                    option2.innerText = data.name;
+                    rubricSelectExport.appendChild(option2);
+                });
+            } catch (error) {
+                console.error("Error al cargar rubricas:", error);
+            }
+        }
+
+        // --- Student List Module ---
+
+        document.getElementById('addStudentListBtn').addEventListener('click', async () => {
+            if (!userId) {
+                showMessageBox('Debes iniciar sesión para agregar listas de estudiantes.', 'error');
+                return;
+            }
+            const listName = document.getElementById('studentListName').value.trim();
+            const studentsText = document.getElementById('studentListInput').value.trim();
+
+            if (!listName || !studentsText) {
+                showMessageBox('Por favor, ingresa un nombre para la lista y los nombres de los estudiantes.', 'info');
+                return;
+            }
+
+            const studentNames = studentsText.split('\n').map(s => s.trim()).filter(s => s !== '');
+            if (studentNames.length === 0) {
+                showMessageBox('La lista de estudiantes no puede estar vacía.', 'info');
+                return;
+            }
+
+            try {
+                await setDoc(doc(db, `artifacts/${appId}/users/${userId}/student_lists`, listName), {
+                    name: listName,
+                    students: studentNames
+                });
+                showMessageBox(`Lista "${listName}" guardada exitosamente.`, 'success');
+                document.getElementById('studentListName').value = '';
+                document.getElementById('studentListInput').value = '';
+                loadStudentLists(); // Reload lists in dropdown
+            } catch (error) {
+                console.error("Error al agregar lista de estudiantes:", error);
+                showMessageBox(`Error al agregar lista de estudiantes: ${error.message}`, 'error');
+            }
+        });
+
+        async function loadStudentLists() {
+            if (!userId) return;
+            const studentListEvalSelect = document.getElementById('studentListEvalSelect');
+            const studentListEvalSelectExport = document.getElementById('studentListEvalSelectExport'); // Added for export module
+            studentListEvalSelect.innerHTML = '<option value="">Selecciona una lista de estudiantes</option>';
+            studentListEvalSelectExport.innerHTML = '<option value="">Selecciona una lista de estudiantes</option>'; // Clear both
+            const studentListsContainer = document.getElementById('studentListsContainer');
+            studentListsContainer.innerHTML = ''; // Clear existing lists
+
+            try {
+                const q = query(collection(db, `artifacts/${appId}/users/${userId}/student_lists`));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const listId = doc.id;
+
+                    // Populate select for evaluation module
+                    const option1 = document.createElement('option');
+                    option1.value = listId;
+                    option1.innerText = data.name;
+                    studentListEvalSelect.appendChild(option1);
+
+                    // Populate select for export module
+                    const option2 = document.createElement('option');
+                    option2.value = listId;
+                    option2.innerText = data.name;
+                    studentListEvalSelectExport.appendChild(option2);
+
+                    // Display list for management
+                    const listDiv = document.createElement('div');
+                    listDiv.classList.add('flex', 'justify-between', 'items-center', 'bg-gray-50', 'p-3', 'rounded-md', 'mb-2');
+                    listDiv.innerHTML = `
+                        <span class="font-medium text-gray-700">${data.name} (${data.students.length} estudiantes)</span>
+                        <button data-list-id="${listId}" class="delete-list-btn btn btn-red py-1 px-3 text-sm">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Eliminar
+                        </button>
+                    `;
+                    studentListsContainer.appendChild(listDiv);
                 });
 
-                // Elimina el div temporal del DOM
-                document.body.removeChild(tempDiv);
+                // Add event listeners for delete buttons
+                document.querySelectorAll('.delete-list-btn').forEach(button => {
+                    button.addEventListener('click', deleteStudentList);
+                });
+            } catch (error) {
+                console.error("Error al cargar listas de estudiantes:", error);
+            }
+        }
+
+        async function deleteStudentList(event) {
+            if (!userId) {
+                showMessageBox('Debes iniciar sesión para eliminar listas.', 'error');
+                return;
+            }
+            const listId = event.currentTarget.dataset.listId;
+            openConfirmModal(`¿Estás seguro de que quieres eliminar la lista "${listId}"?`, async (confirmed) => {
+                if (confirmed) {
+                    try {
+                        await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/student_lists`, listId));
+                        showMessageBox(`Lista "${listId}" eliminada exitosamente.`, 'success');
+                        loadStudentLists();
+                    } catch (error) {
+                        console.error("Error al eliminar lista de estudiantes:", error);
+                        showMessageBox(`Error al eliminar lista: ${error.message}`, 'error');
+                    }
+                }
+            });
+        }
+
+
+        // --- Evaluation Module ---
+
+        document.getElementById('startEvaluationBtn').addEventListener('click', async () => {
+            const selectedRubricId = document.getElementById('rubricSelect').value;
+            currentStudentListId = document.getElementById('studentListEvalSelect').value;
+
+            if (!selectedRubricId || !currentStudentListId) {
+                showMessageBox('Por favor, selecciona una rúbrica y una lista de estudiantes para iniciar la evaluación.', 'info');
+                return;
             }
 
-            doc.save(`Rubricas_Evaluacion_${appState.config.course}_${appState.config.date}.pdf`); // Guarda el PDF
-            showMessage("¡Rúbricas exportadas a PDF exitosamente!");
+            try {
+                // Load the selected rubric
+                const rubricDoc = await getDoc(doc(db, `artifacts/${appId}/users/${userId}/rubrics`, selectedRubricId));
+                if (rubricDoc.exists()) {
+                    currentRubric = JSON.parse(rubricDoc.data().data);
+                } else {
+                    showMessageBox('Rúbrica seleccionada no encontrada.', 'error');
+                    return;
+                }
+
+                // Load the selected student list
+                const studentListDoc = await getDoc(doc(db, `artifacts/${appId}/users/${userId}/student_lists`, currentStudentListId));
+                if (studentListDoc.exists()) {
+                    currentStudents = studentListDoc.data().students;
+                    if (currentStudents.length === 0) {
+                        showMessageBox('La lista de estudiantes seleccionada está vacía.', 'info');
+                        return;
+                    }
+                } else {
+                    showMessageBox('Lista de estudiantes seleccionada no encontrada.', 'error');
+                    return;
+                }
+
+                // Load existing evaluations for this list and rubric
+                allEvaluations = {};
+                const q = query(collection(db, `artifacts/${appId}/users/${userId}/evaluations`));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.studentListId === currentStudentListId && data.rubricId === selectedRubricId) {
+                        allEvaluations[data.studentName] = data.evaluation;
+                    }
+                });
+
+                currentStudentIndex = 0;
+                showPage('evaluation-module');
+                renderEvaluationInterface();
+                showMessageBox('Evaluación iniciada.', 'success');
+            } catch (error) {
+                console.error("Error al iniciar evaluación:", error);
+                showMessageBox(`Error al iniciar evaluación: ${error.message}`, 'error');
+            }
         });
 
-        // Botón para finalizar la evaluación y exportar (guarda la actual y luego exporta)
-        finishEvaluationBtn.addEventListener('click', async () => {
-            // Primero, guarda la evaluación del estudiante actual (por si no se hizo un último clic antes de exportar)
-            const listId = appState.currentEvaluationListId;
-            const selectedList = appState.studentLists[listId];
-            const currentStudentName = selectedList.students[appState.currentStudentIndex];
-            const studentId = `${listId}_${btoa(currentStudentName).replace(/=/g, '')}`;
-
-            if (appState.evaluatedRubrics[studentId]) {
-                await saveStudentEvaluation(studentId, appState.evaluatedRubrics[studentId]);
+        function renderEvaluationInterface() {
+            if (currentStudents.length === 0 || !currentRubric) {
+                document.getElementById('evaluationContent').innerHTML = '<p class="text-gray-600">Por favor, inicia una evaluación.</p>';
+                return;
             }
 
-            // Luego, simula un clic en el botón de exportar PDF para la lista actual
-            document.getElementById('export-student-list').value = appState.currentEvaluationListId;
-            document.getElementById('export-pdf-btn').click();
+            const currentStudentName = currentStudents[currentStudentIndex];
+            document.getElementById('currentStudentName').innerText = currentStudentName;
+            document.getElementById('studentCounter').innerText = `Estudiante ${currentStudentIndex + 1} de ${currentStudents.length}`;
+
+            // Check if there's an existing evaluation for this student and rubric
+            currentEvaluationData = allEvaluations[currentStudentName] || {};
+
+            const tableContainer = document.getElementById('rubricEvaluationTableContainer');
+            tableContainer.innerHTML = ''; // Clear previous content
+
+            const table = document.createElement('table');
+            table.id = 'rubricEvaluationTable';
+            table.classList.add('min-w-full', 'bg-white', 'border-collapse', 'rounded-lg', 'overflow-hidden', 'shadow-md');
+
+            // Create table header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            headerRow.classList.add('bg-purple-100');
+            // Ensure currentRubric[0] and currentRubric[0].criteria exist before mapping
+            const criteriaHeaders = currentRubric[0].criteria && currentRubric[0].criteria.length > 0
+                ? currentRubric[0].criteria.map(c => `<th class="py-3 px-4 border border-purple-200 text-left text-sm font-semibold text-purple-800">${c.level}</th>`).join('')
+                : ''; // Fallback if no criteria are present in the first aspect
+
+            headerRow.innerHTML = `
+                <th class="py-3 px-4 border border-purple-200 text-left text-sm font-semibold text-purple-800">Aspectos</th>
+                ${criteriaHeaders}
+            `;
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Create table body
+            const tbody = document.createElement('tbody');
+            currentRubric.forEach(aspect => {
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-purple-50');
+
+                // Aspect Name Cell
+                const aspectNameCell = document.createElement('td');
+                aspectNameCell.classList.add('py-3', 'px-4', 'border', 'border-gray-200', 'font-medium', 'text-gray-700');
+                aspectNameCell.innerText = aspect.name;
+                row.appendChild(aspectNameCell);
+
+                // Criteria Cells
+                if (aspect.criteria && aspect.criteria.length > 0) {
+                    aspect.criteria.forEach(criterion => {
+                        const cell = document.createElement('td');
+                        cell.classList.add('py-3', 'px-4', 'border', 'border-gray-200', 'text-gray-800', 'cursor-pointer');
+                        cell.innerText = criterion.description;
+                        cell.dataset.aspectId = aspect.id;
+                        cell.dataset.score = criterion.score;
+
+                        if (currentEvaluationData[aspect.id] === criterion.score) {
+                            cell.classList.add('selected');
+                        }
+                        cell.addEventListener('click', selectRubricCell); // Attach listener directly to the DOM element
+                        row.appendChild(cell); // Append the actual DOM element
+                    });
+                } else {
+                    // Fallback for aspects without criteria (though CSV parsing should prevent this if strict)
+                    const emptyCell = document.createElement('td');
+                    emptyCell.setAttribute('colspan', (currentRubric[0].criteria ? currentRubric[0].criteria.length : 1));
+                    emptyCell.classList.add('py-3', 'px-4', 'border', 'border-gray-200', 'text-gray-800', 'text-center');
+                    emptyCell.innerText = 'Sin criterios definidos para este aspecto.';
+                    row.appendChild(emptyCell);
+                }
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            tableContainer.appendChild(table);
+
+            calculateAndDisplayScores();
+        }
+
+        function selectRubricCell(event) {
+            const clickedCell = event.target;
+            const aspectId = clickedCell.dataset.aspectId;
+            const score = parseInt(clickedCell.dataset.score);
+
+            // Deselect previously selected cell for this aspect
+            document.querySelectorAll(`#rubricEvaluationTable td[data-aspect-id="${aspectId}"]`).forEach(cell => {
+                cell.classList.remove('selected');
+            });
+
+            // Select the clicked cell
+            clickedCell.classList.add('selected');
+
+            currentEvaluationData[aspectId] = score;
+            calculateAndDisplayScores();
+        }
+
+        function calculateAndDisplayScores() {
+            let totalScore = 0;
+            let aspectsCount = 0;
+            Object.keys(currentEvaluationData).forEach(aspectId => {
+                totalScore += currentEvaluationData[aspectId];
+                aspectsCount++;
+            });
+
+            const averageScore = aspectsCount > 0 ? (totalScore / aspectsCount).toFixed(2) : 0;
+
+            document.getElementById('totalScore').innerText = totalScore;
+            document.getElementById('averageScore').innerText = averageScore;
+        }
+
+        document.getElementById('prevStudentBtn').addEventListener('click', () => {
+            saveCurrentStudentEvaluation(); // Save before moving
+            if (currentStudentIndex > 0) {
+                currentStudentIndex--;
+                renderEvaluationInterface();
+            } else {
+                showMessageBox('Este es el primer estudiante.', 'info');
+            }
         });
 
+        document.getElementById('nextStudentBtn').addEventListener('click', () => {
+            saveCurrentStudentEvaluation(); // Save before moving
+            if (currentStudentIndex < currentStudents.length - 1) {
+                currentStudentIndex++;
+                renderEvaluationInterface();
+            } else {
+                showMessageBox('Este es el último estudiante.', 'info');
+            }
+        });
 
+        async function saveCurrentStudentEvaluation() {
+            if (!userId || !currentRubric || !currentStudentListId || currentStudents.length === 0) {
+                showMessageBox('No hay evaluación en curso para guardar.', 'error');
+                return;
+            }
+
+            const studentName = currentStudents[currentStudentIndex];
+            if (Object.keys(currentEvaluationData).length === 0) {
+                showMessageBox('No se han registrado calificaciones para este estudiante.', 'info');
+                return;
+            }
+
+            const evaluationId = `${currentStudentListId}_${studentName.replace(/\s+/g, '_')}_${document.getElementById('rubricSelect').value.replace(/\s+/g, '_')}`;
+
+            try {
+                await setDoc(doc(db, `artifacts/${appId}/users/${userId}/evaluations`, evaluationId), {
+                    studentName: studentName,
+                    studentListId: currentStudentListId,
+                    rubricId: document.getElementById('rubricSelect').value,
+                    evaluation: currentEvaluationData,
+                    totalScore: parseFloat(document.getElementById('totalScore').innerText),
+                    averageScore: parseFloat(document.getElementById('averageScore').innerText),
+                    evaluatedAt: new Date().toISOString()
+                });
+                allEvaluations[studentName] = currentEvaluationData; // Update local cache
+                showMessageBox(`Evaluación de "${studentName}" guardada.`, 'success');
+            } catch (error) {
+                console.error("Error al guardar evaluación:", error);
+                showMessageBox(`Error al guardar evaluación: ${error.message}`, 'error');
+            }
+        }
+
+        document.getElementById('finishEvaluationBtn').addEventListener('click', async () => {
+            saveCurrentStudentEvaluation(); // Save the last student's evaluation
+            showMessageBox('Evaluación finalizada. Puedes exportar los resultados.', 'info');
+            // Optionally, switch to export module or show a summary
+            showPage('export-module');
+        });
+
+        // --- PDF Export Module ---
+        // Include jsPDF library directly in HTML for this
+        const jsPDFScript = document.createElement('script');
+        jsPDFScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+        document.head.appendChild(jsPDFScript);
+
+        // Load jsPDF-AutoTable only after jsPDF is loaded
+        jsPDFScript.onload = () => {
+            const jsPDFAutoTableScript = document.createElement('script');
+            jsPDFAutoTableScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js";
+            document.head.appendChild(jsPDFAutoTableScript);
+
+            jsPDFAutoTableScript.onload = () => {
+                if (window.jspdf && window.jspdf.jsPDF) {
+                    jspdfConstructor = window.jspdf.jsPDF;
+                    console.log("jsPDF and AutoTable loaded and constructor set.");
+                } else {
+                    console.error("jsPDF or its constructor not found after autotable loaded.");
+                }
+            };
+            jsPDFAutoTableScript.onerror = (e) => {
+                console.error("Error loading jspdf.plugin.autotable.min.js", e);
+                showMessageBox("Error al cargar el plugin de autoTable de PDF. Intenta refrescar la página.", "error");
+            };
+        };
+        jsPDFScript.onerror = (e) => {
+            console.error("Error al cargar la librería base de PDF. Intenta refrescar la página.", "error");
+        };
+
+
+        async function getCommonExportData() {
+            if (!userId) {
+                showMessageBox('Debes iniciar sesión para exportar.', 'error');
+                return null;
+            }
+            if (!jspdfConstructor) { // Check for the constructor directly
+                showMessageBox('Librería de PDF aún no cargada. Intenta de nuevo en unos segundos o refresca la página.', 'error');
+                return null;
+            }
+
+            const configDoc = await getDoc(doc(db, `artifacts/${appId}/users/${userId}/configs`, 'main_config'));
+            const configData = configDoc.exists() ? configDoc.data() : {};
+
+            // Use the export module's dropdowns for getting selected rubric/student list for export
+            const selectedRubricIdExport = document.getElementById('rubricSelectExport').value;
+            const selectedStudentListIdExport = document.getElementById('studentListEvalSelectExport').value;
+
+
+            if (!selectedRubricIdExport || !selectedStudentListIdExport) {
+                showMessageBox('Por favor, selecciona una rúbrica y una lista de estudiantes para exportar.', 'info');
+                return null;
+            }
+
+            const rubricDoc = await getDoc(doc(db, `artifacts/${appId}/users/${userId}/rubrics`, selectedRubricIdExport));
+            const currentRubricExport = rubricDoc.exists() ? JSON.parse(rubricDoc.data().data) : null;
+            if (!currentRubricExport) {
+                showMessageBox('Rúbrica seleccionada no encontrada para exportar.', 'error');
+                return null;
+            }
+
+            const evaluationsQuery = query(collection(db, `artifacts/${appId}/users/${userId}/evaluations`));
+            const querySnapshot = await getDocs(query(collection(db, `artifacts/${appId}/users/${userId}/evaluations`)));
+            const evaluationsForListAndRubric = [];
+            querySnapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.studentListId === selectedStudentListIdExport && data.rubricId === selectedRubricIdExport) {
+                    evaluationsForListAndRubric.push(data);
+                }
+            });
+
+            if (evaluationsForListAndRubric.length === 0) {
+                showMessageBox('No hay evaluaciones guardadas para la rúbrica y lista seleccionadas.', 'info');
+                return null;
+            }
+
+            return {
+                configData,
+                currentRubricExport,
+                evaluationsForListAndRubric,
+                selectedRubricId: selectedRubricIdExport, // Use the export module's selected ID
+                selectedStudentListId: selectedStudentListIdExport // Use the export module's selected ID
+            };
+        }
+
+
+        document.getElementById('exportAllPdfsBtn').addEventListener('click', async () => {
+            const exportData = await getCommonExportData();
+            if (!exportData) return;
+
+            const { configData, currentRubricExport, evaluationsForListAndRubric, selectedRubricId, selectedStudentListId } = exportData;
+
+            evaluationsForListAndRubric.forEach(evalData => {
+                generateSingleRubricPdf(configData, currentRubricExport, evalData, selectedRubricId, selectedStudentListId);
+            });
+            showMessageBox('Todas las rúbricas individuales exportadas a PDF.', 'success');
+        });
+
+        async function generateSingleRubricPdf(config, rubric, evalData, rubricId, studentListId) {
+            if (!jspdfConstructor) {
+                showMessageBox('Error: El generador de PDF no está listo. Intenta de nuevo.', 'error');
+                return;
+            }
+            const doc = new jspdfConstructor('l', 'mm', 'a4'); // 'l' for landscape, A4 size
+
+            // Add Header
+            doc.setFontSize(16);
+            doc.text(`Rúbrica de Evaluación: ${rubricId}`, 15, 15);
+            doc.setFontSize(12);
+            doc.text(`Estudiante: ${evalData.studentName}`, 15, 25);
+            doc.text(`Lista: ${studentListId}`, 15, 30);
+            doc.text(`Institución: ${config.institucion || ''}`, 15, 35);
+            doc.text(`Curso/Módulo: ${config.curso || ''}`, 15, 40);
+            doc.text(`Título de la sesión: ${config.tituloSesion || ''}`, 15, 45);
+            doc.text(`Docente: ${config.docente || ''}`, 15, 50);
+            doc.text(`Fecha: ${config.fecha || ''}`, 15, 55);
+
+            // Prepare table data for jsPDF-AutoTable
+            const head = [['Aspectos', ...rubric[0].criteria.map(c => c.level)]];
+            const body = rubric.map(aspect => {
+                const row = [aspect.name];
+                aspect.criteria.forEach(criterion => {
+                    let cellContent = criterion.description;
+                    row.push(cellContent);
+                });
+                return row;
+            });
+
+            doc.autoTable({
+                head: head,
+                body: body,
+                startY: 65,
+                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+                headStyles: { fillColor: [156, 163, 175], textColor: [255, 255, 255] },
+                alternateRowStyles: { fillColor: [243, 244, 246] },
+                didParseCell: (data) => {
+                    // This hook runs before text is drawn, good for setting background/text color
+                    if (data.section === 'body' && data.column.index > 0) {
+                        const aspect = rubric[data.row.index];
+                        const criterion = aspect.criteria[data.column.index - 1];
+                        if (criterion && evalData.evaluation[aspect.id] === criterion.score) {
+                            data.cell.styles.fillColor = [191, 219, 254]; // bg-blue-200
+                            data.cell.styles.textColor = [29, 78, 216]; // Tailwind blue-700 for contrast
+                            data.cell.styles.fontStyle = 'bold'; // Make text bold
+                        }
+                    }
+                },
+                // Removed columnStyles to allow auto-sizing for better content visibility
+            });
+
+            // Add Total and Average Scores
+            const finalY = doc.autoTable.previous.finalY + 10;
+            doc.setFontSize(12);
+            doc.text(`Puntaje Total: ${evalData.totalScore}`, 15, finalY);
+            doc.text(`Promedio del Alumno: ${evalData.averageScore}`, 15, finalY + 7);
+
+
+            doc.save(`rubrica_${evalData.studentName.replace(/\s+/g, '_')}_${evalData.rubricId.replace(/\s+/g, '_')}.pdf`);
+        }
+
+        document.getElementById('exportSummaryPdfBtn').addEventListener('click', async () => {
+            const exportData = await getCommonExportData();
+            if (!exportData) return;
+
+            if (!jspdfConstructor) { // Also check here before proceeding
+                showMessageBox('Error: El generador de PDF no está listo. Intenta de nuevo.', 'error');
+                return;
+            }
+
+            const { configData, evaluationsForListAndRubric, selectedRubricId, selectedStudentListId } = exportData;
+
+            const doc = new jspdfConstructor('l', 'mm', 'a4'); // Use the stored constructor
+
+            // Add Header
+            doc.setFontSize(16);
+            doc.text(`Registro Auxiliar Resumido de Calificaciones`, 15, 15);
+            doc.setFontSize(12);
+            doc.text(`Rúbrica: ${selectedRubricId}`, 15, 25);
+            doc.text(`Lista de Estudiantes: ${selectedStudentListId}`, 15, 30);
+            doc.text(`Institución: ${configData.institucion || ''}`, 15, 35);
+            doc.text(`Curso: ${configData.curso || ''}`, 15, 40);
+            doc.text(`Docente: ${configData.docente || ''}`, 15, 45);
+            doc.text(`Fecha: ${configData.fecha || ''}`, 15, 50);
+
+            // Prepare table data
+            const head = [['Estudiante', 'Puntaje Total', 'Promedio']];
+            const body = evaluationsForListAndRubric.map(evalData => [
+                evalData.studentName,
+                evalData.totalScore,
+                evalData.averageScore
+            ]);
+
+            doc.autoTable({
+                head: head,
+                body: body,
+                startY: 60,
+                styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255] },
+                alternateRowStyles: { fillColor: [226, 232, 240] }
+            });
+
+            doc.save(`resumen_calificaciones_${selectedStudentListId}_${selectedRubricId}.pdf`);
+            showMessageBox('Registro auxiliar resumido exportado a PDF.', 'success');
+        });
+
+        // --- Tab Navigation ---
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                showPage(event.target.dataset.page);
+            });
+        });
+
+        // No need to call showPage here, it's handled by onAuthStateChanged
     </script>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div class="message-box rounded-lg shadow-md mt-4 mx-auto w-11/12 max-w-lg" id="messageBox"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModalBtn">&times;</span>
+            <p id="modalMessage" class="text-lg text-gray-700 mb-4"></p>
+            <div class="flex justify-end gap-4">
+                <button id="cancelModalBtn" class="btn btn-secondary">Cancelar</button>
+                <button id="confirmModalBtn" class="btn btn-red">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Autenticación -->
+    <div id="auth-section" class="container mt-10 p-6 flex-grow flex items-center justify-center">
+        <div class="card w-full max-w-md">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Acceso al Sistema</h2>
+            <div class="mb-4">
+                <label for="registerEmail" class="block text-gray-700 text-sm font-bold mb-2">Correo Electrónico (Registro):</label>
+                <input type="email" id="registerEmail" placeholder="tu@example.com" class="input-field">
+            </div>
+            <div class="mb-6">
+                <label for="registerPassword" class="block text-gray-700 text-sm font-bold mb-2">Contraseña (Registro):</label>
+                <input type="password" id="registerPassword" placeholder="********" class="input-field">
+            </div>
+            <button id="registerBtn" class="btn btn-primary w-full mb-4">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM4 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"></path></svg>
+                Registrar
+            </button>
+            <div class="mb-4">
+                <label for="loginEmail" class="block text-gray-700 text-sm font-bold mb-2">Correo Electrónico (Login):</label>
+                <input type="email" id="loginEmail" placeholder="tu@example.com" class="input-field">
+            </div>
+            <div class="mb-6">
+                <label for="loginPassword" class="block text-gray-700 text-sm font-bold mb-2">Contraseña (Login):</label>
+                <input type="password" id="loginPassword" placeholder="********" class="input-field">
+            </div>
+            <button id="loginBtn" class="btn btn-primary w-full mb-4">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                Iniciar Sesión
+            </button>
+            <button id="resetPasswordBtn" class="btn btn-secondary w-full">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v3h8z"></path></svg>
+                Restablecer Contraseña
+            </button>
+        </div>
+    </div>
+
+    <!-- Sección de la Aplicación Principal -->
+    <div id="app-section" class="container mt-10 p-6 flex-grow" style="display: none;">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-4xl font-extrabold text-blue-700">Sistema de Evaluación</h1>
+            <div class="flex items-center">
+                <span id="user-id-display" class="text-sm font-semibold text-gray-600 mr-4"></span>
+                <button id="logoutBtn" class="btn btn-red">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="flex border-b border-gray-200">
+                <button class="tab-btn active" data-page="config-module">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Configuración
+                </button>
+                <button class="tab-btn" data-page="rubric-module">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    Rúbrica
+                </button>
+                <button class="tab-btn" data-page="student-module">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h2a2 2 0 002-2V7a2 2 0 00-2-2h-2m-4 10V4a2 2 0 00-2-2H7a2 2 0 00-2 2v16a2 2 0 002 2h2m3-11h2m-2 4h2m-2 4h2m-6 0h2"></path></svg>
+                    Estudiantes
+                </button>
+                <button class="tab-btn" data-page="evaluation-module">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17L3 20l6-3m2 0l6 3m-6-3l-6 3m2 0l6-3m-6 3l6-3m-6 3l6-3m-6 3l6-3m-6 3l6-3m-6 3l6-3m-6 3l6-3m-6 3l6-3m-6 3l6-3m-6 3l6-3m-6 3l6-3"></path></svg>
+                    Evaluación
+                </button>
+                <button class="tab-btn" data-page="export-module">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    Exportar
+                </button>
+            </div>
+
+            <!-- Módulo de Configuración -->
+            <div id="config-module" class="app-page tab-content active">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Configuración General</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="institucion" class="block text-gray-700 text-sm font-bold mb-2">Institución Educativa:</label>
+                        <input type="text" id="institucion" class="input-field" placeholder="Nombre de la Institución">
+                    </div>
+                    <div>
+                        <label for="curso" class="block text-gray-700 text-sm font-bold mb-2">Curso/Módulo:</label>
+                        <input type="text" id="curso" class="input-field" placeholder="Ej: Álgebra Lineal">
+                    </div>
+                    <div>
+                        <label for="tituloSesion" class="block text-gray-700 text-sm font-bold mb-2">Título de la Sesión:</label>
+                        <input type="text" id="tituloSesion" class="input-field" placeholder="Ej: Examen Parcial I">
+                    </div>
+                    <div>
+                        <label for="docente" class="block text-gray-700 text-sm font-bold mb-2">Docente:</label>
+                        <input type="text" id="docente" class="input-field" placeholder="Nombre del Docente">
+                    </div>
+                    <div>
+                        <label for="fecha" class="block text-gray-700 text-sm font-bold mb-2">Fecha:</label>
+                        <input type="date" id="fecha" class="input-field">
+                    </div>
+                </div>
+                <button id="saveConfigBtn" class="btn btn-primary mt-6">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-2-4l-4 4m0 0l-4-4m4 4V3"></path></svg>
+                    Guardar Configuración
+                </button>
+            </div>
+
+            <!-- Módulo de Rúbrica -->
+            <div id="rubric-module" class="app-page tab-content">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Gestión de Rúbricas</h2>
+                <p class="text-gray-600 mb-4">Pega tu texto CSV delimitado por comas o punto y coma aquí. Las comas dentro de un texto deben ir entre comillas dobles (ej: `"Texto con, comas"`). La primera línea debe ser los encabezados (Ej: Aspectos;Destacado (5);Logrado (4);...).</p>
+                <textarea id="rubricCsvInput" rows="10" class="input-field resize-y" placeholder="Ejemplo CSV (delimitado por punto y coma):
+Aspectos;Destacado (5);Logrado (4);Proceso (3);Inicio (2);Previo al Inicio (1)
+
+Contenido;La información es completa, precisa, actualizada y altamente relevante para el tema tratado.;La información es clara y adecuada al tema, aunque puede faltar un pequeño detalle.;Presenta información general sobre el tema, con algunos errores u omisiones.;La información es incompleta o poco clara, con errores frecuentes.;La información es irrelevante, confusa o incorrecta.
+
+Organización y estructura;La infografía tiene excelente organización visual, uso de jerarquías claras, títulos y subtítulos coherentes.;Buena organización general, aunque podría mejorar la jerarquía o distribución de algún elemento.;La estructura es poco clara o confusa en algunas partes, dificultando la comprensión del contenido.;La organización es deficiente, desordenada o sin lógica aparente.;No presenta una estructura reconocible.
+
+Ejemplo CSV (delimitado por comas, con texto entre comillas dobles):
+Aspectos,Destacado (5),Logrado (4),Proceso (3),Inicio (2),Previo al Inicio (1)
+
+Contenido,Rúbrica: La información es completa, precisa, actualizada y altamente relevante para el tema tratado.,"La información es clara y adecuada al tema, aunque puede faltar un pequeño detalle.",Presenta información general sobre el tema, con algunos errores u omisiones.,La información es incompleta o poco clara, con errores frecuentes.,La información es irrelevante, confusa o incorrecta."></textarea>
+                
+                <div class="mb-4">
+                    <label for="rubricNameInput" class="block text-gray-700 text-sm font-bold mb-2">Nombre de la Rúbrica:</label>
+                    <input type="text" id="rubricNameInput" class="input-field" placeholder="Escribe un nombre para la rúbrica">
+                </div>
+
+                <div class="flex gap-4 mt-4">
+                    <button id="parseRubricBtn" class="btn btn-primary">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        Previsualizar Rúbrica
+                    </button>
+                    <button id="saveRubricBtn" class="btn btn-secondary">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-2-4l-4 4m0 0l-4-4m4 4V3"></path></svg>
+                        Guardar Rúbrica
+                    </button>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-700 mt-6 mb-3">Previsualización de Rúbrica:</h3>
+                <div id="rubricPreview" class="overflow-x-auto"></div>
+            </div>
+
+            <!-- Módulo de Estudiantes -->
+            <div id="student-module" class="app-page tab-content">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Gestión de Listas de Estudiantes</h2>
+                <p class="text-gray-600 mb-4">Pega una lista de estudiantes (un nombre por línea).</p>
+                <div>
+                    <label for="studentListName" class="block text-gray-700 text-sm font-bold mb-2">Nombre de la Lista:</label>
+                    <input type="text" id="studentListName" class="input-field" placeholder="Ej: AULA 01">
+                </div>
+                <textarea id="studentListInput" rows="8" class="input-field resize-y" placeholder="Nombres de estudiantes (uno por línea):
+Juan Pérez
+María García
+Carlos Sánchez"></textarea>
+                <button id="addStudentListBtn" class="btn btn-primary mt-4">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Agregar Lista de Estudiantes
+                </button>
+                <h3 class="text-xl font-semibold text-gray-700 mt-6 mb-3">Listas Guardadas:</h3>
+                <div id="studentListsContainer" class="space-y-3">
+                    <!-- Student lists will be loaded here -->
+                    <p class="text-gray-600">Cargando listas de estudiantes...</p>
+                </div>
+            </div>
+
+            <!-- Módulo de Evaluación -->
+            <div id="evaluation-module" class="app-page tab-content">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Módulo de Evaluación</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label for="rubricSelect" class="block text-gray-700 text-sm font-bold mb-2">Seleccionar Rúbrica:</label>
+                        <select id="rubricSelect" class="input-field">
+                            <option value="">Cargando rúbricas...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="studentListEvalSelect" class="block text-gray-700 text-sm font-bold mb-2">Seleccionar Lista de Estudiantes:</label>
+                        <select id="studentListEvalSelect" class="input-field">
+                            <option value="">Cargando listas de estudiantes...</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="startEvaluationBtn" class="btn btn-primary mb-6 w-full md:w-auto">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.127l-3.328 3.328m0 0l-3.328-3.328m3.328 3.328V12c0-.621.5-1.121 1.121-1.121h1.121c.621 0 1.121.5 1.121 1.121v1.121m0 0l-3.328 3.328M12 21a9 9 0 110-18 9 9 0 0118 0z"></path></svg>
+                    Iniciar Evaluación
+                </button>
+
+                <div id="evaluationContent" class="mt-8 p-4 bg-purple-50 rounded-xl shadow-inner">
+                    <h3 class="text-xl font-bold text-purple-800 mb-3">Estudiante Actual: <span id="currentStudentName" class="text-purple-600">N/A</span></h3>
+                    <p class="text-gray-600 mb-4"><span id="studentCounter"></span></p>
+
+                    <div id="rubricEvaluationTableContainer" class="overflow-x-auto">
+                        <!-- Rubric evaluation table will be rendered here -->
+                        <p class="text-gray-600">Selecciona una rúbrica y una lista de estudiantes para comenzar.</p>
+                    </div>
+
+                    <div class="flex justify-between items-center mt-6">
+                        <button id="prevStudentBtn" class="btn btn-secondary">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path></svg>
+                            Anterior
+                        </button>
+                        <div class="text-center">
+                            <p class="text-lg font-semibold text-gray-800">Puntaje Total: <span id="totalScore" class="text-blue-600">0</span></p>
+                            <p class="text-lg font-semibold text-gray-800">Promedio: <span id="averageScore" class="text-blue-600">0</span></p>
+                        </div>
+                        <button id="nextStudentBtn" class="btn btn-primary">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                            Siguiente
+                        </button>
+                    </div>
+                    <button id="finishEvaluationBtn" class="btn btn-green mt-6 w-full bg-green-500 hover:bg-green-600 text-white shadow-lg">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Finalizar Evaluación y Exportar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Módulo de Exportación -->
+            <div id="export-module" class="app-page tab-content">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Exportar Resultados</h2>
+                <p class="text-gray-600 mb-4">Exporta las rubricas de evaluación o un resumen de calificaciones.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label for="rubricSelectExport" class="block text-gray-700 text-sm font-bold mb-2">Seleccionar Rúbrica:</label>
+                        <select id="rubricSelectExport" class="input-field">
+                            <option value="">Cargando rúbricas...</option>
+                            <!-- Options will be populated from loadRubrics() -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="studentListEvalSelectExport" class="block text-gray-700 text-sm font-bold mb-2">Seleccionar Lista de Estudiantes:</label>
+                        <select id="studentListEvalSelectExport" class="input-field">
+                            <option value="">Cargando listas de estudiantes...</option>
+                            <!-- Options will be populated from loadStudentLists() -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <button id="exportAllPdfsBtn" class="btn btn-primary flex-1">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Exportar Rubricas Individuales (PDF)
+                    </button>
+                    <button id="exportSummaryPdfBtn" class="btn btn-secondary flex-1">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l-3 3M9 19l3-3m-3 3l-3-3m-3 0h12a2 2 0 002-2V8a2 2 0 00-2-2H9"></path></svg>
+                        Exportar Registro Resumido (PDF)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
