@@ -113,14 +113,26 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 1.5rem;
+            table-layout: fixed; /* Ensures columns share space equally */
         }
         #rubricTableEdit th, #rubricTableEdit td,
         #rubricEvaluationTable th, #rubricEvaluationTable td {
             border: 1px solid #e2e8f0; /* border-gray-200 */
-            padding: 0.75rem;
+            padding: 0.75rem; /* Default padding */
             text-align: left;
             vertical-align: top;
+            word-break: break-all; /* Force long words/strings to break */
+            font-size: 0.875rem; /* Default text-sm */
         }
+        /* Styles for small screens (below Tailwind's 'sm' breakpoint which is 640px) */
+        @media (max-width: 639px) { 
+            #rubricTableEdit th, #rubricTableEdit td,
+            #rubricEvaluationTable th, #rubricEvaluationTable td {
+                padding: 0.5rem 0.25rem; /* Smaller padding */
+                font-size: 0.75rem; /* text-xs */
+            }
+        }
+
         #rubricTableEdit th, #rubricEvaluationTable th {
             background-color: #f8fafc; /* bg-gray-50 */
             font-weight: 600;
@@ -297,6 +309,11 @@
             const activeTabButton = document.querySelector(`.tab-btn[data-page="${pageId}"]`);
             if (activeTabButton) {
                 activeTabButton.classList.add('active');
+            }
+            // Hide mobile menu if a tab is clicked
+            const mainNavTabs = document.getElementById('mainNavTabs');
+            if (window.innerWidth < 768) { // Assuming md breakpoint is 768px
+                mainNavTabs.classList.add('hidden');
             }
         }
 
@@ -1220,6 +1237,14 @@
             });
         });
 
+        // Toggle mobile menu visibility
+        document.getElementById('mobileMenuToggle').addEventListener('click', () => {
+            const mainNavTabs = document.getElementById('mainNavTabs');
+            mainNavTabs.classList.toggle('hidden');
+            mainNavTabs.classList.toggle('flex');
+            mainNavTabs.classList.toggle('flex-col');
+        });
+
         // No need to call showPage here, it's handled by onAuthStateChanged
     </script>
 </head>
@@ -1287,7 +1312,19 @@
         </div>
 
         <div class="card">
-            <div class="flex border-b border-gray-200">
+            <!-- Mobile menu header with toggle button -->
+            <div class="flex justify-between items-center border-b border-gray-200 md:hidden p-4 -mx-4 -mt-4 mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Menú</h2>
+                <button id="mobileMenuToggle" class="p-2 rounded-md text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation tabs - hidden on mobile by default, shown on desktop -->
+            <!-- On mobile, this will be revealed by JS and stack vertically -->
+            <div id="mainNavTabs" class="flex-col md:flex md:flex-row border-b border-gray-200 hidden md:flex">
                 <button class="tab-btn active" data-page="config-module">
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     Configuración
@@ -1310,7 +1347,7 @@
                 </button>
             </div>
 
-            <!-- Módulo de Configuración -->
+            <!-- Tab contents -->
             <div id="config-module" class="app-page tab-content active">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Configuración General</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1341,7 +1378,6 @@
                 </button>
             </div>
 
-            <!-- Módulo de Rúbrica -->
             <div id="rubric-module" class="app-page tab-content">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Gestión de Rúbricas</h2>
                 <p class="text-gray-600 mb-4">Pega tu texto CSV delimitado por comas o punto y coma aquí. Las comas dentro de un texto deben ir entre comillas dobles (ej: `"Texto con, comas"`). La primera línea debe ser los encabezados (Ej: Aspectos;Destacado (5);Logrado (4);...).</p>
@@ -1376,7 +1412,6 @@ Contenido,Rúbrica: La información es completa, precisa, actualizada y altament
                 <div id="rubricPreview" class="overflow-x-auto"></div>
             </div>
 
-            <!-- Módulo de Estudiantes -->
             <div id="student-module" class="app-page tab-content">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Gestión de Listas de Estudiantes</h2>
                 <p class="text-gray-600 mb-4">Pega una lista de estudiantes (un nombre por línea).</p>
@@ -1399,7 +1434,6 @@ Carlos Sánchez"></textarea>
                 </div>
             </div>
 
-            <!-- Módulo de Evaluación -->
             <div id="evaluation-module" class="app-page tab-content">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Módulo de Evaluación</h2>
 
@@ -1452,7 +1486,6 @@ Carlos Sánchez"></textarea>
                 </div>
             </div>
 
-            <!-- Módulo de Exportación -->
             <div id="export-module" class="app-page tab-content">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Exportar Resultados</h2>
                 <p class="text-gray-600 mb-4">Exporta las rubricas de evaluación o un resumen de calificaciones.</p>
