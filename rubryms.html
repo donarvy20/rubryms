@@ -109,14 +109,14 @@
         }
 
         /* Rubric Table Styling */
-        #rubricTableEdit, #rubricEvaluationTable { /* Apply to both tables */
+        /* Table for editing/preview (fixed layout for compact display) */
+        #rubricTableEdit {
             width: 100%;
             border-collapse: collapse;
             margin-top: 1.5rem;
             table-layout: fixed; /* Ensures columns share space equally */
         }
-        #rubricTableEdit th, #rubricTableEdit td,
-        #rubricEvaluationTable th, #rubricEvaluationTable td {
+        #rubricTableEdit th, #rubricTableEdit td {
             border: 1px solid #e2e8f0; /* border-gray-200 */
             padding: 0.75rem; /* Default padding */
             text-align: left;
@@ -124,15 +124,25 @@
             word-break: break-all; /* Force long words/strings to break */
             font-size: 0.875rem; /* Default text-sm */
         }
-        /* Styles for small screens (below Tailwind's 'sm' breakpoint which is 640px) */
-        @media (max-width: 639px) { 
-            #rubricTableEdit th, #rubricTableEdit td,
-            #rubricEvaluationTable th, #rubricEvaluationTable td {
-                padding: 0.5rem 0.25rem; /* Smaller padding */
-                font-size: 0.75rem; /* text-xs */
-            }
+
+        /* Table for evaluation (auto layout for content visibility, will scroll) */
+        #rubricEvaluationTable {
+            width: 100%; /* Will naturally expand beyond 100% with auto layout */
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            /* No table-layout: fixed here, let it auto-size for content */
+        }
+        #rubricEvaluationTable th, #rubricEvaluationTable td {
+            border: 1px solid #e2e8f0; /* border-gray-200 */
+            padding: 0.75rem; /* Default padding */
+            text-align: left;
+            vertical-align: top;
+            /* No word-break: break-all here, allow overflow for scroll */
+            font-size: 0.875rem; /* Default text-sm */
+            white-space: normal; /* Allow text to wrap naturally if space permits */
         }
 
+        /* Common styles for both tables */
         #rubricTableEdit th, #rubricEvaluationTable th {
             background-color: #f8fafc; /* bg-gray-50 */
             font-weight: 600;
@@ -151,6 +161,19 @@
         #rubricTableEdit td:hover,
         #rubricEvaluationTable td:hover {
             background-color: #eff6ff; /* bg-blue-50 */
+        }
+
+        /* Styles for small screens (below Tailwind's 'sm' breakpoint which is 640px) */
+        @media (max-width: 639px) { 
+            #rubricTableEdit th, #rubricTableEdit td {
+                padding: 0.5rem 0.25rem; /* Smaller padding */
+                font-size: 0.75rem; /* text-xs */
+            }
+            #rubricEvaluationTable th, #rubricEvaluationTable td {
+                padding: 0.75rem; /* Keep normal padding for evaluation to improve readability */
+                font-size: 0.875rem; /* Keep text-sm for readability with horizontal scroll */
+                min-width: 100px; /* Ensure a minimum width for readability on small screens */
+            }
         }
 
         /* Modal Styling */
