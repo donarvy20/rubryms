@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
     <style>
+        /* Estilos generales para el cuerpo y contenedor */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
@@ -18,7 +19,6 @@
             min-height: 100vh;
             padding: 20px;
             box-sizing: border-box;
-            position: relative; /* Needed for hamburger menu positioning */
         }
         .container {
             background-color: #ffffff;
@@ -31,8 +31,8 @@
             flex-direction: column;
             gap: 20px;
             transition: all 0.3s ease-in-out;
-            z-index: 1; /* Ensure container is above other elements */
         }
+        /* Estilos para textareas y botones */
         textarea {
             min-height: 150px;
             resize: vertical;
@@ -46,6 +46,7 @@
         button:active {
             transform: translateY(0);
         }
+        /* Estilos para mensajes de feedback */
         .message-box {
             background-color: #e0f2f7;
             color: #0288d1;
@@ -63,6 +64,7 @@
             background-color: #e8f5e9;
             color: #388e3c;
         }
+        /* Estilos para niveles de desempeño */
         .performance-level {
             font-weight: bold;
             padding: 3px 8px;
@@ -89,6 +91,7 @@
             background-color: #e6f7ff;
             color: #0066cc;
         }
+        /* Estilos para la previsualización de la rúbrica */
         .rubric-preview {
             max-height: 500px;
             overflow-y: auto;
@@ -96,6 +99,7 @@
             padding: 10px;
             margin-top: 10px;
             background-color: #f9f9f9;
+            border-radius: 10px; /* Bordes redondeados para la previsualización */
         }
         .rubric-preview table {
             width: 100%;
@@ -112,166 +116,63 @@
         .rubric-preview textarea {
             min-height: 80px;
             width: 100%;
+            resize: vertical;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px;
         }
-        .rubric-preview input[type="text"], .rubric-preview input[type="number"] {
+        .rubric-preview input {
             width: 100%;
             padding: 4px;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
 
-        /* Styles for hamburger menu */
-        .hamburger-menu {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000; /* Ensure it's on top */
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            width: 30px;
-            height: 24px;
-            padding: 5px;
-            border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: all 0.3s ease-in-out;
-        }
-        .hamburger-menu span {
-            display: block;
-            width: 100%;
-            height: 3px;
-            background-color: #333;
-            border-radius: 2px;
-            transition: all 0.3s ease-in-out;
-        }
-        /* Rotation for close icon */
-        .hamburger-menu.open span:nth-child(1) {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-        .hamburger-menu.open span:nth-child(2) {
-            opacity: 0;
-        }
-        .hamburger-menu.open span:nth-child(3) {
-            transform: rotate(-45deg) translate(5px, -5px);
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: -250px; /* Hidden by default */
-            width: 250px;
-            height: 100%;
-            background-color: #334155; /* slate-700 */
-            color: white;
-            padding: 20px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.3);
-            transition: left 0.3s ease-in-out;
-            z-index: 999; /* Ensure it's above content but below hamburger icon */
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar.open {
-            left: 0;
-        }
-        .sidebar a {
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background-color 0.2s ease;
-        }
-        .sidebar a:hover {
-            background-color: #475569; /* slate-600 */
-        }
-        .sidebar .close-btn {
-            align-self: flex-end;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: white;
-            cursor: pointer;
+        /* Estilos para el menú de navegación */
+        .navbar {
+            background-color: #4f46e5; /* Color morado oscuro */
+            padding: 1rem;
+            border-radius: 10px;
             margin-bottom: 20px;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+            justify-content: center; /* Centrar los elementos del menú */
+            gap: 1rem; /* Espacio entre los botones */
+            flex-wrap: wrap; /* Permitir que los elementos se envuelvan en pantallas pequeñas */
         }
-        .modal-content {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            transform: translateY(-20px);
-            animation: fadeIn 0.3s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        .modal-content p {
-            margin-bottom: 20px;
-            font-size: 1.1em;
-            color: #333;
-        }
-        .modal-content button {
-            margin: 0 10px;
-            padding: 10px 20px;
+        .navbar button {
+            background-color: #6366f1; /* Un morado más claro para los botones */
+            color: white;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
             font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
-
-        /* Responsive adjustments for overall layout */
-        @media (max-width: 768px) {
-            .container {
-                padding-top: 80px; /* Adjust for fixed hamburger */
-            }
-            .hamburger-menu {
-                top: 10px;
-                left: 10px;
-            }
+        .navbar button:hover {
+            background-color: #4338ca; /* Un morado más oscuro al pasar el ratón */
+            transform: translateY(-2px);
+        }
+        .navbar button.active {
+            background-color: #3730a3; /* Color para el botón activo */
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: none; /* Sin efecto de elevación para el activo */
         }
     </style>
 </head>
 <body>
-    <!-- Hamburger Menu Icon -->
-    <div class="hamburger-menu" id="hamburger-menu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar" id="sidebar">
-        <button class="close-btn" id="close-sidebar-btn">&times;</button>
-        <a href="#" id="nav-add-students">📝 Estudiantes</a>
-        <a href="#" id="nav-rubric-config">📚 Rúbricas</a>
-        <a href="#" id="nav-evaluation">🎯 Evaluación</a>
-        <a href="#" id="nav-report">📊 Reportes</a>
-        <a href="#" id="nav-new-evaluation">🆕 Nueva Evaluación</a>
-    </aside>
-
     <div class="container">
         <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-6">Evaluador de Estudiantes</h1>
+
+        <!-- Menú de Navegación Flexible -->
+        <div class="navbar">
+            <button id="nav-students-btn" class="active">Estudiantes</button>
+            <button id="nav-rubric-btn">Rúbrica</button>
+            <button id="nav-evaluation-btn" class="hidden">Evaluación</button>
+            <button id="nav-report-btn" class="hidden">Reportes</button>
+        </div>
+        <!-- Fin Menú de Navegación -->
 
         <!-- Sección de Añadir Estudiantes -->
         <div id="add-students-section" class="bg-blue-50 p-6 rounded-xl border border-blue-200">
@@ -332,12 +233,6 @@
                     <option value="">-- Seleccionar Rúbrica --</option>
                 </select>
                 <button
-                    id="load-rubric-btn"
-                    class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                >
-                    Cargar Rúbrica Seleccionada y Empezar Evaluación
-                </button>
-                <button
                     id="delete-rubric-btn"
                     class="w-full bg-red-500 text-white font-semibold py-2 px-4 mt-2 rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"
                 >
@@ -366,10 +261,15 @@
                     id="preview-rubric-btn"
                     class="w-full bg-blue-500 text-white font-semibold py-2 px-4 mt-2 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 >
-                    Previsualizar y Editar Rúbrica
+                    Previsualizar Rúbrica
                 </button>
-                <!-- Este botón se mostrará después de la previsualización y confirmación de edición -->
-                <!-- The original save-rubric-btn is now handled by confirm-save-rubric-btn within the preview -->
+                <!-- Este botón se gestionará por el JS después de la previsualización -->
+                <button
+                    id="save-rubric-btn"
+                    class="w-full bg-green-600 text-white font-semibold py-3 px-6 mt-2 rounded-xl shadow-md hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 hidden"
+                >
+                    Guardar Rúbrica y Empezar Evaluación
+                </button>
             </div>
             <div id="rubric-config-message-box" class="message-box"></div>
         </div>
@@ -381,7 +281,7 @@
                 <p class="text-gray-600 text-sm">Estudiante <span id="student-index">1</span> de <span id="total-students">0</span></p>
             </div>
             <div id="student-rubric-display" class="overflow-x-auto">
-                <!-- Rubric evaluation table will be rendered here -->
+                <!-- La tabla de evaluación se renderizará aquí -->
             </div>
             <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
                 <button
@@ -437,7 +337,7 @@
                     Atrás (Modificar Evaluación)
                 </button>
                 <button
-                    id="new-evaluation-btn"
+                    id="new-rubric-btn"
                     class="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 >
                     Nueva Evaluación
@@ -448,21 +348,8 @@
 
     </div>
 
-    <!-- Custom Confirmation Modal -->
-    <div id="confirm-modal-overlay" class="modal-overlay hidden">
-        <div class="modal-content">
-            <p id="confirm-modal-message"></p>
-            <button id="confirm-modal-ok" class="bg-blue-500 text-white hover:bg-blue-600">Aceptar</button>
-            <button id="confirm-modal-cancel" class="bg-gray-300 text-gray-800 hover:bg-gray-400">Cancelar</button>
-        </div>
-    </div>
-
     <script>
-        // Get DOM elements
-        const hamburgerMenu = document.getElementById('hamburger-menu');
-        const sidebar = document.getElementById('sidebar');
-        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-
+        // Obtener referencias a los elementos del DOM
         const addStudentsSection = document.getElementById('add-students-section');
         const groupNameInput = document.getElementById('group-name-input');
         const studentListInput = document.getElementById('student-list-input');
@@ -474,12 +361,12 @@
 
         const rubricConfigSection = document.getElementById('rubric-config-section');
         const rubricSelect = document.getElementById('rubric-select');
-        const loadRubricBtn = document.getElementById('load-rubric-btn'); // New button
         const deleteRubricBtn = document.getElementById('delete-rubric-btn');
         const rubricNameInput = document.getElementById('rubric-name-input');
         const rubricCsvInput = document.getElementById('rubric-csv-input');
         const rubricPreview = document.getElementById('rubric-preview');
         const previewRubricBtn = document.getElementById('preview-rubric-btn');
+        const saveRubricBtn = document.getElementById('save-rubric-btn'); // Aunque se oculta, su referencia es útil
         const rubricConfigMessageBox = document.getElementById('rubric-config-message-box');
 
         const evaluationSection = document.getElementById('evaluation-section');
@@ -497,85 +384,128 @@
         const exportIndividualRubricsBtn = document.getElementById('export-individual-rubrics-btn');
         const exportCsvBtn = document.getElementById('export-csv-btn');
         const backToEvaluationBtn = document.getElementById('back-to-evaluation-btn');
-        const newEvaluationBtn = document.getElementById('new-evaluation-btn'); // Renamed from newRubricBtn
+        const newRubricBtn = document.getElementById('new-rubric-btn');
         const reportMessageBox = document.getElementById('report-message-box');
 
-        const navAddStudents = document.getElementById('nav-add-students');
-        const navRubricConfig = document.getElementById('nav-rubric-config');
-        const navEvaluation = document.getElementById('nav-evaluation');
-        const navReport = document.getElementById('nav-report');
-        const navNewEvaluation = document.getElementById('nav-new-evaluation');
-
-        // Custom Confirmation Modal elements
-        const confirmModalOverlay = document.getElementById('confirm-modal-overlay');
-        const confirmModalMessage = document.getElementById('confirm-modal-message');
-        const confirmModalOk = document.getElementById('confirm-modal-ok');
-        const confirmModalCancel = document.getElementById('confirm-modal-cancel');
+        // Navegación
+        const navStudentsBtn = document.getElementById('nav-students-btn');
+        const navRubricBtn = document.getElementById('nav-rubric-btn');
+        const navEvaluationBtn = document.getElementById('nav-evaluation-btn');
+        const navReportBtn = document.getElementById('nav-report-btn');
 
 
-        // Global application variables
+        // Variables globales para la aplicación
         let studentGroups = {};
         let currentStudents = [];
         let currentStudentIndex = 0;
         let savedRubrics = {};
         let currentRubric = null;
         let evaluations = {};
-        let temporaryRubric = null; // Used for editing a rubric before final save
+        let temporaryRubric = null; // Para la edición de la rúbrica antes de guardar
 
-        // --- Utility Functions ---
 
-        /**
-         * Displays a message in a designated message box.
-         * @param {HTMLElement} boxElement - The DOM element to display the message in.
-         * @param {string} message - The message text.
-         * @param {string} type - 'success', 'error', or empty for default.
-         */
+        // --- Funciones de Navegación ---
+        function showSection(sectionId) {
+            const sections = [addStudentsSection, rubricConfigSection, evaluationSection, reportSection];
+            sections.forEach(section => {
+                if (section.id === sectionId) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+
+            // Actualizar botones de navegación activos
+            const navButtons = [navStudentsBtn, navRubricBtn, navEvaluationBtn, navReportBtn];
+            navButtons.forEach(btn => {
+                // Determine the base section name from the button ID (e.g., 'nav-students-btn' -> 'students')
+                const btnSectionName = btn.id.replace('nav-', '').replace('-btn', '');
+                // Determine the base section name from the target section ID (e.g., 'add-students-section' -> 'students')
+                const targetSectionName = sectionId.replace('-section', '').replace('add-', '');
+
+                if (btnSectionName === targetSectionName) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Mostrar/ocultar botones de navegación condicionalmente
+            // El botón de Rúbrica se muestra si hay algún estudiante cargado
+            if (Object.keys(studentGroups).length > 0 || currentStudents.length > 0) {
+                navRubricBtn.classList.remove('hidden');
+            } else {
+                navRubricBtn.classList.add('hidden');
+            }
+
+            // El botón de Evaluación se muestra si hay estudiantes Y una rúbrica cargada
+            if (currentStudents.length > 0 && currentRubric) {
+                navEvaluationBtn.classList.remove('hidden');
+            } else {
+                navEvaluationBtn.classList.add('hidden');
+            }
+
+            // El botón de Reportes se muestra si hay estudiantes, una rúbrica Y al menos una evaluación iniciada para el grupo actual
+            const currentGroupName = groupSelect.value;
+            const hasEvaluationsForCurrentGroup = Object.keys(evaluations).some(key => key.startsWith(`${currentGroupName}_`));
+
+            if (currentStudents.length > 0 && currentRubric && hasEvaluationsForCurrentGroup) {
+                 navReportBtn.classList.remove('hidden');
+            } else {
+                navReportBtn.classList.add('hidden');
+            }
+        }
+
+        navStudentsBtn.addEventListener('click', () => showSection('add-students-section'));
+        navRubricBtn.addEventListener('click', () => {
+            if (currentStudents.length === 0) {
+                showMessage(rubricConfigMessageBox, "Para configurar una rúbrica, primero debes cargar o añadir un grupo de estudiantes en la sección 'Estudiantes'.", 'error');
+                return;
+            }
+            showSection('rubric-config-section');
+        });
+        navEvaluationBtn.addEventListener('click', () => {
+            if (currentStudents.length === 0) {
+                showMessage(evaluationMessageBox, "Para evaluar, primero debes cargar o añadir un grupo de estudiantes.", 'error');
+                return;
+            }
+            if (!currentRubric) {
+                showMessage(evaluationMessageBox, "Para evaluar, primero debes seleccionar o crear una rúbrica en la sección 'Rúbrica'.", 'error');
+                return;
+            }
+            showSection('evaluation-section');
+            renderStudentEvaluation(); // Asegura que la evaluación se renderice al volver
+        });
+        navReportBtn.addEventListener('click', () => {
+            const currentGroupName = groupSelect.value;
+            const hasEvaluationsForCurrentGroup = Object.keys(evaluations).some(key => key.startsWith(`${currentGroupName}_`));
+            
+            if (currentStudents.length === 0 || !currentRubric || !hasEvaluationsForCurrentGroup) {
+                showMessage(reportMessageBox, "Para ver reportes, asegúrate de tener un grupo de estudiantes cargado, una rúbrica seleccionada y haber realizado al menos una evaluación.", 'error');
+                return;
+            }
+            showSection('report-section');
+        });
+
+
+        // --- Funciones de Utilidad --- 
+
         function showMessage(boxElement, message, type = '') {
             boxElement.textContent = message;
-            boxElement.className = 'message-box'; // Reset classes
+            boxElement.className = 'message-box'; // Reiniciar clases
             if (type) {
                 boxElement.classList.add(type);
             }
             boxElement.style.display = 'block';
             setTimeout(() => {
                 boxElement.style.display = 'none';
-            }, 5000);
+            }, 5000); // El mensaje desaparece después de 5 segundos
         }
 
         /**
-         * Custom confirmation modal instead of window.confirm.
-         * @param {string} message - The message to display.
-         * @returns {Promise<boolean>} Resolves true if confirmed, false if cancelled.
-         */
-        function showConfirmModal(message) {
-            return new Promise((resolve) => {
-                confirmModalMessage.textContent = message;
-                confirmModalOverlay.classList.remove('hidden');
-
-                const handleOk = () => {
-                    confirmModalOverlay.classList.add('hidden');
-                    confirmModalOk.removeEventListener('click', handleOk);
-                    confirmModalCancel.removeEventListener('click', handleCancel);
-                    resolve(true);
-                };
-
-                const handleCancel = () => {
-                    confirmModalOverlay.classList.add('hidden');
-                    confirmModalOk.removeEventListener('click', handleOk);
-                    confirmModalCancel.removeEventListener('click', handleCancel);
-                    resolve(false);
-                };
-
-                confirmModalOk.addEventListener('click', handleOk);
-                confirmModalCancel.addEventListener('click', handleCancel);
-            });
-        }
-
-
-        /**
-         * Parses CSV text, handling commas within quoted fields.
-         * @param {string} text - The CSV string.
-         * @returns {Array<Array<string>>} Parsed 2D array of strings.
+         * Parsea una cadena CSV, manejando comas dentro de comillas.
+         * @param {string} text - La cadena CSV a parsear.
+         * @returns {Array<Array<string>>} Una matriz de filas y columnas.
          */
         function parseCSV(text) {
             const lines = text.split('\n').filter(line => line.trim() !== '');
@@ -591,7 +521,13 @@
                     const char = line[j];
                     
                     if (char === '"') {
-                        inQuotes = !inQuotes;
+                        // Manejar comillas escapadas (ej: "" dentro de un campo)
+                        if (inQuotes && line[j + 1] === '"') {
+                            buffer += '"';
+                            j++; // Saltar la siguiente comilla
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
                     } else if (char === ',' && !inQuotes) {
                         current.push(buffer.trim());
                         buffer = '';
@@ -600,15 +536,14 @@
                     }
                 }
                 
-                current.push(buffer.trim());
+                current.push(buffer.trim()); // Añadir el último campo de la línea
                 result.push(current);
             }
-            
             return result;
         }
 
         /**
-         * Loads all saved data from localStorage into global variables.
+         * Carga los datos guardados en localStorage al iniciar la aplicación.
          */
         function loadData() {
             try {
@@ -633,27 +568,22 @@
                 const storedCurrentRubric = localStorage.getItem('currentRubric');
                 if (storedCurrentRubric) {
                     currentRubric = JSON.parse(storedCurrentRubric);
+                    rubricSelect.value = currentRubric.name; // Seleccionar la rúbrica cargada
                 }
 
                 const storedEvaluations = localStorage.getItem('evaluations');
                 if (storedEvaluations) {
                     evaluations = JSON.parse(storedEvaluations);
                 }
-
-                // Initial UI state based on loaded data
-                if (currentStudents.length > 0) {
-                    addStudentsSection.classList.add('hidden');
-                    if (currentRubric) {
-                        rubricConfigSection.classList.add('hidden');
-                        evaluationSection.classList.remove('hidden');
-                        renderStudentEvaluation();
-                    } else {
-                        rubricConfigSection.classList.remove('hidden');
-                        // Show message to select/import a rubric
-                        showMessage(rubricConfigMessageBox, "Por favor, selecciona una rúbrica existente o importa una nueva para empezar la evaluación.", 'info');
-                    }
+                
+                // Determinar qué sección mostrar al cargar, priorizando el flujo de trabajo
+                if (currentStudents.length > 0 && currentRubric) {
+                    showSection('evaluation-section');
+                    renderStudentEvaluation();
+                } else if (currentStudents.length > 0) {
+                    showSection('rubric-config-section');
                 } else {
-                    showSection('add-students-section'); // Start at student management if no group is loaded
+                    showSection('add-students-section');
                 }
 
             } catch (e) {
@@ -663,7 +593,7 @@
         }
 
         /**
-         * Saves all current application data to localStorage.
+         * Guarda todos los datos relevantes en localStorage.
          */
         function saveData() {
             try {
@@ -681,7 +611,7 @@
         }
 
         /**
-         * Resets the current evaluation state, but keeps student groups and saved rubrics.
+         * Reinicia el estado de la evaluación actual, manteniendo grupos y rúbricas guardadas.
          */
         function resetApp() {
             localStorage.removeItem('currentRubric');
@@ -689,89 +619,20 @@
 
             currentRubric = null;
             evaluations = {};
-            currentStudentIndex = 0; // Reset student index too
+            currentStudentIndex = 0; // Reiniciar índice del estudiante
 
-            // Show appropriate section after reset
-            if (currentStudents.length > 0) {
-                showSection('rubric-config-section');
-                showMessage(rubricConfigMessageBox, "La evaluación ha sido reiniciada. Tus grupos y rúbricas permanecen guardados.", 'success');
-            } else {
-                showSection('add-students-section');
-                showMessage(studentMessageBox, "La evaluación ha sido reiniciada. Por favor, selecciona o agrega un grupo de estudiantes.", 'success');
-            }
-            
-            // Clear rubric inputs
-            rubricNameInput.value = '';
-            rubricCsvInput.value = '';
-            rubricPreview.classList.add('hidden');
+            rubricNameInput.value = ''; // Limpiar el campo de nombre de rúbrica
+            rubricCsvInput.value = ''; // Limpiar el campo CSV de rúbrica
+            rubricPreview.classList.add('hidden'); // Ocultar la previsualización
+
+            showSection('rubric-config-section'); // Volver a la configuración de rúbrica
+            showMessage(reportMessageBox, "La evaluación ha sido reiniciada. Tus grupos y rúbricas permanecen guardados.", 'success');
         }
 
-        // --- Navigation Logic (Hamburger Menu) ---
+        // --- Lógica de Añadir y Gestionar Estudiantes --- 
 
         /**
-         * Toggles the visibility of the sidebar navigation.
-         */
-        function toggleSidebar() {
-            sidebar.classList.toggle('open');
-            hamburgerMenu.classList.toggle('open');
-        }
-
-        /**
-         * Hides all main content sections and shows the specified one.
-         * @param {string} sectionId - The ID of the section to show.
-         */
-        function showSection(sectionId) {
-            const sections = [addStudentsSection, rubricConfigSection, evaluationSection, reportSection];
-            sections.forEach(section => {
-                if (section.id === sectionId) {
-                    section.classList.remove('hidden');
-                } else {
-                    section.classList.add('hidden');
-                }
-            });
-            sidebar.classList.remove('open'); // Close sidebar after navigation
-            hamburgerMenu.classList.remove('open'); // Reset hamburger icon
-        }
-
-        // Event listeners for hamburger menu and sidebar navigation
-        hamburgerMenu.addEventListener('click', toggleSidebar);
-        closeSidebarBtn.addEventListener('click', toggleSidebar);
-
-        navAddStudents.addEventListener('click', (e) => {
-            e.preventDefault();
-            showSection('add-students-section');
-        });
-        navRubricConfig.addEventListener('click', (e) => {
-            e.preventDefault();
-            showSection('rubric-config-section');
-        });
-        navEvaluation.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentStudents.length > 0 && currentRubric) {
-                renderStudentEvaluation();
-                showSection('evaluation-section');
-            } else {
-                showMessage(evaluationMessageBox, "Necesitas cargar un grupo de estudiantes y una rúbrica antes de evaluar.", 'error');
-                showSection('add-students-section'); // Go back to student section if no students/rubric
-            }
-        });
-        navReport.addEventListener('click', (e) => {
-            e.preventDefault();
-            showSection('report-section');
-        });
-        navNewEvaluation.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const confirm = await showConfirmModal("¿Estás seguro de que quieres iniciar una nueva evaluación? Esto borrará las evaluaciones actuales pero mantendrá tus grupos y rúbricas guardadas.");
-            if (confirm) {
-                resetApp();
-            }
-        });
-
-
-        // --- Student Management Logic ---
-
-        /**
-         * Populates the student group selection dropdown.
+         * Renderiza las opciones del selector de grupos de estudiantes.
          */
         function renderGroupSelect() {
             groupSelect.innerHTML = '<option value="">-- Seleccionar Grupo --</option>';
@@ -781,30 +642,27 @@
                 option.textContent = groupName;
                 groupSelect.appendChild(option);
             }
-            // Retain selected value if it still exists
-            const currentSelectedGroup = localStorage.getItem('currentSelectedGroup');
-            if (currentSelectedGroup && studentGroups[currentSelectedGroup]) {
-                groupSelect.value = currentSelectedGroup;
-            } else {
-                groupSelect.value = ""; // Reset if not found
+            // Asegurar que el grupo seleccionado actualmente se mantenga visible si existe
+            const storedCurrentGroup = localStorage.getItem('currentSelectedGroup');
+            if (storedCurrentGroup && studentGroups[storedCurrentGroup]) {
+                groupSelect.value = storedCurrentGroup;
             }
         }
 
         addStudentsBtn.addEventListener('click', () => {
             const rawList = studentListInput.value.trim();
             let groupName = groupNameInput.value.trim();
-            const selectedGroupOption = groupSelect.value; // Get value from selected option
+            const selectedGroupOption = groupSelect.value; // Obtener el grupo seleccionado en el dropdown
 
             if (!rawList) {
                 showMessage(studentMessageBox, "Por favor, introduce la lista de estudiantes.", 'error');
                 return;
             }
 
-            // Remove duplicates and empty lines
             const newStudents = rawList.split('\n')
                                         .map(name => name.trim())
                                         .filter(name => name !== '')
-                                        .filter((name, index, self) => self.indexOf(name) === index); // Unique names
+                                        .filter((name, index, self) => self.indexOf(name) === index); // Eliminar duplicados
 
             if (newStudents.length === 0) {
                 showMessage(studentMessageBox, "No se encontraron nombres de estudiantes válidos en la lista.", 'error');
@@ -814,21 +672,28 @@
             let targetGroupName;
             let actionMessage = "";
 
-            if (groupName) { // User provided a new group name or wants to overwrite/create with this name
+            if (groupName) { // Si se ha introducido un nombre de grupo en el input
                 targetGroupName = groupName;
-                studentGroups[targetGroupName] = newStudents;
-                actionMessage = `¡Grupo "${targetGroupName}" con ${newStudents.length} estudiantes guardado (o actualizado)!`;
-            } else if (selectedGroupOption) { // User selected an existing group from the dropdown
+                // Si el grupo ya existe, combinar, sino, crear nuevo
+                if (studentGroups[targetGroupName]) {
+                    const existingStudents = studentGroups[targetGroupName];
+                    const combinedStudents = [...new Set([...existingStudents, ...newStudents])]; // Combinar y eliminar duplicados
+                    studentGroups[targetGroupName] = combinedStudents;
+                    actionMessage = `¡${newStudents.length} estudiantes añadidos al grupo "${targetGroupName}"! Total: ${combinedStudents.length} estudiantes.`;
+                } else {
+                    studentGroups[targetGroupName] = newStudents;
+                    actionMessage = `¡Nuevo grupo "${targetGroupName}" con ${newStudents.length} estudiantes guardado!`;
+                }
+            } else if (selectedGroupOption) { // Si hay un grupo seleccionado en el dropdown y NO se introdujo un nuevo nombre
                 targetGroupName = selectedGroupOption;
                 const existingStudents = studentGroups[targetGroupName] || [];
-                // Combine existing and new students, ensuring uniqueness
                 const combinedStudents = [...new Set([...existingStudents, ...newStudents])];
                 studentGroups[targetGroupName] = combinedStudents;
                 actionMessage = `¡${newStudents.length} estudiantes añadidos al grupo "${targetGroupName}"! Total: ${combinedStudents.length} estudiantes.`;
-            } else { // No group name provided and no group selected
+            } else { // Ni nombre de grupo nuevo ni grupo seleccionado
                 targetGroupName = `Grupo - ${new Date().toLocaleDateString('es-ES')}`;
                 let counter = 1;
-                while(studentGroups[targetGroupName]) { // Prevent duplicate auto-generated names
+                while(studentGroups[targetGroupName]) { // Evitar sobrescribir si el nombre generado ya existe
                     targetGroupName = `Grupo - ${new Date().toLocaleDateString('es-ES')} (${counter})`;
                     counter++;
                 }
@@ -838,12 +703,13 @@
 
             currentStudents = studentGroups[targetGroupName];
             renderGroupSelect();
-            groupSelect.value = targetGroupName; // Set the dropdown to the newly saved/updated group
+            groupSelect.value = targetGroupName; // Seleccionar el grupo recién creado/actualizado
             saveData();
             showMessage(studentMessageBox, actionMessage, 'success');
 
-            groupNameInput.value = ''; // Clear input fields
+            groupNameInput.value = '';
             studentListInput.value = '';
+            showSection('add-students-section'); // Mantenerse en la sección de estudiantes después de guardar
         });
 
         selectGroupBtn.addEventListener('click', () => {
@@ -857,34 +723,50 @@
             saveData();
             showMessage(studentMessageBox, `¡Grupo "${selectedGroup}" cargado para evaluación!`, 'success');
 
-            showSection('rubric-config-section');
-            currentStudentIndex = 0; // Reset index for new evaluation session
+            showSection('rubric-config-section'); // Avanzar a la sección de rúbrica
+            currentStudentIndex = 0; // Reiniciar el índice del estudiante al cambiar de grupo
         });
 
-        deleteGroupBtn.addEventListener('click', async () => {
+        deleteGroupBtn.addEventListener('click', () => {
             const selectedGroup = groupSelect.value;
             if (!selectedGroup) {
                 showMessage(studentMessageBox, "Por favor, selecciona un grupo para eliminar.", 'error');
                 return;
             }
 
-            const confirmDelete = await showConfirmModal(`¿Estás seguro de que quieres eliminar el grupo "${selectedGroup}"? Ten en cuenta que esto NO eliminará las evaluaciones asociadas a este grupo si ya se han realizado. Para borrar evaluaciones individuales, necesitarías reiniciar la rúbrica.`);
-            if (confirmDelete) {
-                delete studentGroups[selectedGroup];
-                if (localStorage.getItem('currentSelectedGroup') === selectedGroup) {
-                    localStorage.removeItem('currentSelectedGroup');
-                    currentStudents = []; // Clear current students if the deleted group was active
+            // Usar un modal personalizado en lugar de window.confirm
+            const customConfirm = createCustomConfirm(`¿Estás seguro de que quieres eliminar el grupo "${selectedGroup}"? Ten en cuenta que esto NO eliminará las evaluaciones asociadas a este grupo si ya se han realizado. Para borrar evaluaciones individuales, necesitarías reiniciar la rúbrica.`);
+            customConfirm.then(result => {
+                if (result) {
+                    delete studentGroups[selectedGroup];
+                    // También eliminar evaluaciones asociadas a este grupo
+                    for (const key in evaluations) {
+                        if (key.startsWith(`${selectedGroup}_`)) {
+                            delete evaluations[key];
+                        }
+                    }
+
+                    if (localStorage.getItem('currentSelectedGroup') === selectedGroup) {
+                        localStorage.removeItem('currentSelectedGroup');
+                        currentStudents = []; // Limpiar estudiantes actuales si se elimina el grupo activo
+                    }
+                    renderGroupSelect();
+                    saveData();
+                    showMessage(studentMessageBox, `Grupo "${selectedGroup}" eliminado.`, 'success');
+                    // Si el grupo actual es eliminado, volver a la sección de añadir estudiantes
+                    if (!currentStudents.length) {
+                        showSection('add-students-section');
+                    } else {
+                        showSection('add-students-section'); // Refrescar vista
+                    }
                 }
-                renderGroupSelect();
-                saveData();
-                showMessage(studentMessageBox, `Grupo "${selectedGroup}" eliminado.`, 'success');
-            }
+            });
         });
 
-        // --- Rubric Configuration Logic ---
+        // --- Lógica de Configuración de Rúbrica --- 
 
         /**
-         * Populates the rubric selection dropdown.
+         * Renderiza las opciones del selector de rúbricas guardadas.
          */
         function renderRubricSelect() {
             rubricSelect.innerHTML = '<option value="">-- Seleccionar Rúbrica --</option>';
@@ -894,118 +776,121 @@
                 option.textContent = rubricName;
                 rubricSelect.appendChild(option);
             }
-            // If a current rubric is set, select it in the dropdown
+            // Asegurar que la rúbrica seleccionada actualmente se mantenga visible si existe
             if (currentRubric && savedRubrics[currentRubric.name]) {
                 rubricSelect.value = currentRubric.name;
-            } else {
-                rubricSelect.value = ""; // Reset if not found
             }
         }
 
         /**
-         * Parses the CSV input into a rubric object structure.
-         * @param {string} csvText - The raw CSV string from the textarea.
-         * @returns {object|null} The parsed rubric object or null if parsing fails.
+         * Parsea el texto CSV de la rúbrica en un objeto de rúbrica.
+         * @param {string} csvText - El contenido CSV de la rúbrica.
+         * @returns {Object|null} El objeto de la rúbrica o null si hay un error.
          */
         function parseRubricFromCSV(csvText) {
             const parsedData = parseCSV(csvText);
             if (parsedData.length < 2) {
-                showMessage(rubricConfigMessageBox, "El formato del CSV no es válido. Debe tener al menos 2 líneas (encabezados y al menos un aspecto).", 'error');
+                showMessage(rubricConfigMessageBox, "El formato del CSV no es válido. Debe tener al menos 2 líneas (encabezados de niveles y al menos un aspecto).", 'error');
                 return null;
             }
 
-            // Extract levels (first row, skipping the first empty cell)
+            // Extraer niveles (primera fila, omitiendo la primera celda vacía)
             const levels = parsedData[0].slice(1).map(level => level.replace(/^"|"$/g, '').trim());
             if (levels.length === 0) {
                 showMessage(rubricConfigMessageBox, "No se encontraron niveles de desempeño en la primera fila del CSV.", 'error');
                 return null;
             }
 
-            // Extract aspects and descriptors
+            // Extraer aspectos y descriptores
             const aspects = [];
             const descriptors = {};
             const levelScores = {};
             
-            // Assign default scores based on position (e.g., first level is highest score)
-            // Example: if 5 levels, scores could be 5, 4, 3, 2, 1
+            // Asignar puntajes predeterminados basados en la posición (del más alto al más bajo)
+            // Se asume que el nivel más a la izquierda (índice 0) es el de mayor puntaje.
             levels.forEach((level, index) => {
-                levelScores[level] = levels.length - index;
+                levelScores[level] = levels.length - index; // Ejemplo: si hay 5 niveles, el primero es 5, el segundo 4, etc.
             });
 
             for (let i = 1; i < parsedData.length; i++) {
                 const row = parsedData[i];
                 const aspect = row[0].replace(/^"|"$/g, '').trim();
-                if (!aspect) continue; // Skip empty aspect rows
+                if (!aspect) continue; // Saltar filas sin nombre de aspecto
 
                 aspects.push(aspect);
                 descriptors[aspect] = {};
 
                 for (let j = 1; j < row.length; j++) {
-                    const level = levels[j - 1]; // Corresponding level for this column
-                    if (!level) continue; // Skip if level name is missing (shouldn't happen with proper CSV)
-
-                    descriptors[aspect][level] = row[j].replace(/^"|"$/g, '').trim();
+                    const level = levels[j - 1]; // Coincide con el índice de los niveles en la primera fila
+                    if (level) { // Asegurarse de que el nivel existe
+                        descriptors[aspect][level] = row[j] ? row[j].replace(/^"|"$/g, '').trim() : '';
+                    }
                 }
             }
 
             if (aspects.length === 0) {
-                showMessage(rubricConfigMessageBox, "No se encontraron aspectos válidos en el CSV.", 'error');
+                showMessage(rubricConfigMessageBox, "No se encontraron aspectos válidos en el CSV. Asegúrate de que la primera columna contenga los nombres de los aspectos.", 'error');
+                return null;
+            }
+            if (aspects.some(aspect => !descriptors[aspect] || Object.keys(descriptors[aspect]).length === 0)) {
+                showMessage(rubricConfigMessageBox, "Algunos aspectos no tienen descriptores asociados a los niveles definidos.", 'error');
                 return null;
             }
 
             return {
-                name: rubricNameInput.value.trim() || `Rúbrica ${new Date().toLocaleDateString('es-ES')}`, // Use input name or generate one
+                name: rubricNameInput.value.trim() || `Rúbrica ${new Date().toLocaleDateString('es-ES')}`,
                 aspects,
                 levels,
                 descriptors,
                 levelScores,
-                generalObservations: "" // Add a field for general observations
+                generalObservations: "" // Campo para futuras observaciones generales
             };
         }
 
         /**
-         * Displays the rubric data in an editable table for preview and modification.
-         * @param {object} rubricData - The rubric object to display.
+         * Muestra una previsualización editable de la rúbrica para que el usuario pueda ajustarla.
+         * @param {Object} rubricData - El objeto de la rúbrica a previsualizar/editar.
          */
         function showEditableRubric(rubricData) {
-            let previewHTML = '<h4 class="font-semibold mb-2">Editar Rúbrica antes de Guardar:</h4>';
+            let previewHTML = '<h4 class="font-semibold mb-2 text-center text-lg">Revisa y Edita tu Rúbrica:</h4>';
             
-            // Editable rubric name
+            // Nombre editable
             previewHTML += `
                 <div class="mb-4">
                     <label for="editable-rubric-name" class="block text-gray-700 font-medium mb-2">Nombre de la Rúbrica:</label>
-                    <input type="text" id="editable-rubric-name" class="w-full p-2 border border-gray-300 rounded" value="${rubricData.name}">
+                    <input type="text" id="editable-rubric-name" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" value="${rubricData.name}">
                 </div>
             `;
             
-            // Editable table structure
-            previewHTML += '<table class="w-full border-collapse"><thead><tr><th class="p-2 border bg-gray-100">Aspecto</th>';
+            // Tabla editable
+            previewHTML += '<div class="overflow-x-auto"><table class="min-w-full border-collapse"><thead><tr><th class="p-2 border bg-gray-100 min-w-[120px]">Aspecto</th>';
             
-            // Editable level headers with scores
+            // Encabezados de niveles con puntajes editables
             rubricData.levels.forEach((level, index) => {
                 previewHTML += `
-                    <th class="p-2 border bg-gray-100">
-                        <input type="text" class="w-full p-1 border-b border-gray-300 rounded-sm" 
-                               data-level-index="${index}" onchange="updateRubricLevel(this)" value="${level}">
-                        <input type="number" class="w-full p-1 mt-1 border-b border-gray-300 rounded-sm" 
-                               value="${rubricData.levelScores[level]}" min="0" max="10" step="0.5"
+                    <th class="p-2 border bg-gray-100 min-w-[100px]">
+                        <input type="text" class="w-full p-1 border-b border-gray-300 text-center rounded-sm" value="${level}" 
+                               data-level-index="${index}" onchange="updateRubricLevel(this)">
+                        <label for="score-${level.replace(/\s/g, '-')}-${index}" class="block text-gray-700 text-xs mt-1">Puntaje:</label>
+                        <input type="number" id="score-${level.replace(/\s/g, '-')}-${index}" class="w-full p-1 mt-1 border-b border-gray-300 text-center rounded-sm" 
+                               value="${rubricData.levelScores[level]}" min="0" max="100" step="0.5"
                                data-level-index="${index}" onchange="updateRubricScore(this)">
                     </th>
                 `;
             });
             previewHTML += '</tr></thead><tbody>';
             
-            // Editable aspect rows and descriptors
+            // Filas de aspectos y descriptores editables
             rubricData.aspects.forEach((aspect, aspectIndex) => {
                 previewHTML += `<tr><td class="p-2 border"><input type="text" class="w-full p-1 border-b border-gray-300 rounded-sm" 
-                               value="${aspect}" data-aspect-index="${aspectIndex}" onchange="updateRubricAspect(this)"></td>`;
+                                value="${aspect}" data-aspect-index="${aspectIndex}" onchange="updateRubricAspect(this)"></td>`;
                 
                 rubricData.levels.forEach((level, levelIndex) => {
                     previewHTML += `
                         <td class="p-2 border">
                             <textarea class="w-full p-1 border border-gray-300 h-20 rounded-sm" 
-                                       data-aspect-index="${aspectIndex}" data-level-index="${levelIndex}"
-                                       onchange="updateRubricDescriptor(this)">${rubricData.descriptors[aspect][level] || ''}</textarea>
+                                      data-aspect-index="${aspectIndex}" data-level-index="${levelIndex}"
+                                      onchange="updateRubricDescriptor(this)">${rubricData.descriptors[aspect][level] || ''}</textarea>
                         </td>
                     `;
                 });
@@ -1013,15 +898,15 @@
                 previewHTML += '</tr>';
             });
             
-            previewHTML += '</tbody></table>';
+            previewHTML += '</tbody></table></div>';
             
-            // Action buttons
+            // Botones de acción
             previewHTML += `
-                <div class="mt-4 flex flex-col sm:flex-row justify-between gap-2">
-                    <button id="cancel-edit-rubric-btn" class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 shadow-md">
+                <div class="mt-4 flex flex-col sm:flex-row justify-between gap-4">
+                    <button id="cancel-edit-rubric-btn" class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-xl shadow-md hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-300">
                         Cancelar Edición
                     </button>
-                    <button id="confirm-save-rubric-btn" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 shadow-md">
+                    <button id="confirm-save-rubric-btn" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-xl shadow-md hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300">
                         Confirmar y Guardar Rúbrica
                     </button>
                 </div>
@@ -1029,147 +914,175 @@
             
             rubricPreview.innerHTML = previewHTML;
             rubricPreview.classList.remove('hidden');
-            
-            // Store the temporary rubric for direct manipulation during editing
-            temporaryRubric = JSON.parse(JSON.stringify(rubricData)); // Deep copy to avoid modifying original until confirmed
-            
-            // Event listeners for the preview actions
+            // Ocultar el botón original "Guardar Rúbrica" cuando la previsualización editable está activa
+            previewRubricBtn.classList.add('hidden'); 
+            rubricNameInput.classList.add('hidden');
+            rubricCsvInput.classList.add('hidden');
+
+
+            // Crear una copia profunda para `temporaryRubric` para evitar modificar `rubricData` directamente
+            // hasta que se confirme el guardado.
+            temporaryRubric = JSON.parse(JSON.stringify(rubricData)); 
+
+            // Eventos para los botones de edición de la previsualización
             document.getElementById('cancel-edit-rubric-btn').addEventListener('click', () => {
                 rubricPreview.classList.add('hidden');
-                // saveRubricBtn.classList.add('hidden'); // This button is not used anymore in this flow
-                temporaryRubric = null; // Clear temporary rubric
+                rubricCsvInput.value = ''; // Limpiar el input CSV
+                rubricNameInput.value = ''; // Limpiar el nombre de la rúbrica
+                temporaryRubric = null; // Limpiar la rúbrica temporal
+                previewRubricBtn.classList.remove('hidden'); // Mostrar el botón original
+                rubricNameInput.classList.remove('hidden');
+                rubricCsvInput.classList.remove('hidden');
             });
             
             document.getElementById('confirm-save-rubric-btn').addEventListener('click', () => {
-                // Get the updated name from the editable input field
-                const updatedRubricName = document.getElementById('editable-rubric-name').value.trim();
-
-                if (!updatedRubricName) {
+                // Actualizamos el nombre por si fue editado
+                const newRubricName = document.getElementById('editable-rubric-name').value.trim();
+                if (!newRubricName) {
                     showMessage(rubricConfigMessageBox, "El nombre de la rúbrica no puede estar vacío.", 'error');
                     return;
                 }
                 
-                // If the name changed and already exists, ask for confirmation
-                if (updatedRubricName !== rubricData.name && savedRubrics[updatedRubricName]) {
-                    showConfirmModal(`Ya existe una rúbrica con el nombre "${updatedRubricName}". ¿Deseas sobrescribirla?`)
-                        .then(confirm => {
-                            if (confirm) {
-                                finalizeRubricSave(updatedRubricName);
-                            } else {
-                                // Do nothing, user chose not to overwrite
-                            }
-                        });
-                } else {
-                    finalizeRubricSave(updatedRubricName);
+                // Si el nombre ha cambiado y ya existe otra rúbrica con ese nombre
+                if (newRubricName !== rubricData.name && savedRubrics[newRubricName]) {
+                    showMessage(rubricConfigMessageBox, `Ya existe una rúbrica con el nombre "${newRubricName}". Por favor, elige un nombre diferente.`, 'error');
+                    return;
                 }
+
+                temporaryRubric.name = newRubricName;
+
+                // Verificar si hay niveles o aspectos vacíos o con puntajes inválidos en la rúbrica temporal
+                if (temporaryRubric.levels.some(level => !level.trim())) {
+                    showMessage(rubricConfigMessageBox, "Todos los nombres de niveles deben estar definidos.", 'error');
+                    return;
+                }
+                if (temporaryRubric.aspects.some(aspect => !aspect.trim())) {
+                    showMessage(rubricConfigMessageBox, "Todos los nombres de aspectos deben estar definidos.", 'error');
+                    return;
+                }
+                for (const level of temporaryRubric.levels) {
+                    const score = temporaryRubric.levelScores[level];
+                    if (score === undefined || isNaN(score) || score < 0) {
+                        showMessage(rubricConfigMessageBox, `El puntaje para el nivel "${level}" no es válido. Debe ser un número positivo.`, 'error');
+                        return;
+                    }
+                }
+
+                // Eliminar la rúbrica antigua si el nombre ha cambiado
+                if (rubricData.name && rubricData.name !== newRubricName) {
+                    delete savedRubrics[rubricData.name];
+                    // Si la rúbrica actual era la que se renombró, limpiarla para forzar la carga de la nueva
+                    if (currentRubric && currentRubric.name === rubricData.name) {
+                        currentRubric = null;
+                        localStorage.removeItem('currentRubric');
+                    }
+                }
+                
+                // Guardar la rúbrica editada
+                savedRubrics[temporaryRubric.name] = temporaryRubric;
+                currentRubric = temporaryRubric; // Establecer la rúbrica editada como la actual
+                saveData();
+                renderRubricSelect(); // Actualizar la lista de rúbricas guardadas
+
+                rubricPreview.classList.add('hidden');
+                rubricCsvInput.value = ''; // Limpiar el input CSV
+                rubricNameInput.value = ''; // Limpiar el nombre de la rúbrica
+                temporaryRubric = null; // Limpiar la rúbrica temporal
+                previewRubricBtn.classList.remove('hidden'); // Mostrar el botón original
+                rubricNameInput.classList.remove('hidden');
+                rubricCsvInput.classList.remove('hidden');
+
+                showMessage(rubricConfigMessageBox, `¡Rúbrica "${currentRubric.name}" guardada y lista para la evaluación!`, 'success');
+                showSection('evaluation-section'); // Avanzar a la sección de evaluación
+                currentStudentIndex = 0; // Reiniciar índice del estudiante
+                renderStudentEvaluation();
             });
         }
 
-        /**
-         * Finalizes saving the edited rubric.
-         * @param {string} finalRubricName - The name to save the rubric under.
-         */
-        function finalizeRubricSave(finalRubricName) {
-            // Remove old entry if name changed
-            if (temporaryRubric.name && temporaryRubric.name !== finalRubricName && savedRubrics[temporaryRubric.name]) {
-                delete savedRubrics[temporaryRubric.name];
-            }
-
-            temporaryRubric.name = finalRubricName;
-            savedRubrics[temporaryRubric.name] = temporaryRubric;
-            currentRubric = temporaryRubric; // Set as current
-            saveData();
-            renderRubricSelect(); // Update dropdown with new rubric
-
-            rubricConfigSection.classList.add('hidden');
-            evaluationSection.classList.remove('hidden');
-            currentStudentIndex = 0;
-            renderStudentEvaluation(); // Start evaluation with the new rubric
-            
-            showMessage(rubricConfigMessageBox, `¡Rúbrica "${finalRubricName}" guardada y lista para la evaluación!`, 'success');
-            rubricPreview.classList.add('hidden'); // Hide the preview table
-            rubricNameInput.value = ''; // Clear rubric input fields
-            rubricCsvInput.value = '';
-        }
-
-        // Functions to update the temporary rubric during editing (global scope for inline HTML event handlers)
+        // Funciones para actualizar la rúbrica temporal durante la edición (accesibles globalmente)
         window.updateRubricLevel = function(input) {
-            const levelIndex = input.dataset.levelIndex;
+            const levelIndex = parseInt(input.dataset.levelIndex);
             const newLevelName = input.value.trim();
             const oldLevelName = temporaryRubric.levels[levelIndex];
             
-            if (newLevelName === "") {
-                 showMessage(rubricConfigMessageBox, "El nombre de un nivel no puede estar vacío.", 'error');
-                 input.value = oldLevelName; // Revert
-                 return;
-            }
-
-            // Update level name in the array
-            temporaryRubric.levels[levelIndex] = newLevelName;
-            
-            // If the name changed, update the keys in levelScores and descriptors
-            if (oldLevelName !== newLevelName) {
-                // Update levelScores
-                if (temporaryRubric.levelScores[oldLevelName] !== undefined) {
-                    temporaryRubric.levelScores[newLevelName] = temporaryRubric.levelScores[oldLevelName];
-                    delete temporaryRubric.levelScores[oldLevelName];
+            if (newLevelName && newLevelName !== oldLevelName) {
+                // Verificar si el nuevo nombre de nivel ya existe (excepto si es el mismo nivel)
+                if (temporaryRubric.levels.includes(newLevelName) && temporaryRubric.levels.indexOf(newLevelName) !== levelIndex) {
+                    showMessage(rubricConfigMessageBox, `El nivel "${newLevelName}" ya existe. Por favor, elige un nombre único.`, 'error');
+                    input.value = oldLevelName; // Revertir al valor anterior
+                    return;
                 }
+                // Actualizamos el nombre del nivel en la lista de niveles
+                temporaryRubric.levels[levelIndex] = newLevelName;
                 
-                // Update descriptors for all aspects
+                // Si el nombre cambió, actualizamos las claves en levelScores y descriptors
+                temporaryRubric.levelScores[newLevelName] = temporaryRubric.levelScores[oldLevelName];
+                delete temporaryRubric.levelScores[oldLevelName];
+                
                 temporaryRubric.aspects.forEach(aspect => {
                     if (temporaryRubric.descriptors[aspect] && temporaryRubric.descriptors[aspect][oldLevelName] !== undefined) {
                         temporaryRubric.descriptors[aspect][newLevelName] = temporaryRubric.descriptors[aspect][oldLevelName];
                         delete temporaryRubric.descriptors[aspect][oldLevelName];
                     }
                 });
+            } else if (!newLevelName) {
+                showMessage(rubricConfigMessageBox, "El nombre del nivel no puede estar vacío.", 'error');
+                input.value = oldLevelName; // Revertir al valor anterior
             }
         };
 
         window.updateRubricScore = function(input) {
-            const levelIndex = input.dataset.levelIndex;
-            const levelName = temporaryRubric.levels[levelIndex]; // Get current name, which might have just been updated
-            let score = parseFloat(input.value);
+            const levelIndex = parseInt(input.dataset.levelIndex);
+            const levelName = temporaryRubric.levels[levelIndex];
+            const newScore = parseFloat(input.value);
 
-            if (isNaN(score) || score < 0) {
-                showMessage(rubricConfigMessageBox, "El puntaje debe ser un número válido mayor o igual a cero.", 'error');
-                input.value = temporaryRubric.levelScores[levelName] || 0; // Revert to old value or 0
-                return;
+            if (!isNaN(newScore) && newScore >= 0) {
+                temporaryRubric.levelScores[levelName] = newScore;
+            } else {
+                showMessage(rubricConfigMessageBox, `El puntaje para el nivel "${levelName}" no es válido. Debe ser un número positivo.`, 'error');
+                input.value = temporaryRubric.levelScores[levelName]; // Revertir al valor anterior
             }
-            temporaryRubric.levelScores[levelName] = score;
         };
 
         window.updateRubricAspect = function(input) {
-            const aspectIndex = input.dataset.aspectIndex;
+            const aspectIndex = parseInt(input.dataset.aspectIndex);
             const newAspectName = input.value.trim();
             const oldAspectName = temporaryRubric.aspects[aspectIndex];
-
-            if (newAspectName === "") {
-                showMessage(rubricConfigMessageBox, "El nombre de un aspecto no puede estar vacío.", 'error');
-                input.value = oldAspectName; // Revert
-                return;
-            }
             
-            // Update aspect name in the array
-            temporaryRubric.aspects[aspectIndex] = newAspectName;
-            
-            // If the name changed, update the key in descriptors
-            if (oldAspectName !== newAspectName) {
-                if (temporaryRubric.descriptors[oldAspectName] !== undefined) {
+            if (newAspectName && newAspectName !== oldAspectName) {
+                // Check for duplicate aspect names within the temporary rubric
+                if (temporaryRubric.aspects.includes(newAspectName) && temporaryRubric.aspects.indexOf(newAspectName) !== aspectIndex) {
+                    showMessage(rubricConfigMessageBox, `El aspecto "${newAspectName}" ya existe. Por favor, elige un nombre único.`, 'error');
+                    input.value = oldAspectName; // Revertir al valor anterior
+                    return;
+                }
+                
+                // Update the aspect name in the list
+                temporaryRubric.aspects[aspectIndex] = newAspectName;
+                
+                // Update the key in the descriptors object
+                if (temporaryRubric.descriptors[oldAspectName]) {
                     temporaryRubric.descriptors[newAspectName] = temporaryRubric.descriptors[oldAspectName];
                     delete temporaryRubric.descriptors[oldAspectName];
+                } else {
+                    temporaryRubric.descriptors[newAspectName] = {}; // Crear si no existía
                 }
+            } else if (!newAspectName) {
+                showMessage(rubricConfigMessageBox, "El nombre del aspecto no puede estar vacío.", 'error');
+                input.value = oldAspectName; // Revertir al valor anterior
             }
         };
 
         window.updateRubricDescriptor = function(textarea) {
-            const aspectIndex = textarea.dataset.aspectIndex;
-            const levelIndex = textarea.dataset.levelIndex;
+            const aspectIndex = parseInt(textarea.dataset.aspectIndex);
+            const levelIndex = parseInt(textarea.dataset.levelIndex);
             const aspectName = temporaryRubric.aspects[aspectIndex];
             const levelName = temporaryRubric.levels[levelIndex];
             
-            if (temporaryRubric.descriptors[aspectName]) { // Ensure aspect exists
-                temporaryRubric.descriptors[aspectName][levelName] = textarea.value.trim();
+            if (!temporaryRubric.descriptors[aspectName]) {
+                temporaryRubric.descriptors[aspectName] = {};
             }
+            temporaryRubric.descriptors[aspectName][levelName] = textarea.value.trim();
         };
 
         previewRubricBtn.addEventListener('click', () => {
@@ -1180,82 +1093,102 @@
                 showMessage(rubricConfigMessageBox, "Por favor, pega el contenido CSV de la rúbrica.", 'error');
                 return;
             }
+            if (!rubricName) {
+                 showMessage(rubricConfigMessageBox, "Por favor, introduce un nombre para la rúbrica.", 'error');
+                 return;
+            }
+            // Verificar si el nombre ya existe y no estamos editando esa misma rúbrica
+            if (savedRubrics[rubricName] && savedRubrics[rubricName] !== currentRubric) {
+                showMessage(rubricConfigMessageBox, `Ya existe una rúbrica con el nombre "${rubricName}". Por favor, elige un nombre diferente o cárgala desde el selector.`, 'error');
+                return;
+            }
+
 
             const parsedRubric = parseRubricFromCSV(csvText);
             if (parsedRubric) {
-                if (rubricName) {
-                    parsedRubric.name = rubricName; // Use user-provided name if available
-                }
+                parsedRubric.name = rubricName; // Asegurar que el nombre del input se use
                 showEditableRubric(parsedRubric);
-                showMessage(rubricConfigMessageBox, "Rúbrica analizada. Puedes modificarla antes de guardar.", 'success');
+                showMessage(rubricConfigMessageBox, "Rúbrica analizada correctamente. Puedes modificarla antes de guardar.", 'success');
             }
         });
 
-        loadRubricBtn.addEventListener('click', () => {
+        rubricSelect.addEventListener('change', () => {
             const selectedRubricName = rubricSelect.value;
-            if (!selectedRubricName) {
-                showMessage(rubricConfigMessageBox, "Por favor, selecciona una rúbrica existente para cargar.", 'error');
-                return;
-            }
-            
-            if (savedRubrics[selectedRubricName]) {
+            rubricPreview.classList.add('hidden'); // Ocultar previsualización si se selecciona una rúbrica
+            previewRubricBtn.classList.remove('hidden'); // Mostrar el botón original
+            rubricNameInput.classList.remove('hidden');
+            rubricCsvInput.classList.remove('hidden');
+
+            if (selectedRubricName && savedRubrics[selectedRubricName]) {
                 currentRubric = savedRubrics[selectedRubricName];
-                saveData(); // Save the currently loaded rubric
+                saveData();
                 
-                showSection('evaluation-section');
-                currentStudentIndex = 0; // Reset student index for new evaluation session
+                showMessage(rubricConfigMessageBox, `¡Rúbrica "${selectedRubricName}" cargada y lista para la evaluación!`, 'success');
+                showSection('evaluation-section'); // Avanzar a la sección de evaluación
+                currentStudentIndex = 0; // Reiniciar índice del estudiante
                 renderStudentEvaluation();
-                showMessage(rubricConfigMessageBox, `Rúbrica "${selectedRubricName}" cargada para la evaluación.`, 'success');
             } else {
-                showMessage(rubricConfigMessageBox, `Error: La rúbrica "${selectedRubricName}" no se encontró.`, 'error');
+                currentRubric = null; // Si no se selecciona nada, limpiar la rúbrica actual
+                localStorage.removeItem('currentRubric');
+                // showMessage(rubricConfigMessageBox, "Selecciona una rúbrica para continuar.", 'info'); // Opcional
             }
+            // Limpiar los campos de input y textarea si se selecciona una rúbrica existente
+            rubricNameInput.value = '';
+            rubricCsvInput.value = '';
         });
 
-        deleteRubricBtn.addEventListener('click', async () => {
+        deleteRubricBtn.addEventListener('click', () => {
             const selectedRubricName = rubricSelect.value;
             if (!selectedRubricName) {
                 showMessage(rubricConfigMessageBox, "Por favor, selecciona una rúbrica para eliminar.", 'error');
                 return;
             }
 
-            const confirmDelete = await showConfirmModal(`¿Estás seguro de que quieres eliminar la rúbrica "${selectedRubricName}"?`);
-            if (confirmDelete) {
-                delete savedRubrics[selectedRubricName];
-                if (currentRubric && currentRubric.name === selectedRubricName) {
-                    currentRubric = null; // Clear current rubric if it was the one deleted
-                    localStorage.removeItem('currentRubric');
+            const customConfirm = createCustomConfirm(`¿Estás seguro de que quieres eliminar la rúbrica "${selectedRubricName}"? Esto no eliminará las evaluaciones que ya la usaron.`);
+            customConfirm.then(result => {
+                if (result) {
+                    delete savedRubrics[selectedRubricName];
+                    if (currentRubric && currentRubric.name === selectedRubricName) {
+                        currentRubric = null;
+                        localStorage.removeItem('currentRubric');
+                    }
+                    saveData();
+                    renderRubricSelect();
+                    showMessage(rubricConfigMessageBox, `Rúbrica "${selectedRubricName}" eliminada.`, 'success');
+                    // Opcional: si no hay rúbrica actual, volver a estudiantes o dejar en config
+                    showSection('rubric-config-section');
                 }
-                saveData();
-                renderRubricSelect();
-                showMessage(rubricConfigMessageBox, `Rúbrica "${selectedRubricName}" eliminada.`, 'success');
-            }
+            });
         });
 
-        // --- Student Evaluation Logic ---
+        // --- Lógica de Evaluación de Estudiantes --- 
 
         /**
-         * Determines the performance level based on an average score.
-         * @param {number} averageScore - The average score.
-         * @returns {object} An object with `level` (text) and `class` (CSS class).
+         * Determina el nivel de desempeño basado en el promedio de puntajes.
+         * @param {number} averageScore - El puntaje promedio del estudiante.
+         * @returns {{level: string, class: string}} Objeto con el nombre del nivel y la clase CSS.
          */
         function getPerformanceLevel(averageScore) {
-            if (averageScore >= 4.5 && averageScore <= 5) return { level: "Destacado", class: "outstanding" };
-            if (averageScore >= 3.5 && averageScore < 4.5) return { level: "Logrado", class: "achieved" };
-            if (averageScore >= 2.5 && averageScore < 3.5) return { level: "En proceso", class: "process" };
-            if (averageScore >= 1.5 && averageScore < 2.5) return { level: "Inicio", class: "beginning" };
-            if (averageScore >= 0 && averageScore < 1.5) return { level: "Previo al inicio", class: "previous" };
-            return { level: "No evaluado", class: "" };
+            // Ajustar estos rangos y nombres según las necesidades.
+            if (averageScore === 0) return { level: "No evaluado", class: "" }; // Manejar caso sin evaluación
+            if (averageScore >= 1 && averageScore < 2) return { level: "Previo al inicio", class: "previous" }; 
+            if (averageScore >= 2 && averageScore < 3) return { level: "Inicio", class: "beginning" }; 
+            if (averageScore >= 3 && averageScore < 4) return { level: "En proceso", class: "process" }; 
+            if (averageScore >= 4 && averageScore < 5) return { level: "Logrado", class: "achieved" }; 
+            if (averageScore >= 5) return { level: "Destacado", class: "outstanding" }; 
+            return { level: "Inválido", class: "" }; // Para puntajes fuera de rango esperados
         }
 
         /**
-         * Renders the evaluation table for the current student.
+         * Renderiza la tabla de evaluación para el estudiante actual.
          */
         function renderStudentEvaluation() {
             if (!currentRubric || currentStudents.length === 0) {
-                currentStudentName.textContent = "No hay estudiantes o rúbrica cargada";
-                studentIndexSpan.textContent = "0";
-                totalStudentsSpan.textContent = "0";
-                studentRubricDisplay.innerHTML = "";
+                currentStudentName.textContent = "No hay estudiantes o rúbrica";
+                studentRubricDisplay.innerHTML = `<p class="text-center text-gray-500">Por favor, carga un grupo de estudiantes y una rúbrica para comenzar la evaluación.</p>`;
+                finishEvaluationBtn.classList.add('hidden');
+                nextStudentBtn.classList.add('hidden');
+                prevStudentBtn.classList.add('hidden');
                 return;
             }
 
@@ -1266,524 +1199,582 @@
 
             const evaluationKey = `${groupSelect.value}_${studentName}`;
 
-            let tableHTML = `
-                <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Aspecto</th>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Nivel Asignado</th>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Puntaje</th>
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Descriptores (Haz clic para asignar)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            let tableHTML = ` 
+                <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm"> 
+                    <thead class="bg-gray-100"> 
+                        <tr> 
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Aspecto</th> 
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Nivel Asignado</th> 
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Puntaje</th> 
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Descriptores (Haz clic para asignar)</th> 
+                        </tr> 
+                    </thead> 
+                    <tbody> 
+            `; 
 
-            let totalScore = 0;
-            let evaluatedAspectsCount = 0;
+            let totalScore = 0; 
+            let evaluatedAspectsCount = 0; 
 
-            currentRubric.aspects.forEach(aspect => {
-                const currentLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] : null;
-                const currentScore = currentLevel ? currentRubric.levelScores[currentLevel] || 0 : 0;
+            currentRubric.aspects.forEach(aspect => { 
+                const currentLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] : null; 
+                const currentScore = currentLevel ? currentRubric.levelScores[currentLevel] || 0 : 0; 
                 
-                if (currentLevel) {
-                    totalScore += currentScore;
-                    evaluatedAspectsCount++;
+                if (currentLevel) { 
+                    totalScore += currentScore; 
+                    evaluatedAspectsCount++; 
+                } 
+                
+                tableHTML += ` 
+                    <tr> 
+                        <td class="py-3 px-4 border-b text-gray-800 font-medium">${aspect}</td> 
+                        <td class="py-3 px-4 border-b"> 
+                            <span class="font-bold text-blue-600">${currentLevel || 'N/A'}</span> 
+                        </td> 
+                        <td class="py-3 px-4 border-b"> 
+                            <span class="font-bold text-green-600">${currentScore}</span> 
+                        </td> 
+                        <td class="py-2 px-4 border-b"> 
+                            <div class="flex flex-wrap gap-2"> 
+                                ${currentRubric.levels.map(level => { 
+                                    const descriptor = currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][level] || 'Sin descriptor' : 'Sin descriptor'; 
+                                    const isSelected = currentLevel === level; 
+                                    const buttonClasses = ` 
+                                        flex-grow min-w-0 p-2 text-sm border rounded-md cursor-pointer 
+                                        ${isSelected ? 'bg-blue-200 border-blue-500 text-blue-800 shadow-md' : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'} 
+                                        transition duration-200 ease-in-out 
+                                        text-left 
+                                    `; 
+                                    return ` 
+                                        <button 
+                                            data-aspect="${aspect}" 
+                                            data-level="${level}" 
+                                            class="${buttonClasses}" 
+                                            title="${descriptor}" 
+                                        > 
+                                            <span class="font-semibold">${level} (${currentRubric.levelScores[level] || 0} pts):</span> ${descriptor} 
+                                        </button> 
+                                    `; 
+                                }).join('')} 
+                            </div> 
+                        </td> 
+                    </tr> 
+                `; 
+            }); 
+
+            const averageScore = evaluatedAspectsCount > 0 ? (totalScore / currentRubric.aspects.length).toFixed(1) : 0; // Promedio sobre todos los aspectos de la rúbrica
+            const performanceLevel = getPerformanceLevel(parseFloat(averageScore)); 
+
+            tableHTML += ` 
+                    </tbody> 
+                    <tfoot> 
+                        <tr> 
+                            <td class="py-3 px-4 border-t font-bold text-gray-800">Puntaje Total del Estudiante</td> 
+                            <td class="py-3 px-4 border-t font-bold text-gray-800"></td> 
+                            <td class="py-3 px-4 border-t font-bold text-green-600">${totalScore}</td> 
+                            <td class="py-3 px-4 border-t font-bold text-gray-800"></td> 
+                        </tr> 
+                        <tr> 
+                            <td class="py-3 px-4 border-t font-bold text-gray-800">Promedio General</td> 
+                            <td class="py-3 px-4 border-t font-bold text-gray-800"></td> 
+                            <td class="py-3 px-4 border-t font-bold text-green-600">${averageScore}</td> 
+                            <td class="py-3 px-4 border-t font-bold text-gray-800"> 
+                                <span class="performance-level ${performanceLevel.class}">${performanceLevel.level}</span> 
+                            </td> 
+                        </tr> 
+                    </tfoot> 
+                </table> 
+                <div class="mt-4 p-3 bg-gray-50 rounded-lg"> 
+                    <h4 class="font-semibold mb-2">Rúbrica: ${currentRubric.name}</h4> 
+                </div> 
+            `; 
+            studentRubricDisplay.innerHTML = tableHTML; 
+
+            studentRubricDisplay.querySelectorAll('button[data-aspect][data-level]').forEach(button => { 
+                button.addEventListener('click', (event) => { 
+                    const aspect = event.currentTarget.dataset.aspect; 
+                    const level = event.currentTarget.dataset.level; 
+                    evaluateAspect(studentName, aspect, level); 
+                }); 
+            }); 
+
+            prevStudentBtn.disabled = currentStudentIndex === 0; 
+            nextStudentBtn.disabled = currentStudentIndex === currentStudents.length - 1; 
+            if (currentStudentIndex === currentStudents.length - 1 && currentStudents.length > 0) { 
+                finishEvaluationBtn.classList.remove('hidden'); 
+                nextStudentBtn.classList.add('hidden'); 
+            } else { 
+                finishEvaluationBtn.classList.add('hidden'); 
+                nextStudentBtn.classList.remove('hidden'); 
+            }
+            showSection(evaluationSection.id); // Asegurarse de que la sección de evaluación esté visible
+        } 
+
+        /**
+         * Asigna un nivel de desempeño a un aspecto para un estudiante dado.
+         * @param {string} studentName - El nombre del estudiante.
+         * @param {string} aspect - El aspecto a evaluar.
+         * @param {string} level - El nivel de desempeño a asignar.
+         */
+        function evaluateAspect(studentName, aspect, level) { 
+            const evaluationKey = `${groupSelect.value}_${studentName}`; 
+            if (!evaluations[evaluationKey]) { 
+                evaluations[evaluationKey] = {}; 
+            } 
+            evaluations[evaluationKey][aspect] = level; 
+            saveData(); 
+            renderStudentEvaluation(); 
+            showMessage(evaluationMessageBox, `Evaluación para '${aspect}' del estudiante '${studentName}' actualizada a '${level}'.`, 'success'); 
+        } 
+
+        prevStudentBtn.addEventListener('click', () => { 
+            if (currentStudentIndex > 0) { 
+                currentStudentIndex--; 
+                renderStudentEvaluation(); 
+            } 
+        }); 
+
+        nextStudentBtn.addEventListener('click', () => { 
+            if (currentStudentIndex < currentStudents.length - 1) { 
+                currentStudentIndex++; 
+                renderStudentEvaluation(); 
+            } 
+        }); 
+
+        finishEvaluationBtn.addEventListener('click', () => { 
+            showSection('report-section'); 
+        }); 
+
+        backToEvaluationBtn.addEventListener('click', () => { 
+            showSection('evaluation-section'); 
+            renderStudentEvaluation(); 
+        }); 
+
+        newRubricBtn.addEventListener('click', () => { 
+            const customConfirm = createCustomConfirm("¿Estás seguro de que quieres iniciar una nueva evaluación? Esto borrará las evaluaciones actuales pero mantendrá tus grupos y rúbricas guardadas.");
+            customConfirm.then(result => {
+                if (result) {
+                    resetApp(); 
                 }
+            });
+        }); 
+
+        // --- Lógica de Exportación a PDF y CSV --- 
+
+        /**
+         * Genera un reporte PDF individual para un estudiante.
+         * @param {string} studentName - El nombre del estudiante.
+         * @param {string} groupName - El nombre del grupo al que pertenece el estudiante.
+         */
+        function generateSingleStudentPdf(studentName, groupName) { 
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF({ 
+                orientation: 'landscape', 
+                unit: 'mm', 
+                format: 'a4' 
+            }); 
+
+            doc.setFont("helvetica"); 
+            let yOffset = 20; 
+            const margin = 20; 
+
+            // Título y encabezado 
+            doc.setFontSize(22); 
+            doc.setTextColor(40, 40, 40); 
+            doc.text("Rúbrica de Evaluación", doc.internal.pageSize.width / 2, yOffset, { align: 'center' }); 
+            yOffset += 10; 
+
+            doc.setFontSize(14); 
+            doc.setTextColor(50, 50, 50); 
+            doc.text(`Grupo: ${groupName || 'N/A'}`, doc.internal.pageSize.width / 2, yOffset, { align: 'center' }); 
+            yOffset += 10; 
+
+            doc.setFontSize(10); 
+            doc.setTextColor(80, 80, 80); 
+            doc.text(`Rúbrica: ${currentRubric.name || 'N/A'}`, margin, yOffset); 
+            yOffset += 5; 
+            doc.text(`Estudiante: ${studentName || 'N/A'}`, margin, yOffset); 
+            yOffset += 15; 
+
+            // Primero mostramos la matriz completa de la rúbrica 
+            doc.setFontSize(12); 
+            doc.setTextColor(0, 0, 0); 
+            doc.text("Matriz Completa de la Rúbrica:", margin, yOffset); 
+            yOffset += 7; 
+
+            // Encabezados para la matriz de rúbrica 
+            const rubricHeaders = ["Aspecto", ...currentRubric.levels.map(level => `${level} (${currentRubric.levelScores[level]} pts)`)]; 
+            // Calcular anchos de columna dinámicamente, asegurando espacio suficiente para el aspecto
+            const rubricColumnWidths = [40, ...Array(currentRubric.levels.length).fill( (doc.internal.pageSize.width - 40 - (margin * 2)) / currentRubric.levels.length )]; 
+
+            const rubricTableData = currentRubric.aspects.map(aspect => { 
+                return [aspect, ...currentRubric.levels.map(level => currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][level] || '' : '')]; 
+            }); 
+
+            doc.autoTable({ 
+                startY: yOffset, 
+                head: [rubricHeaders], 
+                body: rubricTableData, 
+                theme: 'grid', 
+                styles: { 
+                    fontSize: 6, 
+                    cellPadding: 1, 
+                    valign: 'middle', 
+                    halign: 'left', 
+                    textColor: [50, 50, 50], 
+                }, 
+                headStyles: { 
+                    fillColor: [220, 220, 220], 
+                    textColor: [0, 0, 0], 
+                    fontStyle: 'bold', 
+                }, 
+                columnStyles: rubricHeaders.reduce((acc, _, index) => { 
+                    acc[index] = { cellWidth: rubricColumnWidths[index] }; 
+                    return acc; 
+                }, {}), 
+                didDrawPage: function (data) { 
+                    let str = "Página " + doc.internal.getNumberOfPages(); 
+                    doc.setFontSize(8); 
+                    doc.setTextColor(150); 
+                    doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10); 
+                } 
+            }); 
+
+            yOffset = doc.autoTable.previous.finalY + 10; 
+
+            // Ahora mostramos la evaluación específica del estudiante 
+            doc.setFontSize(12); 
+            doc.setTextColor(0, 0, 0); 
+            doc.text("Evaluación del Estudiante:", margin, yOffset); 
+            yOffset += 7; 
+
+            const evaluationHeaders = ["Aspecto", "Nivel Asignado", "Puntaje", "Descriptor"]; 
+            const evaluationColumnWidths = [40, 25, 15, (doc.internal.pageSize.width - 40 - 25 - 15 - (margin * 2))]; 
+
+            const evaluationKey = `${groupName}_${studentName}`; 
+            const evaluationTableData = []; 
+            let studentTotalScore = 0; 
+            let hasEvaluatedAspects = false; 
+
+            currentRubric.aspects.forEach(aspect => { 
+                const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || 'No Evaluado' : 'No Evaluado'; 
+                const scoreForAspect = currentRubric.levelScores[assignedLevel] || 0; 
+                const descriptorText = currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][assignedLevel] || 'N/A' : 'N/A'; 
+                evaluationTableData.push([aspect, assignedLevel, scoreForAspect, descriptorText]); 
+
+                if (assignedLevel !== 'No Evaluado') { 
+                    studentTotalScore += scoreForAspect; 
+                    hasEvaluatedAspects = true; 
+                } 
+            }); 
+
+            let maxPossibleScore = 0; 
+            currentRubric.aspects.forEach(aspect => { 
+                let maxAspectScore = 0; 
+                currentRubric.levels.forEach(level => { 
+                    const score = currentRubric.levelScores[level] || 0; 
+                    if (score > maxAspectScore) { 
+                        maxAspectScore = score; 
+                    } 
+                }); 
+                maxPossibleScore += maxAspectScore; 
+            }); 
+
+            const studentAverageScore = hasEvaluatedAspects ? (studentTotalScore / currentRubric.aspects.length).toFixed(1) : 'N/A'; 
+            const performanceLevel = getPerformanceLevel(parseFloat(studentAverageScore)); 
+
+            doc.autoTable({ 
+                startY: yOffset, 
+                head: [evaluationHeaders], 
+                body: evaluationTableData, 
+                theme: 'grid', 
+                styles: { 
+                    fontSize: 7, 
+                    cellPadding: 1.5, 
+                    valign: 'middle', 
+                    halign: 'left', 
+                    textColor: [50, 50, 50], 
+                }, 
+                headStyles: { 
+                    fillColor: [220, 220, 220], 
+                    textColor: [0, 0, 0], 
+                    fontStyle: 'bold', 
+                }, 
+                columnStyles: { 
+                    0: { cellWidth: evaluationColumnWidths[0] }, 
+                    1: { cellWidth: evaluationColumnWidths[1] }, 
+                    2: { cellWidth: evaluationColumnWidths[2], halign: 'center' }, 
+                    3: { cellWidth: evaluationColumnWidths[3] } 
+                },
+                didDrawPage: function (data) {
+                    let str = "Página " + doc.internal.getNumberOfPages();
+                    doc.setFontSize(8);
+                    doc.setTextColor(150);
+                    doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                } 
+            }); 
+
+            yOffset = doc.autoTable.previous.finalY; 
+
+            // Resumen final 
+            doc.setFontSize(10); 
+            doc.setTextColor(0, 100, 0); 
+            doc.text(`Puntaje Final: ${studentTotalScore} / ${maxPossibleScore} pts`, margin, yOffset + 5); 
+            doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10); 
+            doc.text(`Nivel de Desempeño: ${performanceLevel.level}`, margin, yOffset + 15); 
+
+            const safeStudentName = studentName.replace(/[^a-zA-Z0-9]/g, '_'); // Limpiar nombre para el archivo
+            const safeGroupName = groupName.replace(/[^a-zA-Z0-9]/g, '_'); // Limpiar nombre para el archivo
+            doc.save(`rubrica_${safeStudentName}_${safeGroupName}.pdf`); 
+        } 
+
+        exportIndividualRubricsBtn.addEventListener('click', async () => { 
+            if (currentStudents.length === 0) { 
+                showMessage(reportMessageBox, "No hay estudiantes en el grupo actual para generar reportes individuales.", 'error'); 
+                return; 
+            } 
+            if (!currentRubric) { 
+                showMessage(reportMessageBox, "No hay una rúbrica seleccionada para exportar.", 'error'); 
+                return; 
+            } 
+
+            const currentGroupName = groupSelect.value; 
+            for (const student of currentStudents) { 
+                generateSingleStudentPdf(student, currentGroupName); 
+            } 
+            showMessage(reportMessageBox, "¡Rúbricas individuales generadas y descargadas!", 'success'); 
+        }); 
+
+        exportPdfBtn.addEventListener('click', async () => { 
+            if (currentStudents.length === 0) { 
+                showMessage(reportMessageBox, "No hay estudiantes en el grupo actual para generar el reporte.", 'error'); 
+                return; 
+            } 
+            if (!currentRubric) { 
+                showMessage(reportMessageBox, "No hay una rúbrica seleccionada para exportar.", 'error'); 
+                return; 
+            } 
+
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF({ 
+                orientation: 'landscape', 
+                unit: 'mm', 
+                format: 'a4' 
+            }); 
+
+            doc.setFont("helvetica"); 
+
+            const currentGroupName = groupSelect.value; 
+            let totalSumOfFinalScores = 0; 
+            let evaluatedStudentCount = 0; 
+
+            for (const student of currentStudents) { 
+                doc.addPage(); // Añadir una nueva página para cada estudiante en el reporte general
+                let yOffset = 20; 
+                const margin = 20; 
+
+                doc.setFontSize(22); 
+                doc.setTextColor(40, 40, 40); 
+                doc.text("Rúbrica de Evaluación", doc.internal.pageSize.width / 2, yOffset, { align: 'center' }); 
+                yOffset += 10; 
+
+                doc.setFontSize(14); 
+                doc.setTextColor(50, 50, 50); 
+                doc.text(`Grupo: ${currentGroupName || 'N/A'}`, doc.internal.pageSize.width / 2, yOffset, { align: 'center' }); 
+                yOffset += 10; 
+
+                doc.setFontSize(10); 
+                doc.setTextColor(80, 80, 80); 
+                doc.text(`Rúbrica: ${currentRubric.name || 'N/A'}`, margin, yOffset); 
+                yOffset += 5; 
+                doc.text(`Estudiante: ${student || 'N/A'}`, margin, yOffset); 
+                yOffset += 10; 
+
+                const headers = ["Aspecto", "Nivel Asignado", "Puntaje", "Descriptor"]; 
+                const tableColumnWidths = [40, 25, 15, (doc.internal.pageSize.width - 40 - 25 - 15 - (margin * 2))]; 
+
+                const evaluationKey = `${currentGroupName}_${student}`; 
+                const tableData = []; 
+                let studentTotalScore = 0; 
+                let hasEvaluatedAspects = false; 
+
+                currentRubric.aspects.forEach(aspect => { 
+                    const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || 'No Evaluado' : 'No Evaluado'; 
+                    const scoreForAspect = currentRubric.levelScores[assignedLevel] || 0; 
+                    const descriptorText = currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][assignedLevel] || 'N/A' : 'N/A'; 
+                    tableData.push([aspect, assignedLevel, scoreForAspect, descriptorText]); 
+
+                    if (assignedLevel !== 'No Evaluado') { 
+                        studentTotalScore += scoreForAspect; 
+                        hasEvaluatedAspects = true; 
+                    } 
+                }); 
+
+                if (hasEvaluatedAspects) { 
+                    totalSumOfFinalScores += studentTotalScore; 
+                    evaluatedStudentCount++; 
+                } 
+
+                let maxPossibleScore = 0; 
+                currentRubric.aspects.forEach(aspect => { 
+                    let maxAspectScore = 0; 
+                    currentRubric.levels.forEach(level => { 
+                        const score = currentRubric.levelScores[level] || 0; 
+                        if (score > maxAspectScore) { 
+                            maxAspectScore = score; 
+                        } 
+                    }); 
+                    maxPossibleScore += maxAspectScore; 
+                }); 
+
+                const studentAverageScore = hasEvaluatedAspects ? (studentTotalScore / currentRubric.aspects.length).toFixed(1) : 'N/A'; 
+                const performanceLevel = getPerformanceLevel(parseFloat(studentAverageScore)); 
+
+                doc.autoTable({ 
+                    startY: yOffset, 
+                    head: [headers], 
+                    body: tableData, 
+                    theme: 'grid', 
+                    styles: { 
+                        fontSize: 7, 
+                        cellPadding: 1.5, 
+                        valign: 'middle', 
+                        halign: 'left', 
+                        textColor: [50, 50, 50], 
+                    }, 
+                    headStyles: { 
+                        fillColor: [220, 220, 220], 
+                        textColor: [0, 0, 0], 
+                        fontStyle: 'bold', 
+                    }, 
+                    columnStyles: { 
+                        0: { cellWidth: tableColumnWidths[0] }, 
+                        1: { cellWidth: tableColumnWidths[1] }, 
+                        2: { cellWidth: tableColumnWidths[2], halign: 'center' }, 
+                        3: { cellWidth: tableColumnWidths[3] } 
+                    }, 
+                    didDrawPage: function (data) { 
+                        let str = "Página " + doc.internal.getNumberOfPages(); 
+                        doc.setFontSize(8); 
+                        doc.setTextColor(150); 
+                        doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10); 
+                    } 
+                }); 
+
+                yOffset = doc.autoTable.previous.finalY; 
+
+                doc.setFontSize(10); 
+                doc.setTextColor(0, 100, 0); 
+                doc.text(`Puntaje Final: ${studentTotalScore} / ${maxPossibleScore} pts`, margin, yOffset + 5); 
+                doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10); 
+                doc.text(`Nivel de Desempeño: ${performanceLevel.level}`, margin, yOffset + 15); 
+            } 
+
+            doc.deletePage(1); // Eliminar la primera página en blanco
+            doc.save(`reporte_general_grupo_${currentGroupName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`); 
+            showMessage(reportMessageBox, "¡Reporte PDF generado y descargado!", 'success'); 
+        }); 
+
+        exportCsvBtn.addEventListener('click', () => { 
+            if (currentStudents.length === 0) { 
+                showMessage(reportMessageBox, "No hay estudiantes en el grupo actual para exportar.", 'error'); 
+                return; 
+            } 
+            if (!currentRubric) { 
+                showMessage(reportMessageBox, "No hay una rúbrica seleccionada para exportar.", 'error'); 
+                return; 
+            } 
+
+            const currentGroupName = groupSelect.value; 
+            let csvContent = "data:text/csv;charset=utf-8,"; 
+            
+            // Encabezados 
+            const headers = ["Estudiante", ...currentRubric.aspects, "Puntaje Total", "Promedio", "Nivel de Desempeño"]; 
+            csvContent += headers.map(h => `"${h}"`).join(",") + "\r\n"; 
+
+            currentStudents.forEach(student => { 
+                const evaluationKey = `${currentGroupName}_${student}`; 
+                let rowData = [student]; 
+                let totalScore = 0; 
+                let evaluatedAspectsCount = 0; 
+
+                currentRubric.aspects.forEach(aspect => { 
+                    const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || '' : ''; 
+                    const scoreForAspect = assignedLevel ? currentRubric.levelScores[assignedLevel] || 0 : 0; 
+                    
+                    if (assignedLevel) { 
+                        totalScore += scoreForAspect; 
+                        evaluatedAspectsCount++; 
+                    } 
+                    
+                    rowData.push(assignedLevel); 
+                }); 
+
+                const averageScore = evaluatedAspectsCount > 0 ? (totalScore / currentRubric.aspects.length).toFixed(1) : 0; 
+                const performanceLevel = getPerformanceLevel(parseFloat(averageScore)); 
                 
-                tableHTML += `
-                    <tr>
-                        <td class="py-3 px-4 border-b text-gray-800 font-medium">${aspect}</td>
-                        <td class="py-3 px-4 border-b">
-                            <span class="font-bold text-blue-600">${currentLevel || 'N/A'}</span>
-                        </td>
-                        <td class="py-3 px-4 border-b">
-                            <span class="font-bold text-green-600">${currentScore}</span>
-                        </td>
-                        <td class="py-2 px-4 border-b">
-                            <div class="flex flex-wrap gap-2">
-                                ${currentRubric.levels.map(level => {
-                                    const descriptor = currentRubric.descriptors[aspect][level] || 'Sin descriptor';
-                                    const isSelected = currentLevel === level;
-                                    const buttonClasses = `
-                                        flex-grow min-w-0 p-2 text-sm border rounded-md cursor-pointer
-                                        ${isSelected ? 'bg-blue-200 border-blue-500 text-blue-800 shadow-md' : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'}
-                                        transition duration-200 ease-in-out
-                                        text-left
-                                    `;
-                                    return `
-                                        <button
-                                            data-aspect="${aspect}"
-                                            data-level="${level}"
-                                            class="${buttonClasses}"
-                                            title="${descriptor}"
-                                        >
-                                            <span class="font-semibold">${level} (${currentRubric.levelScores[level] || 0} pts):</span> ${descriptor}
-                                        </button>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </td>
-                    </tr>
+                rowData.push(totalScore); 
+                rowData.push(averageScore); 
+                rowData.push(performanceLevel.level); 
+                
+                csvContent += rowData.map(item => `"${String(item).replace(/"/g, '""')}"`).join(",") + "\r\n"; // Escapar comillas dobles
+            }); 
+
+            const encodedUri = encodeURI(csvContent); 
+            const link = document.createElement("a"); 
+            link.setAttribute("href", encodedUri); 
+            link.setAttribute("download", `evaluaciones_${currentGroupName.replace(/[^a-zA-Z0-9]/g, '_')}.csv`); 
+            document.body.appendChild(link); 
+            link.click(); 
+            document.body.removeChild(link); 
+            
+            showMessage(reportMessageBox, "¡Datos exportados a CSV correctamente!", 'success'); 
+        }); 
+
+        // --- Funciones de Modal Personalizado (Reemplazo de window.confirm) ---
+        /**
+         * Crea y muestra un modal de confirmación personalizado.
+         * @param {string} message - El mensaje a mostrar en el modal.
+         * @returns {Promise<boolean>} Una promesa que se resuelve a true si el usuario confirma, false si cancela.
+         */
+        function createCustomConfirm(message) {
+            return new Promise((resolve) => {
+                const modalOverlay = document.createElement('div');
+                modalOverlay.classList.add('fixed', 'inset-0', 'bg-gray-900', 'bg-opacity-75', 'flex', 'items-center', 'justify-center', 'z-50', 'p-4');
+                modalOverlay.innerHTML = `
+                    <div class="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full transform transition-all scale-100 opacity-100">
+                        <p class="text-gray-800 text-lg mb-6 text-center">${message}</p>
+                        <div class="flex justify-end gap-4">
+                            <button id="modal-cancel-btn" class="bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                Cancelar
+                            </button>
+                            <button id="modal-confirm-btn" class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700">
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
                 `;
-            });
+                document.body.appendChild(modalOverlay);
 
-            const averageScore = evaluatedAspectsCount > 0 ? (totalScore / evaluatedAspectsCount).toFixed(1) : 0;
-            const performanceLevel = getPerformanceLevel(parseFloat(averageScore));
+                const closeModal = (result) => {
+                    modalOverlay.classList.add('opacity-0', 'scale-95');
+                    modalOverlay.addEventListener('transitionend', () => {
+                        modalOverlay.remove();
+                    });
+                    resolve(result);
+                };
 
-            tableHTML += `
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td class="py-3 px-4 border-t font-bold text-gray-800">Total</td>
-                            <td class="py-3 px-4 border-t font-bold text-gray-800"></td>
-                            <td class="py-3 px-4 border-t font-bold text-green-600">${totalScore}</td>
-                            <td class="py-3 px-4 border-t font-bold text-gray-800"></td>
-                        </tr>
-                        <tr>
-                            <td class="py-3 px-4 border-t font-bold text-gray-800">Promedio</td>
-                            <td class="py-3 px-4 border-t font-bold text-gray-800"></td>
-                            <td class="py-3 px-4 border-t font-bold text-green-600">${averageScore}</td>
-                            <td class="py-3 px-4 border-t font-bold text-gray-800">
-                                <span class="performance-level ${performanceLevel.class}">${performanceLevel.level}</span>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                    <h4 class="font-semibold mb-2">Rúbrica: ${currentRubric.name}</h4>
-                </div>
-            `;
-            studentRubricDisplay.innerHTML = tableHTML;
-
-            // Attach event listeners to newly rendered buttons
-            studentRubricDisplay.querySelectorAll('button[data-aspect][data-level]').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const aspect = event.currentTarget.dataset.aspect;
-                    const level = event.currentTarget.dataset.level;
-                    evaluateAspect(studentName, aspect, level);
+                document.getElementById('modal-confirm-btn').addEventListener('click', () => closeModal(true));
+                document.getElementById('modal-cancel-btn').addEventListener('click', () => closeModal(false));
+                modalOverlay.addEventListener('click', (e) => {
+                    if (e.target === modalOverlay) closeModal(false); // Clic fuera del modal
                 });
             });
-
-            // Control navigation buttons
-            prevStudentBtn.disabled = currentStudentIndex === 0;
-            nextStudentBtn.disabled = currentStudentIndex === currentStudents.length - 1;
-            if (currentStudentIndex === currentStudents.length - 1) {
-                finishEvaluationBtn.classList.remove('hidden');
-                nextStudentBtn.classList.add('hidden');
-            } else {
-                finishEvaluationBtn.classList.add('hidden');
-                nextStudentBtn.classList.remove('hidden');
-            }
         }
 
-        /**
-         * Records the evaluation for a specific aspect of a student.
-         * @param {string} studentName - The name of the student.
-         * @param {string} aspect - The rubric aspect being evaluated.
-         * @param {string} level - The performance level assigned.
-         */
-        function evaluateAspect(studentName, aspect, level) {
-            const evaluationKey = `${groupSelect.value}_${studentName}`;
-            if (!evaluations[evaluationKey]) {
-                evaluations[evaluationKey] = {};
-            }
-            evaluations[evaluationKey][aspect] = level;
-            saveData();
-            renderStudentEvaluation(); // Re-render to update scores and selected buttons
-            showMessage(evaluationMessageBox, `Evaluación para '${aspect}' del estudiante '${studentName}' actualizada a '${level}'.`, 'success');
-        }
+        // --- Inicialización --- 
+        // Cargar los datos al cargar la ventana
+        window.onload = loadData;
 
-        prevStudentBtn.addEventListener('click', () => {
-            if (currentStudentIndex > 0) {
-                currentStudentIndex--;
-                renderStudentEvaluation();
-            }
-        });
-
-        nextStudentBtn.addEventListener('click', () => {
-            if (currentStudentIndex < currentStudents.length - 1) {
-                currentStudentIndex++;
-                renderStudentEvaluation();
-            }
-        });
-
-        finishEvaluationBtn.addEventListener('click', () => {
-            showSection('report-section');
-        });
-
-        backToEvaluationBtn.addEventListener('click', () => {
-            showSection('evaluation-section');
-            renderStudentEvaluation(); // Ensure current student is displayed
-        });
-
-        newEvaluationBtn.addEventListener('click', async () => {
-            const confirm = await showConfirmModal("¿Estás seguro de que quieres iniciar una nueva evaluación? Esto borrará las evaluaciones actuales pero mantendrá tus grupos y rúbricas guardadas.");
-            if (confirm) {
-                resetApp();
-            }
-        });
-
-        // --- PDF and CSV Export Logic ---
-
-        /**
-         * Generates a PDF report for a single student based on their rubric evaluation.
-         * Includes both the full rubric matrix and the student's specific evaluation.
-         * @param {string} studentName - The name of the student.
-         * @param {string} groupName - The name of the student group.
-         */
-        function generateSingleStudentPdf(studentName, groupName) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                orientation: 'landscape',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            doc.setFont("helvetica");
-            let yOffset = 20;
-            const margin = 20;
-
-            // Title and header
-            doc.setFontSize(22);
-            doc.setTextColor(40, 40, 40);
-            doc.text("Rúbrica de Evaluación", doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 10;
-
-            doc.setFontSize(14);
-            doc.setTextColor(50, 50, 50);
-            doc.text(`Grupo: ${groupName || 'N/A'}`, doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 10;
-
-            doc.setFontSize(10);
-            doc.setTextColor(80, 80, 80);
-            doc.text(`Rúbrica: ${currentRubric.name || 'N/A'}`, margin, yOffset);
-            yOffset += 5;
-            doc.text(`Estudiante: ${studentName || 'N/A'}`, margin, yOffset);
-            yOffset += 15;
-
-            // Display full rubric matrix
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.text("Matriz Completa de la Rúbrica:", margin, yOffset);
-            yOffset += 7;
-
-            const rubricHeaders = ["Aspecto", ...currentRubric.levels.map(level => `${level} (${currentRubric.levelScores[level]} pts)`)];
-            // Calculate column widths based on available space and number of levels
-            const availableWidth = doc.internal.pageSize.width - 2 * margin;
-            const aspectColWidth = 40;
-            const levelColWidth = (availableWidth - aspectColWidth) / currentRubric.levels.length;
-            const rubricColumnWidths = [aspectColWidth, ...Array(currentRubric.levels.length).fill(levelColWidth)];
-
-
-            const rubricTableData = currentRubric.aspects.map(aspect => {
-                return [aspect, ...currentRubric.levels.map(level => currentRubric.descriptors[aspect][level] || '')];
-            });
-
-            doc.autoTable({
-                startY: yOffset,
-                head: [rubricHeaders],
-                body: rubricTableData,
-                theme: 'grid',
-                styles: {
-                    fontSize: 6,
-                    cellPadding: 1,
-                    valign: 'middle',
-                    halign: 'left',
-                    textColor: [50, 50, 50],
-                },
-                headStyles: {
-                    fillColor: [220, 220, 220],
-                    textColor: [0, 0, 0],
-                    fontStyle: 'bold',
-                },
-                columnStyles: rubricHeaders.reduce((acc, _, index) => {
-                    acc[index] = { cellWidth: rubricColumnWidths[index] };
-                    return acc;
-                }, {}),
-                didDrawPage: function (data) {
-                    let str = "Página " + doc.internal.getNumberOfPages();
-                    doc.setFontSize(8);
-                    doc.setTextColor(150);
-                    doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
-                }
-            });
-
-            yOffset = doc.autoTable.previous.finalY + 10;
-
-            // Display specific student evaluation
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.text("Evaluación del Estudiante:", margin, yOffset);
-            yOffset += 7;
-
-            const evaluationHeaders = ["Aspecto", "Nivel Asignado", "Puntaje", "Descriptor"];
-            // Adjust column widths for evaluation table
-            const evalAspectColWidth = 40;
-            const evalLevelColWidth = 25;
-            const evalScoreColWidth = 15;
-            const evalDescriptorColWidth = availableWidth - evalAspectColWidth - evalLevelColWidth - evalScoreColWidth;
-            const evaluationColumnWidths = [evalAspectColWidth, evalLevelColWidth, evalScoreColWidth, evalDescriptorColWidth];
-
-
-            const evaluationKey = `${groupName}_${studentName}`;
-            const evaluationTableData = [];
-            let studentTotalScore = 0;
-            let hasEvaluatedAspects = false;
-
-            currentRubric.aspects.forEach(aspect => {
-                const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || 'No Evaluado' : 'No Evaluado';
-                const scoreForAspect = currentRubric.levelScores[assignedLevel] || 0;
-                const descriptorText = currentRubric.descriptors[aspect][assignedLevel] || 'N/A';
-                evaluationTableData.push([aspect, assignedLevel, scoreForAspect, descriptorText]);
-
-                if (assignedLevel !== 'No Evaluado') { // Only add to total if evaluated
-                    studentTotalScore += scoreForAspect;
-                    hasEvaluatedAspects = true;
-                }
-            });
-
-            let maxPossibleScore = 0;
-            currentRubric.aspects.forEach(aspect => {
-                let maxAspectScore = 0;
-                currentRubric.levels.forEach(level => {
-                    const score = currentRubric.levelScores[level] || 0;
-                    if (score > maxAspectScore) {
-                        maxAspectScore = score;
-                    }
-                });
-                maxPossibleScore += maxAspectScore;
-            });
-
-            const studentAverageScore = hasEvaluatedAspects ? (studentTotalScore / currentRubric.aspects.length).toFixed(1) : 'N/A';
-            const performanceLevel = getPerformanceLevel(parseFloat(studentAverageScore));
-
-            doc.autoTable({
-                startY: yOffset,
-                head: [evaluationHeaders],
-                body: evaluationTableData,
-                theme: 'grid',
-                styles: {
-                    fontSize: 7,
-                    cellPadding: 1.5,
-                    valign: 'middle',
-                    halign: 'left',
-                    textColor: [50, 50, 50],
-                },
-                headStyles: {
-                    fillColor: [220, 220, 220],
-                    textColor: [0, 0, 0],
-                    fontStyle: 'bold',
-                },
-                columnStyles: {
-                    0: { cellWidth: evaluationColumnWidths[0] },
-                    1: { cellWidth: evaluationColumnWidths[1] },
-                    2: { cellWidth: evaluationColumnWidths[2], halign: 'center' },
-                    3: { cellWidth: evaluationColumnWidths[3] }
-                },
-                 didDrawPage: function (data) {
-                    let str = "Página " + doc.internal.getNumberOfPages();
-                    doc.setFontSize(8);
-                    doc.setTextColor(150);
-                    doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
-                }
-            });
-
-            yOffset = doc.autoTable.previous.finalY;
-
-            // Final summary
-            doc.setFontSize(10);
-            doc.setTextColor(0, 100, 0);
-            doc.text(`Puntaje Final: ${studentTotalScore} / ${maxPossibleScore} pts`, margin, yOffset + 5);
-            doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10);
-            doc.text(`Nivel de Desempeño: ${performanceLevel.level}`, margin, yOffset + 15);
-
-            const safeStudentName = studentName.replace(/[^a-z0-9]/gi, '_');
-            const safeGroupName = groupName.replace(/[^a-z0-9]/gi, '_');
-            doc.save(`rubrica_${safeStudentName}_${safeGroupName}.pdf`);
-        }
-
-        exportIndividualRubricsBtn.addEventListener('click', async () => {
-            if (currentStudents.length === 0) {
-                showMessage(reportMessageBox, "No hay estudiantes en el grupo actual para generar reportes individuales.", 'error');
-                return;
-            }
-            if (!currentRubric) {
-                showMessage(reportMessageBox, "No hay una rúbrica seleccionada para exportar.", 'error');
-                return;
-            }
-
-            const currentGroupName = groupSelect.value;
-            for (const student of currentStudents) {
-                // Check if the student has any evaluation data for the current rubric
-                const evaluationKey = `${currentGroupName}_${student}`;
-                if (evaluations[evaluationKey] && Object.keys(evaluations[evaluationKey]).length > 0) {
-                    generateSingleStudentPdf(student, currentGroupName);
-                } else {
-                    showMessage(reportMessageBox, `Advertencia: El estudiante '${student}' no tiene evaluaciones para esta rúbrica. Se omitió la generación de su PDF individual.`, 'error');
-                }
-            }
-            showMessage(reportMessageBox, "¡Rúbricas individuales generadas y descargadas!", 'success');
-        });
-
-        exportPdfBtn.addEventListener('click', async () => {
-            if (currentStudents.length === 0) {
-                showMessage(reportMessageBox, "No hay estudiantes en el grupo actual para generar el reporte.", 'error');
-                return;
-            }
-            if (!currentRubric) {
-                showMessage(reportMessageBox, "No hay una rúbrica seleccionada para exportar.", 'error');
-                return;
-            }
-
-            const { jsPDF } = window.jspdf;
-            // Create a single PDF for all students
-            const doc = new jsPDF({
-                orientation: 'portrait', // Changed to portrait for general report
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            doc.setFont("helvetica");
-
-            const currentGroupName = groupSelect.value;
-            let finalReportTableData = [];
-            let finalReportHeaders = ["Estudiante", ...currentRubric.aspects, "Puntaje Total", "Promedio", "Nivel Desempeño"];
-            
-            // Add a starting page
-            doc.addPage();
-            let yOffset = 20;
-            const margin = 20;
-
-            doc.setFontSize(22);
-            doc.setTextColor(40, 40, 40);
-            doc.text("Reporte General de Evaluación", doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 10;
-
-            doc.setFontSize(14);
-            doc.setTextColor(50, 50, 50);
-            doc.text(`Grupo: ${currentGroupName || 'N/A'}`, doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 10;
-            doc.text(`Rúbrica: ${currentRubric.name || 'N/A'}`, doc.internal.pageSize.width / 2, yOffset, { align: 'center' });
-            yOffset += 15;
-
-
-            currentStudents.forEach(student => {
-                const evaluationKey = `${currentGroupName}_${student}`;
-                let rowData = [student];
-                let studentTotalScore = 0;
-                let evaluatedAspectsCount = 0;
-
-                currentRubric.aspects.forEach(aspect => {
-                    const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || '' : '';
-                    const scoreForAspect = assignedLevel ? currentRubric.levelScores[assignedLevel] || 0 : 0;
-                    
-                    if (assignedLevel) {
-                        studentTotalScore += scoreForAspect;
-                        evaluatedAspectsCount++;
-                    }
-                    rowData.push(assignedLevel);
-                });
-
-                const studentAverageScore = evaluatedAspectsCount > 0 ? (studentTotalScore / evaluatedAspectsCount).toFixed(1) : 'N/A';
-                const performanceLevel = getPerformanceLevel(parseFloat(studentAverageScore));
-                
-                rowData.push(studentTotalScore);
-                rowData.push(studentAverageScore);
-                rowData.push(performanceLevel.level);
-                
-                finalReportTableData.push(rowData);
-            });
-
-            doc.autoTable({
-                startY: yOffset,
-                head: [finalReportHeaders],
-                body: finalReportTableData,
-                theme: 'grid',
-                styles: {
-                    fontSize: 8,
-                    cellPadding: 1.5,
-                    valign: 'middle',
-                    halign: 'left',
-                    textColor: [50, 50, 50],
-                },
-                headStyles: {
-                    fillColor: [220, 220, 220],
-                    textColor: [0, 0, 0],
-                    fontStyle: 'bold',
-                },
-                didDrawPage: function (data) {
-                    let str = "Página " + doc.internal.getNumberOfPages();
-                    doc.setFontSize(8);
-                    doc.setTextColor(150);
-                    doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
-                }
-            });
-
-            doc.save(`reporte_general_${currentGroupName}.pdf`);
-            showMessage(reportMessageBox, "¡Reporte PDF generado y descargado!", 'success');
-        });
-
-        exportCsvBtn.addEventListener('click', () => {
-            if (currentStudents.length === 0) {
-                showMessage(reportMessageBox, "No hay estudiantes en el grupo actual para exportar.", 'error');
-                return;
-            }
-            if (!currentRubric) {
-                showMessage(reportMessageBox, "No hay una rúbrica seleccionada para exportar.", 'error');
-                return;
-            }
-
-            const currentGroupName = groupSelect.value;
-            let csvContent = "data:text/csv;charset=utf-8,";
-            
-            // Headers
-            const headers = ["Estudiante", ...currentRubric.aspects, "Puntaje Total", "Promedio", "Nivel de Desempeño"];
-            csvContent += headers.map(h => `"${h}"`).join(",") + "\r\n";
-
-            currentStudents.forEach(student => {
-                const evaluationKey = `${currentGroupName}_${student}`;
-                let rowData = [student];
-                let totalScore = 0;
-                let evaluatedAspectsCount = 0;
-
-                currentRubric.aspects.forEach(aspect => {
-                    const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || '' : '';
-                    const scoreForAspect = assignedLevel ? currentRubric.levelScores[assignedLevel] || 0 : 0;
-                    
-                    if (assignedLevel) {
-                        totalScore += scoreForAspect;
-                        evaluatedAspectsCount++;
-                    }
-                    
-                    rowData.push(assignedLevel);
-                });
-
-                const averageScore = evaluatedAspectsCount > 0 ? (totalScore / evaluatedAspectsCount).toFixed(1) : 0;
-                const performanceLevel = getPerformanceLevel(parseFloat(averageScore));
-                
-                rowData.push(totalScore);
-                rowData.push(averageScore);
-                rowData.push(performanceLevel.level);
-                
-                csvContent += rowData.map(item => `"${item}"`).join(",") + "\r\n";
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `evaluaciones_${currentGroupName}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showMessage(reportMessageBox, "¡Datos exportados a CSV correctamente!", 'success');
-        });
-
-        // --- Initialization ---
-
-        window.onload = loadData; // Load saved data when the page loads
-
-    </script>
-</body>
+    </script> 
+</body> 
 </html>
