@@ -128,14 +128,14 @@
             border-radius: 4px;
         }
 
-        /* Estilos para el menú de navegación */
+        /* Estilos para el menú de navegación (escritorio por defecto) */
         .navbar {
             background-color: #4f46e5; /* Color morado oscuro */
             padding: 1rem;
             border-radius: 10px;
             margin-bottom: 20px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
+            display: flex; /* Mostrar por defecto */
             justify-content: center; /* Centrar los elementos del menú */
             gap: 1rem; /* Espacio entre los botones */
             flex-wrap: wrap; /* Permitir que los elementos se envuelvan en pantallas pequeñas */
@@ -159,20 +159,113 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
             transform: none; /* Sin efecto de elevación para el activo */
         }
+
+        /* Estilos para el menú hamburguesa (solo en móviles) */
+        .hamburger-menu-header {
+            background-color: #4f46e5;
+            padding: 1rem;
+            border-radius: 10px 10px 0 0; /* Bordes redondeados solo arriba */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: none; /* Ocultar por defecto, se muestra con media query */
+            justify-content: space-between;
+            align-items: center;
+            width: 100%; /* Asegura que ocupe todo el ancho del contenedor padre */
+        }
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(17, 24, 39, 0.95); /* bg-gray-900 con opacidad */
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            transform: translateX(100%); /* Ocultar por defecto */
+            opacity: 0;
+            pointer-events: none; /* No interactuable cuando está oculto */
+        }
+        .mobile-nav-overlay.open {
+            transform: translateX(0%); /* Mostrar */
+            opacity: 1;
+            pointer-events: auto; /* Interactuable */
+        }
+        .mobile-nav-overlay .nav-mobile-item {
+            color: white;
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 700; /* font-bold */
+            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            background-color: #6366f1;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .mobile-nav-overlay .nav-mobile-item:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+        .mobile-nav-overlay .nav-mobile-item.active {
+            background-color: #3730a3;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: none;
+        }
+        .mobile-nav-overlay .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: white;
+            font-size: 2.5rem; /* text-4xl */
+            cursor: pointer;
+        }
+
+        /* Media Query para pantallas pequeñas (móviles) */
+        @media (max-width: 767px) { /* Tailwind's 'md' breakpoint is 768px */
+            .navbar {
+                display: none; /* Ocultar la barra de navegación normal */
+            }
+            .hamburger-menu-header {
+                display: flex; /* Mostrar el encabezado de la hamburguesa */
+            }
+            .container {
+                padding-top: 0; /* Ajustar padding superior para el header fijo */
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-6">Evaluador de Estudiantes</h1>
 
-        <!-- Menú de Navegación Flexible -->
+        <!-- Menú de Navegación Flexible para Escritorio -->
         <div class="navbar">
             <button id="nav-students-btn" class="active">Estudiantes</button>
             <button id="nav-rubric-btn">Rúbrica</button>
             <button id="nav-evaluation-btn" class="hidden">Evaluación</button>
             <button id="nav-report-btn" class="hidden">Reportes</button>
         </div>
-        <!-- Fin Menú de Navegación -->
+        <!-- Fin Menú de Navegación de Escritorio -->
+
+        <!-- Encabezado del Menú Hamburguesa para Móviles -->
+        <div class="hamburger-menu-header">
+            <h2 class="text-white text-xl font-bold">Menú</h2>
+            <button id="hamburger-btn" class="text-white focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <!-- Superposición del Menú Móvil -->
+        <div id="mobile-nav-overlay" class="mobile-nav-overlay">
+            <button id="close-mobile-nav-btn" class="close-btn">&times;</button>
+            <button class="nav-mobile-item" data-target-section="add-students-section">Estudiantes</button>
+            <button class="nav-mobile-item" data-target-section="rubric-config-section">Rúbrica</button>
+            <button class="nav-mobile-item hidden" data-target-section="evaluation-section">Evaluación</button>
+            <button class="nav-mobile-item hidden" data-target-section="report-section">Reportes</button>
+        </div>
+        <!-- Fin Menú Hamburguesa -->
+
 
         <!-- Sección de Añadir Estudiantes -->
         <div id="add-students-section" class="bg-blue-50 p-6 rounded-xl border border-blue-200">
@@ -393,6 +486,12 @@
         const navEvaluationBtn = document.getElementById('nav-evaluation-btn');
         const navReportBtn = document.getElementById('nav-report-btn');
 
+        // Referencias para el menú hamburguesa
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+        const closeMobileNavBtn = document.getElementById('close-mobile-nav-btn');
+        const navMobileItems = document.querySelectorAll('.nav-mobile-item');
+
 
         // Variables globales para la aplicación
         let studentGroups = {};
@@ -405,6 +504,10 @@
 
 
         // --- Funciones de Navegación ---
+        /**
+         * Muestra una sección específica de la aplicación y actualiza los botones de navegación.
+         * @param {string} sectionId - El ID de la sección a mostrar (ej: 'add-students-section').
+         */
         function showSection(sectionId) {
             const sections = [addStudentsSection, rubricConfigSection, evaluationSection, reportSection];
             sections.forEach(section => {
@@ -415,12 +518,10 @@
                 }
             });
 
-            // Actualizar botones de navegación activos
+            // Actualizar botones de navegación de escritorio activos
             const navButtons = [navStudentsBtn, navRubricBtn, navEvaluationBtn, navReportBtn];
             navButtons.forEach(btn => {
-                // Determine the base section name from the button ID (e.g., 'nav-students-btn' -> 'students')
                 const btnSectionName = btn.id.replace('nav-', '').replace('-btn', '');
-                // Determine the base section name from the target section ID (e.g., 'add-students-section' -> 'students')
                 const targetSectionName = sectionId.replace('-section', '').replace('add-', '');
 
                 if (btnSectionName === targetSectionName) {
@@ -430,35 +531,34 @@
                 }
             });
 
-            // Mostrar/ocultar botones de navegación condicionalmente
-            // El botón de Rúbrica se muestra si hay algún estudiante cargado
-            if (Object.keys(studentGroups).length > 0 || currentStudents.length > 0) {
-                navRubricBtn.classList.remove('hidden');
-            } else {
-                navRubricBtn.classList.add('hidden');
-            }
+            // Actualizar la visibilidad de los botones de navegación para escritorio y móvil
+            updateNavButtonVisibility();
+        }
 
-            // El botón de Evaluación se muestra si hay estudiantes Y una rúbrica cargada
-            if (currentStudents.length > 0 && currentRubric) {
-                navEvaluationBtn.classList.remove('hidden');
-            } else {
-                navEvaluationBtn.classList.add('hidden');
-            }
-
-            // El botón de Reportes se muestra si hay estudiantes, una rúbrica Y al menos una evaluación iniciada para el grupo actual
+        /**
+         * Actualiza la visibilidad de los botones de navegación (escritorio y móvil)
+         * basándose en el estado actual de estudiantes y rúbricas.
+         */
+        function updateNavButtonVisibility() {
             const currentGroupName = groupSelect.value;
             const hasEvaluationsForCurrentGroup = Object.keys(evaluations).some(key => key.startsWith(`${currentGroupName}_`));
 
-            if (currentStudents.length > 0 && currentRubric && hasEvaluationsForCurrentGroup) {
-                 navReportBtn.classList.remove('hidden');
-            } else {
-                navReportBtn.classList.add('hidden');
-            }
+            // Botones de escritorio
+            navRubricBtn.classList.toggle('hidden', currentStudents.length === 0 && Object.keys(studentGroups).length === 0);
+            navEvaluationBtn.classList.toggle('hidden', currentStudents.length === 0 || !currentRubric);
+            navReportBtn.classList.toggle('hidden', !(currentStudents.length > 0 && currentRubric && hasEvaluationsForCurrentGroup));
+
+            // Botones de navegación móvil (en el overlay)
+            document.querySelector('#mobile-nav-overlay button[data-target-section="rubric-config-section"]').classList.toggle('hidden', currentStudents.length === 0 && Object.keys(studentGroups).length === 0);
+            document.querySelector('#mobile-nav-overlay button[data-target-section="evaluation-section"]').classList.toggle('hidden', currentStudents.length === 0 || !currentRubric);
+            document.querySelector('#mobile-nav-overlay button[data-target-section="report-section"]').classList.toggle('hidden', !(currentStudents.length > 0 && currentRubric && hasEvaluationsForCurrentGroup));
         }
 
+
+        // Event listeners para la navegación de escritorio
         navStudentsBtn.addEventListener('click', () => showSection('add-students-section'));
         navRubricBtn.addEventListener('click', () => {
-            if (currentStudents.length === 0) {
+            if (currentStudents.length === 0 && Object.keys(studentGroups).length === 0) {
                 showMessage(rubricConfigMessageBox, "Para configurar una rúbrica, primero debes cargar o añadir un grupo de estudiantes en la sección 'Estudiantes'.", 'error');
                 return;
             }
@@ -487,9 +587,37 @@
             showSection('report-section');
         });
 
+        // Event listeners para el menú hamburguesa
+        hamburgerBtn.addEventListener('click', () => {
+            mobileNavOverlay.classList.add('open'); // Abrir el overlay
+        });
+
+        closeMobileNavBtn.addEventListener('click', () => {
+            mobileNavOverlay.classList.remove('open'); // Cerrar el overlay
+        });
+
+        navMobileItems.forEach(item => {
+            item.addEventListener('click', (event) => {
+                const targetSection = event.target.dataset.targetSection;
+                // Ejecutar la lógica de navegación de escritorio
+                if (targetSection === 'add-students-section') showSection('add-students-section');
+                else if (targetSection === 'rubric-config-section') navRubricBtn.click(); // Usar el click programático para activar lógica
+                else if (targetSection === 'evaluation-section') navEvaluationBtn.click();
+                else if (targetSection === 'report-section') navReportBtn.click();
+
+                mobileNavOverlay.classList.remove('open'); // Cerrar el overlay después de la selección
+            });
+        });
+
 
         // --- Funciones de Utilidad --- 
 
+        /**
+         * Muestra un mensaje de feedback al usuario en un cuadro específico.
+         * @param {HTMLElement} boxElement - El elemento DOM donde se mostrará el mensaje.
+         * @param {string} message - El texto del mensaje.
+         * @param {string} type - El tipo de mensaje ('success', 'error', o vacío para información).
+         */
         function showMessage(boxElement, message, type = '') {
             boxElement.textContent = message;
             boxElement.className = 'message-box'; // Reiniciar clases
@@ -585,7 +713,7 @@
                 } else {
                     showSection('add-students-section');
                 }
-
+                updateNavButtonVisibility(); // Asegurarse de que los botones de navegación estén correctos al cargar
             } catch (e) {
                 console.error("Error al cargar datos de localStorage:", e);
                 showMessage(studentMessageBox, "Error al cargar datos guardados. Los datos pueden estar corruptos.", 'error');
@@ -604,6 +732,7 @@
                 if (currentRubric) {
                     localStorage.setItem('currentRubric', JSON.stringify(currentRubric));
                 }
+                updateNavButtonVisibility(); // Actualizar visibilidad después de guardar datos
             } catch (e) {
                 console.error("Error al guardar datos en localStorage:", e);
                 showMessage(studentMessageBox, "No se pudieron guardar los datos. Verifique el espacio disponible en su navegador.", 'error');
@@ -627,6 +756,7 @@
 
             showSection('rubric-config-section'); // Volver a la configuración de rúbrica
             showMessage(reportMessageBox, "La evaluación ha sido reiniciada. Tus grupos y rúbricas permanecen guardados.", 'success');
+            updateNavButtonVisibility(); // Actualizar visibilidad de nav al resetear
         }
 
         // --- Lógica de Añadir y Gestionar Estudiantes --- 
@@ -710,6 +840,7 @@
             groupNameInput.value = '';
             studentListInput.value = '';
             showSection('add-students-section'); // Mantenerse en la sección de estudiantes después de guardar
+            updateNavButtonVisibility(); // Actualizar visibilidad de nav
         });
 
         selectGroupBtn.addEventListener('click', () => {
@@ -725,6 +856,7 @@
 
             showSection('rubric-config-section'); // Avanzar a la sección de rúbrica
             currentStudentIndex = 0; // Reiniciar el índice del estudiante al cambiar de grupo
+            updateNavButtonVisibility(); // Actualizar visibilidad de nav
         });
 
         deleteGroupBtn.addEventListener('click', () => {
@@ -759,6 +891,7 @@
                     } else {
                         showSection('add-students-section'); // Refrescar vista
                     }
+                    updateNavButtonVisibility(); // Actualizar visibilidad de nav
                 }
             });
         });
@@ -996,6 +1129,7 @@
                 showSection('evaluation-section'); // Avanzar a la sección de evaluación
                 currentStudentIndex = 0; // Reiniciar índice del estudiante
                 renderStudentEvaluation();
+                updateNavButtonVisibility(); // Actualizar visibilidad de nav
             });
         }
 
@@ -1127,6 +1261,7 @@
                 showSection('evaluation-section'); // Avanzar a la sección de evaluación
                 currentStudentIndex = 0; // Reiniciar índice del estudiante
                 renderStudentEvaluation();
+                updateNavButtonVisibility(); // Actualizar visibilidad de nav
             } else {
                 currentRubric = null; // Si no se selecciona nada, limpiar la rúbrica actual
                 localStorage.removeItem('currentRubric');
@@ -1157,6 +1292,7 @@
                     showMessage(rubricConfigMessageBox, `Rúbrica "${selectedRubricName}" eliminada.`, 'success');
                     // Opcional: si no hay rúbrica actual, volver a estudiantes o dejar en config
                     showSection('rubric-config-section');
+                    updateNavButtonVisibility(); // Actualizar visibilidad de nav
                 }
             });
         });
@@ -1324,6 +1460,7 @@
             saveData(); 
             renderStudentEvaluation(); 
             showMessage(evaluationMessageBox, `Evaluación para '${aspect}' del estudiante '${studentName}' actualizada a '${level}'.`, 'success'); 
+            updateNavButtonVisibility(); // Actualizar visibilidad de nav (especialmente para reportes)
         } 
 
         prevStudentBtn.addEventListener('click', () => { 
@@ -1376,6 +1513,7 @@
             doc.setFont("helvetica"); 
             let yOffset = 20; 
             const margin = 20; 
+            const evaluationKey = `${groupName}_${studentName}`;
 
             // Título y encabezado 
             doc.setFontSize(22); 
@@ -1395,132 +1533,103 @@
             doc.text(`Estudiante: ${studentName || 'N/A'}`, margin, yOffset); 
             yOffset += 15; 
 
-            // Primero mostramos la matriz completa de la rúbrica 
-            doc.setFontSize(12); 
-            doc.setTextColor(0, 0, 0); 
-            doc.text("Matriz Completa de la Rúbrica:", margin, yOffset); 
-            yOffset += 7; 
+            // Primero mostramos la matriz completa de la rúbrica
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text("Matriz Completa de la Rúbrica y Evaluación:", margin, yOffset);
+            yOffset += 7;
 
-            // Encabezados para la matriz de rúbrica 
-            const rubricHeaders = ["Aspecto", ...currentRubric.levels.map(level => `${level} (${currentRubric.levelScores[level]} pts)`)]; 
-            // Calcular anchos de columna dinámicamente, asegurando espacio suficiente para el aspecto
-            const rubricColumnWidths = [40, ...Array(currentRubric.levels.length).fill( (doc.internal.pageSize.width - 40 - (margin * 2)) / currentRubric.levels.length )]; 
+            // Encabezados para la matriz de rúbrica
+            const rubricHeaders = ["Aspecto", ...currentRubric.levels.map(level => `${level} (${currentRubric.levelScores[level]} pts)`)];
+            const colWidth = (doc.internal.pageSize.width - (margin * 2) - 40) / currentRubric.levels.length;
+            const rubricColumnWidths = [40, ...Array(currentRubric.levels.length).fill(colWidth)];
 
-            const rubricTableData = currentRubric.aspects.map(aspect => { 
-                return [aspect, ...currentRubric.levels.map(level => currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][level] || '' : '')]; 
-            }); 
+            const rubricTableData = currentRubric.aspects.map(aspect => {
+                return [aspect, ...currentRubric.levels.map(level => currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][level] || '' : '')];
+            });
 
-            doc.autoTable({ 
-                startY: yOffset, 
-                head: [rubricHeaders], 
-                body: rubricTableData, 
-                theme: 'grid', 
-                styles: { 
-                    fontSize: 6, 
-                    cellPadding: 1, 
-                    valign: 'middle', 
-                    halign: 'left', 
-                    textColor: [50, 50, 50], 
-                }, 
-                headStyles: { 
-                    fillColor: [220, 220, 220], 
-                    textColor: [0, 0, 0], 
-                    fontStyle: 'bold', 
-                }, 
-                columnStyles: rubricHeaders.reduce((acc, _, index) => { 
-                    acc[index] = { cellWidth: rubricColumnWidths[index] }; 
-                    return acc; 
-                }, {}), 
-                didDrawPage: function (data) { 
-                    let str = "Página " + doc.internal.getNumberOfPages(); 
-                    doc.setFontSize(8); 
-                    doc.setTextColor(150); 
-                    doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10); 
-                } 
-            }); 
+            doc.autoTable({
+                startY: yOffset,
+                head: [rubricHeaders],
+                body: rubricTableData,
+                theme: 'grid',
+                styles: {
+                    fontSize: 6,
+                    cellPadding: 1,
+                    valign: 'middle',
+                    halign: 'left',
+                    textColor: [50, 50, 50],
+                },
+                headStyles: {
+                    fillColor: [220, 220, 220],
+                    textColor: [0, 0, 0],
+                    fontStyle: 'bold',
+                },
+                columnStyles: rubricHeaders.reduce((acc, _, index) => {
+                    acc[index] = { cellWidth: rubricColumnWidths[index] };
+                    return acc;
+                }, {}),
+                didDrawCell: function (data) {
+                    if (data.section === 'body' && data.column.index > 0) { // Solo para celdas de descriptores
+                        const aspectName = currentRubric.aspects[data.row.index];
+                        const levelName = currentRubric.levels[data.column.index - 1]; // -1 porque la primera columna es el aspecto
+                        const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspectName] : null;
 
-            yOffset = doc.autoTable.previous.finalY + 10; 
-
-            // Ahora mostramos la evaluación específica del estudiante 
-            doc.setFontSize(12); 
-            doc.setTextColor(0, 0, 0); 
-            doc.text("Evaluación del Estudiante:", margin, yOffset); 
-            yOffset += 7; 
-
-            const evaluationHeaders = ["Aspecto", "Nivel Asignado", "Puntaje", "Descriptor"]; 
-            const evaluationColumnWidths = [40, 25, 15, (doc.internal.pageSize.width - 40 - 25 - 15 - (margin * 2))]; 
-
-            const evaluationKey = `${groupName}_${studentName}`; 
-            const evaluationTableData = []; 
-            let studentTotalScore = 0; 
-            let hasEvaluatedAspects = false; 
-
-            currentRubric.aspects.forEach(aspect => { 
-                const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || 'No Evaluado' : 'No Evaluado'; 
-                const scoreForAspect = currentRubric.levelScores[assignedLevel] || 0; 
-                const descriptorText = currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][assignedLevel] || 'N/A' : 'N/A'; 
-                evaluationTableData.push([aspect, assignedLevel, scoreForAspect, descriptorText]); 
-
-                if (assignedLevel !== 'No Evaluado') { 
-                    studentTotalScore += scoreForAspect; 
-                    hasEvaluatedAspects = true; 
-                } 
-            }); 
-
-            let maxPossibleScore = 0; 
-            currentRubric.aspects.forEach(aspect => { 
-                let maxAspectScore = 0; 
-                currentRubric.levels.forEach(level => { 
-                    const score = currentRubric.levelScores[level] || 0; 
-                    if (score > maxAspectScore) { 
-                        maxAspectScore = score; 
-                    } 
-                }); 
-                maxPossibleScore += maxAspectScore; 
-            }); 
-
-            const studentAverageScore = hasEvaluatedAspects ? (studentTotalScore / currentRubric.aspects.length).toFixed(1) : 'N/A'; 
-            const performanceLevel = getPerformanceLevel(parseFloat(studentAverageScore)); 
-
-            doc.autoTable({ 
-                startY: yOffset, 
-                head: [evaluationHeaders], 
-                body: evaluationTableData, 
-                theme: 'grid', 
-                styles: { 
-                    fontSize: 7, 
-                    cellPadding: 1.5, 
-                    valign: 'middle', 
-                    halign: 'left', 
-                    textColor: [50, 50, 50], 
-                }, 
-                headStyles: { 
-                    fillColor: [220, 220, 220], 
-                    textColor: [0, 0, 0], 
-                    fontStyle: 'bold', 
-                }, 
-                columnStyles: { 
-                    0: { cellWidth: evaluationColumnWidths[0] }, 
-                    1: { cellWidth: evaluationColumnWidths[1] }, 
-                    2: { cellWidth: evaluationColumnWidths[2], halign: 'center' }, 
-                    3: { cellWidth: evaluationColumnWidths[3] } 
+                        if (assignedLevel === levelName) {
+                            doc.setFillColor(199, 230, 248); // Fondo azul claro para el descriptor seleccionado
+                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+                            doc.setTextColor(0, 0, 0); // Texto negro para contraste
+                            doc.setFont(undefined, 'bold'); // Texto en negrita
+                            // Redibujar el texto para que la negrita y el color se apliquen correctamente
+                            doc.text(data.cell.text, data.cell.x + data.cell.padding('left'), data.cell.y + data.cell.padding('top'));
+                        }
+                    }
                 },
                 didDrawPage: function (data) {
                     let str = "Página " + doc.internal.getNumberOfPages();
                     doc.setFontSize(8);
                     doc.setTextColor(150);
                     doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
-                } 
-            }); 
+                }
+            });
 
-            yOffset = doc.autoTable.previous.finalY; 
+            yOffset = doc.autoTable.previous.finalY + 10;
 
-            // Resumen final 
-            doc.setFontSize(10); 
-            doc.setTextColor(0, 100, 0); 
-            doc.text(`Puntaje Final: ${studentTotalScore} / ${maxPossibleScore} pts`, margin, yOffset + 5); 
-            doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10); 
-            doc.text(`Nivel de Desempeño: ${performanceLevel.level}`, margin, yOffset + 15); 
+            // No se muestra la tabla de evaluación separada si ya está integrada en la matriz
+            // Solo el resumen final
+
+            let studentTotalScore = 0;
+            let hasEvaluatedAspects = false;
+            currentRubric.aspects.forEach(aspect => {
+                const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || 'No Evaluado' : 'No Evaluado';
+                const scoreForAspect = currentRubric.levelScores[assignedLevel] || 0;
+                if (assignedLevel !== 'No Evaluado') {
+                    studentTotalScore += scoreForAspect;
+                    hasEvaluatedAspects = true;
+                }
+            });
+
+            let maxPossibleScore = 0;
+            currentRubric.aspects.forEach(aspect => {
+                let maxAspectScore = 0;
+                currentRubric.levels.forEach(level => {
+                    const score = currentRubric.levelScores[level] || 0;
+                    if (score > maxAspectScore) {
+                        maxAspectScore = score;
+                    }
+                });
+                maxPossibleScore += maxAspectScore;
+            });
+
+            const studentAverageScore = hasEvaluatedAspects ? (studentTotalScore / currentRubric.aspects.length).toFixed(1) : 'N/A';
+            const performanceLevel = getPerformanceLevel(parseFloat(studentAverageScore));
+
+            // Resumen final
+            doc.setFontSize(10);
+            doc.setTextColor(0, 100, 0);
+            doc.text(`Puntaje Final: ${studentTotalScore} / ${maxPossibleScore} pts`, margin, yOffset + 5);
+            doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10);
+            doc.text(`Nivel de Desempeño: ${performanceLevel.level}`, margin, yOffset + 15);
 
             const safeStudentName = studentName.replace(/[^a-zA-Z0-9]/g, '_'); // Limpiar nombre para el archivo
             const safeGroupName = groupName.replace(/[^a-zA-Z0-9]/g, '_'); // Limpiar nombre para el archivo
@@ -1571,6 +1680,7 @@
                 doc.addPage(); // Añadir una nueva página para cada estudiante en el reporte general
                 let yOffset = 20; 
                 const margin = 20; 
+                const evaluationKey = `${currentGroupName}_${student}`;
 
                 doc.setFontSize(22); 
                 doc.setTextColor(40, 40, 40); 
@@ -1589,84 +1699,97 @@
                 doc.text(`Estudiante: ${student || 'N/A'}`, margin, yOffset); 
                 yOffset += 10; 
 
-                const headers = ["Aspecto", "Nivel Asignado", "Puntaje", "Descriptor"]; 
-                const tableColumnWidths = [40, 25, 15, (doc.internal.pageSize.width - 40 - 25 - 15 - (margin * 2))]; 
+                // Matriz completa de la rúbrica con descriptores marcados para el reporte general también
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text("Matriz Completa de la Rúbrica y Evaluación:", margin, yOffset);
+                yOffset += 7;
 
-                const evaluationKey = `${currentGroupName}_${student}`; 
-                const tableData = []; 
-                let studentTotalScore = 0; 
-                let hasEvaluatedAspects = false; 
+                const rubricHeaders = ["Aspecto", ...currentRubric.levels.map(level => `${level} (${currentRubric.levelScores[level]} pts)`)];
+                const colWidth = (doc.internal.pageSize.width - (margin * 2) - 40) / currentRubric.levels.length;
+                const rubricColumnWidths = [40, ...Array(currentRubric.levels.length).fill(colWidth)];
 
-                currentRubric.aspects.forEach(aspect => { 
-                    const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || 'No Evaluado' : 'No Evaluado'; 
-                    const scoreForAspect = currentRubric.levelScores[assignedLevel] || 0; 
-                    const descriptorText = currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][assignedLevel] || 'N/A' : 'N/A'; 
-                    tableData.push([aspect, assignedLevel, scoreForAspect, descriptorText]); 
+                const rubricTableData = currentRubric.aspects.map(aspect => {
+                    return [aspect, ...currentRubric.levels.map(level => currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][level] || '' : '')];
+                });
 
-                    if (assignedLevel !== 'No Evaluado') { 
-                        studentTotalScore += scoreForAspect; 
-                        hasEvaluatedAspects = true; 
-                    } 
-                }); 
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [rubricHeaders],
+                    body: rubricTableData,
+                    theme: 'grid',
+                    styles: {
+                        fontSize: 6,
+                        cellPadding: 1,
+                        valign: 'middle',
+                        halign: 'left',
+                        textColor: [50, 50, 50],
+                    },
+                    headStyles: {
+                        fillColor: [220, 220, 220],
+                        textColor: [0, 0, 0],
+                        fontStyle: 'bold',
+                    },
+                    columnStyles: rubricHeaders.reduce((acc, _, index) => {
+                        acc[index] = { cellWidth: rubricColumnWidths[index] };
+                        return acc;
+                    }, {}),
+                    didDrawCell: function (data) {
+                        if (data.section === 'body' && data.column.index > 0) {
+                            const aspectName = currentRubric.aspects[data.row.index];
+                            const levelName = currentRubric.levels[data.column.index - 1];
+                            const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspectName] : null;
 
-                if (hasEvaluatedAspects) { 
-                    totalSumOfFinalScores += studentTotalScore; 
-                    evaluatedStudentCount++; 
-                } 
+                            if (assignedLevel === levelName) {
+                                doc.setFillColor(199, 230, 248); // Fondo azul claro para el descriptor seleccionado
+                                doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+                                doc.setTextColor(0, 0, 0); // Texto negro para contraste
+                                doc.setFont(undefined, 'bold'); // Texto en negrita
+                                doc.text(data.cell.text, data.cell.x + data.cell.padding('left'), data.cell.y + data.cell.padding('top'));
+                            }
+                        }
+                    },
+                    didDrawPage: function (data) {
+                        let str = "Página " + doc.internal.getNumberOfPages();
+                        doc.setFontSize(8);
+                        doc.setTextColor(150);
+                        doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                    }
+                });
 
-                let maxPossibleScore = 0; 
-                currentRubric.aspects.forEach(aspect => { 
-                    let maxAspectScore = 0; 
-                    currentRubric.levels.forEach(level => { 
-                        const score = currentRubric.levelScores[level] || 0; 
-                        if (score > maxAspectScore) { 
-                            maxAspectScore = score; 
-                        } 
-                    }); 
-                    maxPossibleScore += maxAspectScore; 
-                }); 
+                yOffset = doc.autoTable.previous.finalY;
 
-                const studentAverageScore = hasEvaluatedAspects ? (studentTotalScore / currentRubric.aspects.length).toFixed(1) : 'N/A'; 
-                const performanceLevel = getPerformanceLevel(parseFloat(studentAverageScore)); 
+                let studentTotalScore = 0;
+                let hasEvaluatedAspects = false;
+                currentRubric.aspects.forEach(aspect => {
+                    const assignedLevel = evaluations[evaluationKey] ? evaluations[evaluationKey][aspect] || 'No Evaluado' : 'No Evaluado';
+                    const scoreForAspect = currentRubric.levelScores[assignedLevel] || 0;
+                    if (assignedLevel !== 'No Evaluado') {
+                        studentTotalScore += scoreForAspect;
+                        hasEvaluatedAspects = true;
+                    }
+                });
 
-                doc.autoTable({ 
-                    startY: yOffset, 
-                    head: [headers], 
-                    body: tableData, 
-                    theme: 'grid', 
-                    styles: { 
-                        fontSize: 7, 
-                        cellPadding: 1.5, 
-                        valign: 'middle', 
-                        halign: 'left', 
-                        textColor: [50, 50, 50], 
-                    }, 
-                    headStyles: { 
-                        fillColor: [220, 220, 220], 
-                        textColor: [0, 0, 0], 
-                        fontStyle: 'bold', 
-                    }, 
-                    columnStyles: { 
-                        0: { cellWidth: tableColumnWidths[0] }, 
-                        1: { cellWidth: tableColumnWidths[1] }, 
-                        2: { cellWidth: tableColumnWidths[2], halign: 'center' }, 
-                        3: { cellWidth: tableColumnWidths[3] } 
-                    }, 
-                    didDrawPage: function (data) { 
-                        let str = "Página " + doc.internal.getNumberOfPages(); 
-                        doc.setFontSize(8); 
-                        doc.setTextColor(150); 
-                        doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10); 
-                    } 
-                }); 
+                let maxPossibleScore = 0;
+                currentRubric.aspects.forEach(aspect => {
+                    let maxAspectScore = 0;
+                    currentRubric.levels.forEach(level => {
+                        const score = currentRubric.levelScores[level] || 0;
+                        if (score > maxAspectScore) {
+                            maxAspectScore = score;
+                        }
+                    });
+                    maxPossibleScore += maxAspectScore;
+                });
 
-                yOffset = doc.autoTable.previous.finalY; 
+                const studentAverageScore = hasEvaluatedAspects ? (studentTotalScore / currentRubric.aspects.length).toFixed(1) : 'N/A';
+                const performanceLevel = getPerformanceLevel(parseFloat(studentAverageScore));
 
-                doc.setFontSize(10); 
-                doc.setTextColor(0, 100, 0); 
-                doc.text(`Puntaje Final: ${studentTotalScore} / ${maxPossibleScore} pts`, margin, yOffset + 5); 
-                doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10); 
-                doc.text(`Nivel de Desempeño: ${performanceLevel.level}`, margin, yOffset + 15); 
+                doc.setFontSize(10);
+                doc.setTextColor(0, 100, 0);
+                doc.text(`Puntaje Final: ${studentTotalScore} / ${maxPossibleScore} pts`, margin, yOffset + 5);
+                doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10);
+                doc.text(`Nivel de Desempeño: ${performanceLevel.level}`, margin, yOffset + 15);
             } 
 
             doc.deletePage(1); // Eliminar la primera página en blanco
