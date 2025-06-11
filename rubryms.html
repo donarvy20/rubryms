@@ -1456,7 +1456,7 @@
                     <thead class="bg-gray-100"> 
                         <tr> 
                             <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Aspecto</th> 
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Nivel Asignado</th> 
+                            <!-- Eliminar la columna "Nivel Asignado" -->
                             <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Puntaje</th> 
                             <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Descriptores (Haz clic para asignar)</th> 
                         </tr> 
@@ -1479,9 +1479,6 @@
                 tableHTML += ` 
                     <tr> 
                         <td class="py-3 px-4 border-b text-gray-800 font-medium">${aspect}</td> 
-                        <td class="py-3 px-4 border-b"> 
-                            <span class="font-bold text-blue-600">${currentLevel || 'N/A'}</span> 
-                        </td> 
                         <td class="py-3 px-4 border-b"> 
                             <span class="font-bold text-green-600">${currentScore}</span> 
                         </td> 
@@ -1521,13 +1518,13 @@
                     <tfoot> 
                         <tr> 
                             <td class="py-3 px-4 border-t font-bold text-gray-800">Puntaje Total del Estudiante</td> 
-                            <td class="py-3 px-4 border-t font-bold text-gray-800"></td> 
+                            <td class="py-3 px-4 border-t font-bold text-gray-800"></td> <!-- Se mantiene vacío o se ajusta colspan si se eliminan más columnas -->
                             <td class="py-3 px-4 border-t font-bold text-green-600">${totalScore}</td> 
                             <td class="py-3 px-4 border-t font-bold text-gray-800"></td> 
                         </tr> 
                         <tr> 
                             <td class="py-3 px-4 border-t font-bold text-gray-800">Promedio General</td> 
-                            <td class="py-3 px-4 border-t font-bold text-gray-800"></td> 
+                            <td class="py-3 px-4 border-t font-bold text-gray-800"></td> <!-- Se mantiene vacío o se ajusta colspan -->
                             <td class="py-3 px-4 border-t font-bold text-green-600">${averageScore}</td> 
                             <td class="py-3 px-4 border-t font-bold text-gray-800"> 
                                 <span class="performance-level ${performanceLevel.class}">${performanceLevel.level}</span> 
