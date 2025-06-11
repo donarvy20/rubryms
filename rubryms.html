@@ -94,15 +94,11 @@
         /* Estilos para la previsualización de la rúbrica */
         .rubric-preview {
             max-height: 500px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
+            overflow-y: auto; /* Solo scroll vertical para el área total */
             margin-top: 10px;
-            background-color: #f9f9f9;
-            border-radius: 10px; /* Bordes redondeados para la previsualización */
         }
         .rubric-preview table {
-            width: 100%;
+            width: 100%; /* Ajuste a 100% para que el min-width lo fuerce */
             border-collapse: collapse;
         }
         .rubric-preview th, .rubric-preview td {
@@ -114,7 +110,7 @@
             background-color: #f2f2f2;
         }
         .rubric-preview textarea {
-            min-height: 80px;
+            /* min-height: 80px;  Eliminado, ahora h-28*/
             width: 100%;
             resize: vertical;
             border: 1px solid #ddd;
@@ -149,6 +145,10 @@
             cursor: pointer;
             border: none;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex; /* Para alinear ícono y texto */
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
         .navbar button:hover {
             background-color: #4338ca; /* Un morado más oscuro al pasar el ratón */
@@ -203,6 +203,10 @@
             border-radius: 8px;
             background-color: #6366f1;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex; /* Para alinear ícono y texto */
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
         .mobile-nav-overlay .nav-mobile-item:hover {
             background-color: #4338ca;
@@ -240,7 +244,7 @@
     <div class="container">
         <!-- Encabezado de la Aplicación con Logo y Nombre -->
         <div class="header-container flex flex-col md:flex-row items-center justify-center gap-4 mb-6">
-            <img src="https://raw.githubusercontent.com/donarvy20/rubryms/refs/heads/main/ico.png" alt="Rubryms Logo" class="w-16 h-16 md:w-20 md:h-20 rounded-full shadow-md">
+            <img src="https://cdn.creazilla.com/cliparts/3154448/survey-clipart-lg.png" alt="Rubryms Logo" class="w-16 h-16 md:w-20 md:h-20 rounded-full shadow-md">
             <div class="text-center md:text-left">
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Evaluador de Estudiantes</h1>
                 <p class="text-xl md:text-2xl font-semibold text-purple-700">Rubryms</p>
@@ -250,16 +254,28 @@
 
         <!-- Menú de Navegación Flexible para Escritorio -->
         <div class="navbar">
-            <button id="nav-students-btn" class="active">Estudiantes</button>
-            <button id="nav-rubric-btn">Rúbrica</button>
-            <button id="nav-evaluation-btn" class="hidden">Evaluación</button>
-            <button id="nav-report-btn" class="hidden">Reportes</button>
+            <button id="nav-students-btn" class="active">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h2v-2a3 3 0 00-3-3H8a3 3 0 00-3 3v2H3M7 10h.01M17 10h.01M10 12h4m-4 2h4m-4 2h4M7 4h10a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2zm0 0a2 2 0 012-2h4a2 2 0 012 2v2a2 2 0 01-2 2H9a2 2 0 01-2-2z"></path></svg>
+                Estudiantes
+            </button>
+            <button id="nav-rubric-btn">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-2 0V3m0 2a2 2 0 012-2h4a2 2 0 012 2v2a2 2 0 01-2 2H9a2 2 0 01-2-2V7a2 2 0 012-2z"></path></svg>
+                Rúbrica
+            </button>
+            <button id="nav-evaluation-btn" class="hidden">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Evaluación
+            </button>
+            <button id="nav-report-btn" class="hidden">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 2v-6m2 9H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z"></path></svg>
+                Reportes
+            </button>
         </div>
         <!-- Fin Menú de Navegación de Escritorio -->
 
         <!-- Encabezado del Menú Hamburguesa para Móviles -->
         <div class="hamburger-menu-header">
-            <h2 class="text-white text-xl font-bold">Menú</h2>
+            <h2 class="text-white text-xl font-bold">Menú Rubryms</h2>
             <button id="hamburger-btn" class="text-white focus:outline-none">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
             </button>
@@ -267,10 +283,22 @@
         <!-- Superposición del Menú Móvil -->
         <div id="mobile-nav-overlay" class="mobile-nav-overlay">
             <button id="close-mobile-nav-btn" class="close-btn">&times;</button>
-            <button class="nav-mobile-item" data-target-section="add-students-section">Estudiantes</button>
-            <button class="nav-mobile-item" data-target-section="rubric-config-section">Rúbrica</button>
-            <button class="nav-mobile-item hidden" data-target-section="evaluation-section">Evaluación</button>
-            <button class="nav-mobile-item hidden" data-target-section="report-section">Reportes</button>
+            <button class="nav-mobile-item" data-target-section="add-students-section">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h2v-2a3 3 0 00-3-3H8a3 3 0 00-3 3v2H3M7 10h.01M17 10h.01M10 12h4m-4 2h4m-4 2h4M7 4h10a2 2 0 012 2v2a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2zm0 0a2 2 0 012-2h4a2 2 0 012 2v2a2 2 0 01-2 2H9a2 2 0 01-2-2z"></path></svg>
+                Estudiantes
+            </button>
+            <button class="nav-mobile-item" data-target-section="rubric-config-section">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-2 0V3m0 2a2 2 0 012-2h4a2 2 0 012 2v2a2 2 0 01-2 2H9a2 2 0 01-2-2V7a2 2 0 012-2z"></path></svg>
+                Rúbrica
+            </button>
+            <button class="nav-mobile-item hidden" data-target-section="evaluation-section">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Evaluación
+            </button>
+            <button class="nav-mobile-item hidden" data-target-section="report-section">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 2v-6m2 9H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z"></path></svg>
+                Reportes
+            </button>
         </div>
         <!-- Fin Menú Hamburguesa -->
 
@@ -299,6 +327,7 @@
                 id="add-students-btn"
                 class="w-full bg-blue-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
             >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                 Guardar Lista de Estudiantes
             </button>
             <div id="student-message-box" class="message-box"></div>
@@ -313,34 +342,23 @@
                     id="select-group-btn"
                     class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 mt-4 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
                 >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                     Cargar Grupo Seleccionado y Continuar
                 </button>
                 <button
                     id="delete-group-btn"
                     class="w-full bg-red-500 text-white font-semibold py-3 px-6 mt-2 rounded-xl shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"
                 >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     Eliminar Grupo Seleccionado
                 </button>
             </div>
         </div>
 
-        <!-- Sección de Configuración de Rúbrica -->
+        <!-- Sección de Configuración de Rúbrica (Ahora solo para crear/editar nuevas) -->
         <div id="rubric-config-section" class="bg-green-50 p-6 rounded-xl border border-green-200 hidden">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">2. Configurar Rúbrica</h2>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">2. Crear/Importar Rúbrica</h2>
             
-            <div class="mb-6">
-                <h3 class="text-xl font-semibold text-gray-700 mb-4">Seleccionar Rúbrica Existente</h3>
-                <select id="rubric-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 transition duration-200">
-                    <option value="">-- Seleccionar Rúbrica --</option>
-                </select>
-                <button
-                    id="delete-rubric-btn"
-                    class="w-full bg-red-500 text-white font-semibold py-2 px-4 mt-2 rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"
-                >
-                    Eliminar Rúbrica Seleccionada
-                </button>
-            </div>
-
             <div class="mb-6">
                 <h3 class="text-xl font-semibold text-gray-700 mb-4">Importar Nueva Rúbrica desde CSV</h3>
                 <p class="text-gray-600 mb-2">Formato requerido: Primera fila son los niveles de desempeño, primera columna son los aspectos a evaluar, celdas son los descriptores.</p>
@@ -362,37 +380,35 @@
                     id="preview-rubric-btn"
                     class="w-full bg-blue-500 text-white font-semibold py-2 px-4 mt-2 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                     Previsualizar Rúbrica
-                </button>
-                <!-- Este botón se gestionará por el JS después de la previsualización -->
-                <button
-                    id="save-rubric-btn"
-                    class="w-full bg-green-600 text-white font-semibold py-3 px-6 mt-2 rounded-xl shadow-md hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 hidden"
-                >
-                    Guardar Rúbrica y Empezar Evaluación
                 </button>
             </div>
             <div id="rubric-config-message-box" class="message-box"></div>
         </div>
 
+        <!-- Sección de Evaluación de Estudiantes (Ahora con selector de rúbrica) -->
         <div id="evaluation-section" class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4 text-center">3. Evaluación de Estudiantes</h2>
+            
+            <!-- Selector de Rúbrica (Movido aquí) -->
+            <div class="mb-6 bg-yellow-100 p-4 rounded-lg border border-yellow-300">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4 text-center">Seleccionar Rúbrica para Evaluación</h3>
+                <p class="text-gray-600 mb-2 text-center">Elige la rúbrica con la que deseas evaluar:</p>
+                <select id="rubric-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 transition duration-200">
+                    <option value="">-- Seleccionar Rúbrica --</option>
+                </select>
+                <button
+                    id="delete-rubric-btn"
+                    class="w-full bg-red-500 text-white font-semibold py-2 px-4 mt-2 rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Eliminar Rúbrica Seleccionada
+                </button>
+            </div>
+            <!-- Fin Selector de Rúbrica -->
+
             <div class="text-center mb-4">
-
-
-
-
-<select id="rubric-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 transition duration-200"><option value="">-- Seleccionar Rúbrica --</option><option value=""></option></select>
-
-
-
-
-
-
-
-
-
-                
                 <p class="text-lg text-gray-800 font-semibold">Estudiante Actual: <span id="current-student-name" class="text-blue-600"></span></p>
                 <p class="text-gray-600 text-sm">Estudiante <span id="student-index">1</span> de <span id="total-students">0</span></p>
             </div>
@@ -404,6 +420,7 @@
                     id="prev-student-btn"
                     class="flex-1 bg-gray-400 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-300"
                 >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8m-9 0a9 9 0 1118 0A9 9 0 0112 0z"></path></svg>
                     Anterior
                 </button>
                 <button
@@ -411,11 +428,13 @@
                     class="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 >
                     Siguiente Estudiante
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m-9 0a9 9 0 1118 0A9 9 0 0112 0z"></path></svg>
                 </button>
                 <button
                     id="finish-evaluation-btn"
                     class="flex-1 bg-indigo-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 hidden"
                 >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     Finalizar Evaluación y Exportar
                 </button>
             </div>
@@ -430,18 +449,21 @@
                     id="export-pdf-btn"
                     class="flex-1 bg-red-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
                 >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     Exportar Reporte General a PDF
                 </button>
                 <button
                     id="export-individual-rubrics-btn"
                     class="flex-1 bg-teal-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-300"
                 >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     Exportar Rúbricas Individuales a PDF
                 </button>
                 <button
                     id="export-csv-btn"
                     class="flex-1 bg-green-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
                 >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     Exportar a CSV
                 </button>
             </div>
@@ -450,12 +472,14 @@
                     id="back-to-evaluation-btn"
                     class="flex-1 bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300"
                 >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8m-9 0a9 9 0 1118 0A9 9 0 0112 0z"></path></svg>
                     Atrás (Modificar Evaluación)
                 </button>
                 <button
                     id="new-rubric-btn"
                     class="flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                     Nueva Evaluación
                 </button>
             </div>
@@ -488,8 +512,8 @@
         const studentMessageBox = document.getElementById('student-message-box');
 
         const rubricConfigSection = document.getElementById('rubric-config-section');
-        const rubricSelect = document.getElementById('rubric-select');
-        const deleteRubricBtn = document.getElementById('delete-rubric-btn');
+        // const rubricSelect = document.getElementById('rubric-select'); // Movido a evaluation-section
+        // const deleteRubricBtn = document.getElementById('delete-rubric-btn'); // Movido a evaluation-section
         const rubricNameInput = document.getElementById('rubric-name-input');
         const rubricCsvInput = document.getElementById('rubric-csv-input');
         const rubricPreview = document.getElementById('rubric-preview');
@@ -498,6 +522,8 @@
         const rubricConfigMessageBox = document.getElementById('rubric-config-message-box');
 
         const evaluationSection = document.getElementById('evaluation-section');
+        const rubricSelect = document.getElementById('rubric-select'); // Nueva ubicación
+        const deleteRubricBtn = document.getElementById('delete-rubric-btn'); // Nueva ubicación
         const currentStudentName = document.getElementById('current-student-name');
         const studentIndexSpan = document.getElementById('student-index');
         const totalStudentsSpan = document.getElementById('total-students');
@@ -719,7 +745,7 @@
                 const storedRubrics = localStorage.getItem('savedRubrics');
                 if (storedRubrics) {
                     savedRubrics = JSON.parse(storedRubrics);
-                    renderRubricSelect();
+                    renderRubricSelect(); // Renderizar selector de rúbricas al cargar
                 }
 
                 const storedCurrentGroup = localStorage.getItem('currentSelectedGroup');
@@ -731,7 +757,7 @@
                 const storedCurrentRubric = localStorage.getItem('currentRubric');
                 if (storedCurrentRubric) {
                     currentRubric = JSON.parse(storedCurrentRubric);
-                    rubricSelect.value = currentRubric.name; // Seleccionar la rúbrica cargada
+                    rubricSelect.value = currentRubric.name; // Seleccionar la rúbrica cargada en el nuevo select
                 }
 
                 const storedEvaluations = localStorage.getItem('evaluations');
@@ -744,9 +770,9 @@
                     showSection('evaluation-section');
                     renderStudentEvaluation();
                 } else if (currentStudents.length > 0) {
-                    showSection('rubric-config-section');
+                    showSection('rubric-config-section'); // Ir a configurar rúbrica si hay estudiantes pero no rúbrica seleccionada
                 } else {
-                    showSection('add-students-section');
+                    showSection('add-students-section'); // Sino, empezar por añadir estudiantes
                 }
                 updateNavButtonVisibility(); // Asegurarse de que los botones de navegación estén correctos al cargar
             } catch (e) {
@@ -788,6 +814,8 @@
             rubricNameInput.value = ''; // Limpiar el campo de nombre de rúbrica
             rubricCsvInput.value = ''; // Limpiar el campo CSV de rúbrica
             rubricPreview.classList.add('hidden'); // Ocultar la previsualización
+            
+            renderRubricSelect(); // Volver a renderizar el selector de rúbricas en evaluación para reflejar `currentRubric = null`
 
             showSection('rubric-config-section'); // Volver a la configuración de rúbrica
             showMessage(reportMessageBox, "La evaluación ha sido reiniciada. Tus grupos y rúbricas permanecen guardados.", 'success');
@@ -889,7 +917,14 @@
             saveData();
             showMessage(studentMessageBox, `¡Grupo "${selectedGroup}" cargado para evaluación!`, 'success');
 
-            showSection('rubric-config-section'); // Avanzar a la sección de rúbrica
+            // Después de seleccionar un grupo, ir a la sección de rúbrica si no hay rúbrica activa,
+            // o a la sección de evaluación si ya hay una rúbrica activa.
+            if (currentRubric) {
+                showSection('evaluation-section');
+                renderStudentEvaluation();
+            } else {
+                showSection('rubric-config-section');
+            }
             currentStudentIndex = 0; // Reiniciar el índice del estudiante al cambiar de grupo
             updateNavButtonVisibility(); // Actualizar visibilidad de nav
         });
@@ -948,6 +983,46 @@
             if (currentRubric && savedRubrics[currentRubric.name]) {
                 rubricSelect.value = currentRubric.name;
             }
+        }
+
+        /**
+         * Parsea una cadena CSV, manejando comas dentro de comillas.
+         * @param {string} text - La cadena CSV a parsear.
+         * @returns {Array<Array<string>>} Una matriz de filas y columnas.
+         */
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            const result = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const current = [];
+                let inQuotes = false;
+                let buffer = '';
+                
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    
+                    if (char === '"') {
+                        // Manejar comillas escapadas (ej: "" dentro de un campo)
+                        if (inQuotes && line[j + 1] === '"') {
+                            buffer += '"';
+                            j++; // Saltar la siguiente comilla
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        current.push(buffer.trim());
+                        buffer = '';
+                    } else {
+                        buffer += char;
+                    }
+                }
+                
+                current.push(buffer.trim()); // Añadir el último campo de la línea
+                result.push(current);
+            }
+            return result;
         }
 
         /**
@@ -1030,51 +1105,53 @@
                 </div>
             `;
             
-            // Tabla editable
-            previewHTML += '<div class="overflow-x-auto"><table class="min-w-full border-collapse"><thead><tr><th class="p-2 border bg-gray-100 min-w-[120px]">Aspecto</th>';
-            
-            // Encabezados de niveles con puntajes editables
-            rubricData.levels.forEach((level, index) => {
-                previewHTML += `
-                    <th class="p-2 border bg-gray-100 min-w-[100px]">
-                        <input type="text" class="w-full p-1 border-b border-gray-300 text-center rounded-sm" value="${level}" 
-                               data-level-index="${index}" onchange="updateRubricLevel(this)">
-                        <label for="score-${level.replace(/\s/g, '-')}-${index}" class="block text-gray-700 text-xs mt-1">Puntaje:</label>
-                        <input type="number" id="score-${level.replace(/\s/g, '-')}-${index}" class="w-full p-1 mt-1 border-b border-gray-300 text-center rounded-sm" 
-                               value="${rubricData.levelScores[level]}" min="0" max="100" step="0.5"
-                               data-level-index="${index}" onchange="updateRubricScore(this)">
-                    </th>
-                `;
-            });
-            previewHTML += '</tr></thead><tbody>';
-            
-            // Filas de aspectos y descriptores editables
-            rubricData.aspects.forEach((aspect, aspectIndex) => {
-                previewHTML += `<tr><td class="p-2 border"><input type="text" class="w-full p-1 border-b border-gray-300 rounded-sm" 
-                                value="${aspect}" data-aspect-index="${aspectIndex}" onchange="updateRubricAspect(this)"></td>`;
-                
-                rubricData.levels.forEach((level, levelIndex) => {
-                    previewHTML += `
-                        <td class="p-2 border">
-                            <textarea class="w-full p-1 border border-gray-300 h-20 rounded-sm" 
-                                      data-aspect-index="${aspectIndex}" data-level-index="${levelIndex}"
-                                      onchange="updateRubricDescriptor(this)">${rubricData.descriptors[aspect][level] || ''}</textarea>
-                        </td>
-                    `;
-                });
-                
-                previewHTML += '</tr>';
-            });
-            
-            previewHTML += '</tbody></table></div>';
+            // Tabla editable - AHORA CON min-w para forzar desborde y con estilos visuales
+            previewHTML += `
+                <div class="overflow-x-auto border border-gray-300 rounded-lg bg-white shadow-sm p-4">
+                    <table class="min-w-[1050px] border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="p-2 border bg-gray-100 min-w-[150px]">Aspecto</th>
+                                ${rubricData.levels.map((level, index) => `
+                                    <th class="p-2 border bg-gray-100 min-w-[180px]">
+                                        <input type="text" class="w-full p-1 border-b border-gray-300 text-center rounded-sm" value="${level}" 
+                                               data-level-index="${index}" onchange="updateRubricLevel(this)">
+                                        <label for="score-${level.replace(/\s/g, '-')}-${index}" class="block text-gray-700 text-xs mt-1">Puntaje:</label>
+                                        <input type="number" id="score-${level.replace(/\s/g, '-')}-${index}" class="w-full p-1 mt-1 border-b border-gray-300 text-center rounded-sm" 
+                                               value="${rubricData.levelScores[level]}" min="0" max="100" step="0.5"
+                                               data-level-index="${index}" onchange="updateRubricScore(this)">
+                                    </th>
+                                `).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rubricData.aspects.map((aspect, aspectIndex) => `
+                                <tr>
+                                    <td class="p-2 border"><input type="text" class="w-full p-1 border-b border-gray-300 rounded-sm" 
+                                            value="${aspect}" data-aspect-index="${aspectIndex}" onchange="updateRubricAspect(this)"></td>
+                                    ${rubricData.levels.map((level, levelIndex) => `
+                                        <td class="p-2 border">
+                                            <textarea class="w-full p-1 border border-gray-300 h-32 rounded-sm" 
+                                                      data-aspect-index="${aspectIndex}" data-level-index="${levelIndex}"
+                                                      onchange="updateRubricDescriptor(this)">${rubricData.descriptors[aspect][level] || ''}</textarea>
+                                        </td>
+                                    `).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
             
             // Botones de acción
             previewHTML += `
                 <div class="mt-4 flex flex-col sm:flex-row justify-between gap-4">
                     <button id="cancel-edit-rubric-btn" class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-xl shadow-md hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-gray-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         Cancelar Edición
                     </button>
                     <button id="confirm-save-rubric-btn" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-xl shadow-md hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                         Confirmar y Guardar Rúbrica
                     </button>
                 </div>
@@ -1082,7 +1159,7 @@
             
             rubricPreview.innerHTML = previewHTML;
             rubricPreview.classList.remove('hidden');
-            // Ocultar el botón original "Guardar Rúbrica" cuando la previsualización editable está activa
+            // Ocultar el botón original "Previsualizar Rúbrica" y los inputs de nombre/CSV cuando la previsualización editable está activa
             previewRubricBtn.classList.add('hidden'); 
             rubricNameInput.classList.add('hidden');
             rubricCsvInput.classList.add('hidden');
@@ -1283,8 +1360,10 @@
 
         rubricSelect.addEventListener('change', () => {
             const selectedRubricName = rubricSelect.value;
-            rubricPreview.classList.add('hidden'); // Ocultar previsualización si se selecciona una rúbrica
-            previewRubricBtn.classList.remove('hidden'); // Mostrar el botón original
+            // Cuando se selecciona una rúbrica del dropdown en la sección de evaluación,
+            // se limpia la previsualización de la sección de configuración.
+            rubricPreview.classList.add('hidden'); 
+            previewRubricBtn.classList.remove('hidden'); 
             rubricNameInput.classList.remove('hidden');
             rubricCsvInput.classList.remove('hidden');
 
@@ -1292,15 +1371,18 @@
                 currentRubric = savedRubrics[selectedRubricName];
                 saveData();
                 
-                showMessage(rubricConfigMessageBox, `¡Rúbrica "${selectedRubricName}" cargada y lista para la evaluación!`, 'success');
-                showSection('evaluation-section'); // Avanzar a la sección de evaluación
-                currentStudentIndex = 0; // Reiniciar índice del estudiante
-                renderStudentEvaluation();
+                showMessage(evaluationMessageBox, `¡Rúbrica "${selectedRubricName}" cargada y lista para la evaluación!`, 'success');
+                renderStudentEvaluation(); // Renderizar la evaluación con la nueva rúbrica
                 updateNavButtonVisibility(); // Actualizar visibilidad de nav
             } else {
                 currentRubric = null; // Si no se selecciona nada, limpiar la rúbrica actual
                 localStorage.removeItem('currentRubric');
-                // showMessage(rubricConfigMessageBox, "Selecciona una rúbrica para continuar.", 'info'); // Opcional
+                // No mostrar mensaje si la opción es "Seleccionar Rúbrica"
+                if (selectedRubricName !== "") {
+                    showMessage(evaluationMessageBox, "No hay una rúbrica válida seleccionada. Por favor, elige una.", 'error');
+                }
+                renderStudentEvaluation(); // Asegurar que la tabla de evaluación se vacíe
+                updateNavButtonVisibility(); // Actualizar visibilidad de nav
             }
             // Limpiar los campos de input y textarea si se selecciona una rúbrica existente
             rubricNameInput.value = '';
@@ -1310,7 +1392,7 @@
         deleteRubricBtn.addEventListener('click', () => {
             const selectedRubricName = rubricSelect.value;
             if (!selectedRubricName) {
-                showMessage(rubricConfigMessageBox, "Por favor, selecciona una rúbrica para eliminar.", 'error');
+                showMessage(evaluationMessageBox, "Por favor, selecciona una rúbrica para eliminar.", 'error');
                 return;
             }
 
@@ -1323,10 +1405,9 @@
                         localStorage.removeItem('currentRubric');
                     }
                     saveData();
-                    renderRubricSelect();
-                    showMessage(rubricConfigMessageBox, `Rúbrica "${selectedRubricName}" eliminada.`, 'success');
-                    // Opcional: si no hay rúbrica actual, volver a estudiantes o dejar en config
-                    showSection('rubric-config-section');
+                    renderRubricSelect(); // Volver a renderizar el selector
+                    showMessage(evaluationMessageBox, `Rúbrica "${selectedRubricName}" eliminada.`, 'success');
+                    renderStudentEvaluation(); // Actualizar la vista de evaluación (probablemente vacía)
                     updateNavButtonVisibility(); // Actualizar visibilidad de nav
                 }
             });
@@ -1744,14 +1825,10 @@
                 const colWidth = (doc.internal.pageSize.width - (margin * 2) - 40) / currentRubric.levels.length;
                 const rubricColumnWidths = [40, ...Array(currentRubric.levels.length).fill(colWidth)];
 
-                const rubricTableData = currentRubric.aspects.map(aspect => {
-                    return [aspect, ...currentRubric.levels.map(level => currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][level] || '' : '')];
-                });
-
                 doc.autoTable({
                     startY: yOffset,
                     head: [rubricHeaders],
-                    body: rubricTableData,
+                    body: currentRubric.aspects.map(aspect => [aspect, ...currentRubric.levels.map(level => currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][level] || '' : '')]),
                     theme: 'grid',
                     styles: {
                         fontSize: 6,
