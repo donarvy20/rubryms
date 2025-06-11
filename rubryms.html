@@ -1821,7 +1821,7 @@
                 doc.setFontSize(12);
                 doc.setTextColor(0, 0, 0);
                 doc.text("Matriz Completa de la Rúbrica y Evaluación:", margin, yOffset);
-                yOffset += 20;
+                yOffset += 7;
 
                 const rubricHeaders = ["Aspecto", ...currentRubric.levels.map(level => `${level} (${currentRubric.levelScores[level]} pts)`)];
                 const colWidth = (doc.internal.pageSize.width - (margin * 2) - 40) / currentRubric.levels.length;
