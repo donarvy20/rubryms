@@ -1487,7 +1487,8 @@
                             <span class="font-bold text-green-600">${currentScore}</span> 
                         </td> 
                         <td class="py-2 px-4 border-b"> 
-                            <div class="flex flex-wrap gap-2"> 
+                            <div class="flex flex-wrap gap-2" style="width: 500px;"> 
+                           
                                 ${currentRubric.levels.map(level => { 
                                     const descriptor = currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][level] || 'Sin descriptor' : 'Sin descriptor'; 
                                     const isSelected = currentLevel === level; 
