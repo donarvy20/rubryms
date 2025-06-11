@@ -1705,7 +1705,7 @@
                 },
                 didDrawPage: function (data) {
                     let str = "Página " + doc.internal.getNumberOfPages();
-                    doc.setFontSize(8);
+                    doc.setFontSize(10);
                     doc.setTextColor(150);
                     doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
                 }
@@ -1821,7 +1821,7 @@
                 doc.setFontSize(12);
                 doc.setTextColor(0, 0, 0);
                 doc.text("Matriz Completa de la Rúbrica y Evaluación:", margin, yOffset);
-                yOffset += 7;
+                yOffset += 20;
 
                 const rubricHeaders = ["Aspecto", ...currentRubric.levels.map(level => `${level} (${currentRubric.levelScores[level]} pts)`)];
                 const colWidth = (doc.internal.pageSize.width - (margin * 2) - 40) / currentRubric.levels.length;
@@ -1833,7 +1833,7 @@
                     body: currentRubric.aspects.map(aspect => [aspect, ...currentRubric.levels.map(level => currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][level] || '' : '')]),
                     theme: 'grid',
                     styles: {
-                        fontSize: 8,
+                        fontSize: 10,
                         cellPadding: 1,
                         valign: 'middle',
                         halign: 'left',
@@ -1865,9 +1865,9 @@
                     },
                     didDrawPage: function (data) {
                         let str = "Página " + doc.internal.getNumberOfPages();
-                        doc.setFontSize(8);
+                        doc.setFontSize(10);
                         doc.setTextColor(10);
-                        doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 35);
+                        doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 15);
                     }
                 });
 
@@ -1903,7 +1903,7 @@
                 doc.setTextColor(0, 100, 0);
                 doc.text(`Puntaje Final: ${studentTotalScore} / ${maxPossibleScore} pts`, margin, yOffset + 5);
                 doc.text(`Promedio por Aspecto: ${studentAverageScore}`, margin, yOffset + 10);
-                doc.text(`Nivel de Desempeño: ${performanceLevel.level}`, margin, yOffset + 15);
+                doc.text(`Nivel de Desempeño: ${performanceLevel.level}`, margin, yOffset + 11);
             } 
 
             doc.deletePage(1); // Eliminar la primera página en blanco
