@@ -1108,12 +1108,12 @@
             // Tabla editable - AHORA CON min-w para forzar desborde y con estilos visuales
             previewHTML += `
                 <div class="overflow-x-auto border border-gray-300 rounded-lg bg-white shadow-sm p-4">
-                    <table class="min-w-[1200px] border-collapse">
+                    <table class="min-w-[1500px] border-collapse">
                         <thead>
                             <tr>
-                                <th class="p-2 border bg-gray-100 min-w-[180px]">Aspecto</th>
+                                <th class="p-2 border bg-gray-100 min-w-[200px]">Aspecto</th>
                                 ${rubricData.levels.map((level, index) => `
-                                    <th class="p-2 border bg-gray-100 min-w-[220px]">
+                                    <th class="p-2 border bg-gray-100 min-w-[250px]">
                                         <input type="text" class="w-full p-1 border-b border-gray-300 text-center rounded-sm" value="${level}" 
                                                data-level-index="${index}" onchange="updateRubricLevel(this)">
                                         <label for="score-${level.replace(/\s/g, '-')}-${index}" class="block text-gray-700 text-xs mt-1">Puntaje:</label>
@@ -1131,7 +1131,7 @@
                                             value="${aspect}" data-aspect-index="${aspectIndex}" onchange="updateRubricAspect(this)"></td>
                                     ${rubricData.levels.map((level, levelIndex) => `
                                         <td class="p-2 border">
-                                            <textarea class="w-full p-1 border border-gray-300 h-40 rounded-sm" 
+                                            <textarea class="w-full p-1 border border-gray-300 h-48 rounded-sm" 
                                                       data-aspect-index="${aspectIndex}" data-level-index="${levelIndex}"
                                                       onchange="updateRubricDescriptor(this)">${rubricData.descriptors[aspect][level] || ''}</textarea>
                                         </td>
@@ -1350,7 +1350,7 @@
             }
 
 
-            const parsedRubric = parseRubricFromCSV(csvText);
+            const parsedRubric = parseCSV(csvText);
             if (parsedRubric) {
                 parsedRubric.name = rubricName; // Asegurar que el nombre del input se use
                 showEditableRubric(parsedRubric);
@@ -1491,7 +1491,7 @@
                                     const descriptor = currentRubric.descriptors[aspect] ? currentRubric.descriptors[aspect][level] || 'Sin descriptor' : 'Sin descriptor'; 
                                     const isSelected = currentLevel === level; 
                                     const buttonClasses = ` 
-                                        flex-grow min-w-[120px] p-2 text-sm border rounded-md cursor-pointer 
+                                        flex-grow min-w-[180px] p-2 text-sm border rounded-md cursor-pointer 
                                         ${isSelected ? 'bg-blue-200 border-blue-500 text-blue-800 shadow-md' : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'} 
                                         transition duration-200 ease-in-out 
                                         text-left 
