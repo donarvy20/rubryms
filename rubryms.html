@@ -1461,7 +1461,7 @@
                         <tr> 
                             <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Aspecto</th> 
                             <!-- Eliminar la columna "Nivel Asignado" -->
-                            <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Puntaje</th> 
+                           
                             <th class="py-3 px-4 text-left text-gray-700 font-semibold border-b">Descriptores (Haz clic para asignar)</th> 
                         </tr> 
                     </thead> 
@@ -1672,7 +1672,7 @@
                 body: rubricTableData,
                 theme: 'grid',
                 styles: {
-                    fontSize: 6,
+                    fontSize: 8,
                     cellPadding: 1,
                     valign: 'middle',
                     halign: 'left',
@@ -1699,13 +1699,14 @@
                             doc.setTextColor(0, 0, 0); // Texto negro para contraste
                             doc.setFont(undefined, 'bold'); // Texto en negrita
                             // Redibujar el texto para que la negrita y el color se apliquen correctamente
+                             data.cell.y + 10;  // Aumenta el espacio desde arriba
                             doc.text(data.cell.text, data.cell.x + data.cell.padding('left'), data.cell.y + data.cell.padding('top'));
                         }
                     }
                 },
                 didDrawPage: function (data) {
                     let str = "Página " + doc.internal.getNumberOfPages();
-                    doc.setFontSize(10);
+                    doc.setFontSize(8);
                     doc.setTextColor(150);
                     doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
                 }
@@ -1865,8 +1866,8 @@
                     },
                     didDrawPage: function (data) {
                         let str = "Página " + doc.internal.getNumberOfPages();
-                        doc.setFontSize(10);
-                        doc.setTextColor(10);
+                        doc.setFontSize(8);
+                        doc.setTextColor(150);
                         doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
                     }
                 });
