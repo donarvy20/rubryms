@@ -1350,7 +1350,7 @@
             }
 
 
-            const parsedRubric = parseCSV(csvText);
+            const parsedRubric = parseRubricFromCSV(csvText);
             if (parsedRubric) {
                 parsedRubric.name = rubricName; // Asegurar que el nombre del input se use
                 showEditableRubric(parsedRubric);
